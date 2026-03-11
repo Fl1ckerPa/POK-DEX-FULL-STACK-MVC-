@@ -1,13 +1,13 @@
 const mysql = require('mysql2/promise');
-require('dotenv').config();
+const config = require('./environment');
 
 // Configurações do pool de conexões
 const pool = mysql.createPool({
-    host: process.env.DB_HOST || 'localhost',
-    user: process.env.DB_USER || 'root',
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME || 'pokedex_db',
-    port: process.env.DB_PORT || 3306,
+    host: config.database.host,
+    user: config.database.user,
+    password: config.database.password,
+    database: config.database.name,
+    port: config.database.port,
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0
