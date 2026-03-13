@@ -10,22 +10,28 @@ class ValidationService {
     }
 
     /**
-     * Valida senha (mínimo 6 caracteres)
+     * Valida senha (mínimo 8 caracteres, uma maiúscula e um caractere especial)
      * @param {string} password 
      * @returns {boolean}
      */
     static validatePassword(password) {
-        return typeof password === 'string' && password.length >= 6;
+        if (typeof password !== 'string' || password.length < 8) return false;
+        
+        const hasUpperCase = /[A-Z]/.test(password);
+        const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+        
+        return hasUpperCase && hasSpecialChar;
     }
 
     /**
-     * Valida username (mínimo 3 caracteres, alfanumérico)
+     * Valida username (mínimo 3 caracteres, permite espaços para nome completo)
      * @param {string} username 
      * @returns {boolean}
      */
     static validateUsername(username) {
-        const usernameRegex = /^[a-zA-Z0-9_]{3,}$/;
-        return typeof username === 'string' && usernameRegex.test(username);
+        // Remove espaços do início e fim para contar apenas caracteres válidos
+        const trimmedUsername = typeof username === 'string' ? username.trim() : '';
+        return trimmedUsername.length >= 3;
     }
 
     /**
@@ -38,7 +44,7 @@ class ValidationService {
         const { username, email, password } = data;
 
         if (!this.validateUsername(username)) {
-            errors.push('O nome de usuário deve ter pelo menos 3 caracteres e conter apenas letras, números ou underscore.');
+            errors.push('O nome de usuário deve ter pelo menos 3 caracteres.');
         }
 
         if (!this.validateEmail(email)) {
@@ -46,7 +52,7 @@ class ValidationService {
         }
 
         if (!this.validatePassword(password)) {
-            errors.push('A senha deve ter pelo menos 6 caracteres.');
+            errors.push('A senha deve ter pelo menos 8 caracteres, incluir pelo menos uma letra maiúscula e um caractere especial.');
         }
 
         return {

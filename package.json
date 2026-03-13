@@ -1,0 +1,19 @@
+{
+  "name": "pok-dex-full-stack-mvc",
+  "version": "1.0.0",
+  "description": "Projeto Pokédex Fullstack com arquitetura MVC.",
+  "scripts": {
+    "dev": "npm run dev --prefix backend",
+    "start:backend": "npm run dev --prefix backend",
+    "start:frontend": "live-server frontend"
+  },
+  "keywords": [
+    "pokedex",
+    "mvc",
+    "fullstack",
+    "nodejs",
+    "express"
+  ],
+  "author": "Seu Nome",
+  "license": "ISC"
+}
