@@ -12,6 +12,9 @@ const loginValidation = [
     validateRequest
 ];
 
+// Rota POST /api/auth/register
+router.post('/register', authController.register);
+
 // Rota POST /api/auth/login
 router.post('/login', loginValidation, authController.login);
 

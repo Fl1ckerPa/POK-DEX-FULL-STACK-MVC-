@@ -1,8 +1,52 @@
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 const config = require('../config/environment');
+const bcrypt = require('bcryptjs');
 
 class AuthService {
+    static async register(userData) {
+        try {
+            const { username, email, password } = userData;
+
+            // 1. Verificar se o e-mail já existe
+            const existingEmail = await User.findByEmail(email);
+            if (existingEmail) {
+                return { success: false, message: 'Este e-mail já está em uso' };
+            }
+
+            // 2. Verificar se o username já existe
+            const existingUsername = await User.findByUsername(username);
+            if (existingUsername) {
+                return { success: false, message: 'Este nome de usuário já está em uso' };
+            }
+
+            // 3. Gerar hash da senha
+            const salt = await bcrypt.genSalt(10);
+            const hashedPassword = await bcrypt.hash(password, salt);
+
+            // 4. Inserir no banco
+            const userId = await User.create({
+                username,
+                email,
+                password: hashedPassword
+            });
+
+            return {
+                success: true,
+                message: 'Usuário registrado com sucesso',
+                user: {
+                    id: userId,
+                    username,
+                    email
+                }
+            };
+
+        } catch (error) {
+            console.error('Erro no AuthService.register:', error);
+            throw error;
+        }
+    }
+
     static async login(email, password) {
         try {
             // 1. Buscar usuário pelo email
