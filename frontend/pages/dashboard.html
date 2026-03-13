@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pokédex - Dashboard</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <div id="app">
+        <h1>Minha Pokédex</h1>
+        <div id="user-info"></div>
+        <button id="logout-btn">Sair</button>
+    </div>
+
+    <script type="module" src="../js/main.js"></script>
+    <script type="module">
+        import auth from '../js/auth.js';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const userStr = localStorage.getItem('user');
+            if (userStr) {
+                const user = JSON.parse(userStr);
+                document.getElementById('user-info').innerText = `Olá, ${user.name || user.email}!`;
+            }
+
+            document.getElementById('logout-btn').addEventListener('click', () => {
+                auth.logout();
+            });
+        });
+    </script>
+</body>
+</html>

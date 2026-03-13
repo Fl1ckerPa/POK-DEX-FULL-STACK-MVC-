@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pokédex - Login</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <div id="login-container">
+        <h1>Login</h1>
+        <form id="login-form">
+            <input type="email" id="email" placeholder="Email" required>
+            <input type="password" id="password" placeholder="Senha" required>
+            <button type="submit">Entrar</button>
+        </form>
+        <p>Não tem uma conta? <a href="register.html">Cadastre-se</a></p>
+    </div>
+
+    <script type="module" src="../js/main.js"></script>
+    <script type="module">
+        import auth from '../js/auth.js';
+        
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            const result = await auth.login(email, password);
+            if (result.success) {
+                window.location.href = 'dashboard.html';
+            } else {
+                alert(result.message);
+            }
+        });
+    </script>
+</body>
+</html>
