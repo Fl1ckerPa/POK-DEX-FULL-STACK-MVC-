@@ -20,7 +20,7 @@ const authController = {
             const result = await AuthService.register({ username, email, password });
 
             if (!result.success) {
-                return res.status(409).json({
+                return res.status(400).json({
                     success: false,
                     message: result.message
                 });
@@ -53,7 +53,6 @@ const authController = {
             }
 
             return res.json({
-                message: 'Login realizado com sucesso',
                 token: result.token,
                 user: result.user
             });
