@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pokédex - Cadastro</title>
+</head>
+<body>
+    <div id="register-container">
+        <h1>Criar Conta</h1>
+        <form id="register-form">
+            <div>
+                <label for="username">Nome Completo</label>
+                <input type="text" id="username" name="username" placeholder="Mínimo 3 caracteres" required minlength="3">
+                <div id="username-error"></div>
+            </div>
+            
+            <div>
+                <label for="email">E-mail</label>
+                <input type="email" id="email" name="email" placeholder="exemplo@email.com" required>
+                <div id="email-error"></div>
+            </div>
+            
+            <div>
+                <label for="password">Senha</label>
+                <input type="password" id="password" name="password" placeholder="Mínimo 8 caracteres, 1 maiúscula e especial" required minlength="8">
+                <div id="password-error"></div>
+            </div>
+            
+            <div>
+                <label for="confirm-password">Confirmar Senha</label>
+                <input type="password" id="confirm-password" name="confirm-password" placeholder="Repita sua senha" required minlength="8">
+                <div id="confirm-password-error"></div>
+            </div>
+            
+            <button type="submit" id="btn-register">Cadastrar</button>
+        </form>
+        <p>Já tem uma conta? <a href="login.html">Faça login</a></p>
+    </div>
+
+    <script type="module" src="../js/register.js"></script>
+</body>
+</html>

@@ -18,6 +18,25 @@ const auth = {
         }
     },
 
+    async register(username, email, password) {
+        try {
+            const data = await api.post('/auth/register', { username, email, password });
+            
+            if (data.success) {
+                return { success: true, message: data.message };
+            }
+            
+            return { 
+                success: false, 
+                message: data.message || 'Erro ao realizar cadastro',
+                errors: data.errors 
+            };
+        } catch (error) {
+            console.error('Erro no registro:', error);
+            return { success: false, message: 'Erro de conexão com o servidor' };
+        }
+    },
+
     logout() {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
