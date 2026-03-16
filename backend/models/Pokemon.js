@@ -23,6 +23,24 @@ class Pokemon {
     }
 
     /**
+     * Busca um Pokémon pelo seu nome no cache.
+     * @param {string} name - O nome do Pokémon.
+     * @returns {Promise<Object|null>} O Pokémon encontrado ou null.
+     */
+    static async findByName(name) {
+        try {
+            const [rows] = await db.query(
+                'SELECT * FROM pokemons WHERE name = ?',
+                [name.toLowerCase().trim()]
+            );
+            return rows.length > 0 ? rows[0] : null;
+        } catch (error) {
+            console.error(`Erro ao buscar Pokémon por nome no banco:`, error.message);
+            throw error;
+        }
+    }
+
+    /**
      * Salva um Pokémon no cache (banco de dados).
      * @param {Object} pokemonData - Dados formatados do Pokémon.
      * @returns {Promise<number>} O ID do registro inserido.
