@@ -38,9 +38,18 @@ const auth = {
     },
 
     logout() {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        window.location.href = '/login.html';
+        // Limpar todos os dados do localStorage para resetar o estado da aplicação
+        localStorage.clear();
+        
+        // Redirecionar para a página de login de forma inteligente
+        const pathParts = window.location.pathname.split('/');
+        const isSubfolder = pathParts.some(part => part === 'pages');
+        
+        if (isSubfolder) {
+            window.location.href = 'login.html';
+        } else {
+            window.location.href = 'pages/login.html';
+        }
     },
 
     async checkAuthOnLoad() {
