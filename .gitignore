@@ -17,6 +17,10 @@ yarn-error.log*
 *.swp
 *.swo
 
+# Testing
+coverage/
+*.lcov
+
 # OS
 .DS_Store
 Thumbs.db
