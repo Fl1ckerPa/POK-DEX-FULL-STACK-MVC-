@@ -17,17 +17,26 @@ class CacheService {
             const cachedPokemon = await Pokemon.findByPokemonId(id);
 
             if (cachedPokemon) {
-                console.log(`✅ Pokémon ID ${id} encontrado no cache.`);
-                return this._formatCachedToApiResponse(cachedPokemon);
+                // Verificar política de atualização (7 dias)
+                if (!this._isCacheExpired(cachedPokemon.updated_at)) {
+                    console.log(`✅ Pokémon ID ${id} encontrado no cache.`);
+                    return this._formatCachedToApiResponse(cachedPokemon);
+                }
+                console.log(`🔄 Cache expirado para Pokémon ID ${id}. Atualizando...`);
             }
 
-            // 2. Caso não exista no cache, consultar PokéAPI
-            console.log(`🔍 Pokémon ID ${id} não encontrado no cache. Consultando PokéAPI...`);
+            // 2. Caso não exista no cache ou esteja expirado, consultar PokéAPI
+            console.log(`🔍 Buscando Pokémon ID ${id} na PokéAPI...`);
             const pokemonData = await PokeApiService.getById(id);
 
-            // 3. Salvar no cache para futuras consultas
-            await Pokemon.create(pokemonData);
-            console.log(`💾 Pokémon ID ${id} salvo no cache.`);
+            // 3. Salvar ou atualizar no cache
+            if (cachedPokemon) {
+                await Pokemon.update(pokemonData);
+                console.log(`💾 Pokémon ID ${id} atualizado no cache.`);
+            } else {
+                await Pokemon.create(pokemonData);
+                console.log(`💾 Pokémon ID ${id} salvo no cache.`);
+            }
 
             return pokemonData;
         } catch (error) {
@@ -50,17 +59,25 @@ class CacheService {
             const cachedPokemon = await Pokemon.findByName(lowerName);
 
             if (cachedPokemon) {
-                console.log(`✅ Pokémon '${lowerName}' encontrado no cache.`);
-                return this._formatCachedToApiResponse(cachedPokemon);
+                // Verificar política de atualização (7 dias)
+                if (!this._isCacheExpired(cachedPokemon.updated_at)) {
+                    console.log(`✅ Pokémon '${lowerName}' encontrado no cache.`);
+                    return this._formatCachedToApiResponse(cachedPokemon);
+                }
+                console.log(`🔄 Cache expirado para Pokémon '${lowerName}'. Atualizando...`);
             }
 
-            // 2. Caso não exista no cache, consultar PokéAPI
-            console.log(`🔍 Pokémon '${lowerName}' não encontrado no cache. Consultando PokéAPI...`);
+            // 2. Caso não exista no cache ou esteja expirado, consultar PokéAPI
+            console.log(`🔍 Buscando Pokémon '${lowerName}' na PokéAPI...`);
             const pokemonData = await PokeApiService.getByName(lowerName);
 
-            // 3. Verificar se já existe por ID (evitar conflito de Unique Key se buscado por ID antes)
-            const alreadyCached = await Pokemon.findByPokemonId(pokemonData.id);
-            if (!alreadyCached) {
+            // 3. Salvar ou atualizar no cache
+            const alreadyCached = cachedPokemon || await Pokemon.findByPokemonId(pokemonData.id);
+            
+            if (alreadyCached) {
+                await Pokemon.update(pokemonData);
+                console.log(`💾 Pokémon '${lowerName}' (ID ${pokemonData.id}) atualizado no cache.`);
+            } else {
                 await Pokemon.create(pokemonData);
                 console.log(`💾 Pokémon '${lowerName}' (ID ${pokemonData.id}) salvo no cache.`);
             }
@@ -70,6 +87,22 @@ class CacheService {
             console.error(`Erro em CacheService.getPokemonByName('${name}'):`, error.message);
             throw error;
         }
+    }
+
+    /**
+     * Verifica se o cache expirou (mais de 7 dias).
+     * @param {Date|string} updatedAt - Data da última atualização.
+     * @returns {boolean}
+     * @private
+     */
+    static _isCacheExpired(updatedAt) {
+        if (!updatedAt) return true;
+        
+        const lastUpdate = new Date(updatedAt);
+        const now = new Date();
+        const diffInDays = (now - lastUpdate) / (1000 * 60 * 60 * 24);
+        
+        return diffInDays > 7;
     }
 
     /**
