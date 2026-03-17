@@ -3,34 +3,145 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pokédex - Login</title>
-    <link rel="stylesheet" href="../css/style.css">
+    <title>Pokédex - Bem-vindo de volta</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        coral: {
+                            DEFAULT: 'hsl(0, 100%, 71%)',
+                            hover: 'hsl(0, 100%, 65%)',
+                        },
+                        cream: 'hsl(40, 33%, 98%)',
+                    },
+                    fontFamily: {
+                        inter: ['Inter', 'sans-serif'],
+                        quicksand: ['Quicksand', 'sans-serif'],
+                    },
+                    borderRadius: {
+                        '3xl': '2rem',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @keyframes fadeSlideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-slide-up {
+            animation: fadeSlideUp 0.5s ease-out forwards;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+    </style>
 </head>
-<body>
-    <div id="login-container">
-        <h1>Login</h1>
-        <form id="login-form">
-            <input type="email" id="email" placeholder="Email" required>
-            <input type="password" id="password" placeholder="Senha" required>
-            <button type="submit">Entrar</button>
-        </form>
-        <p>Não tem uma conta? <a href="register.html">Cadastre-se</a></p>
-    </div>
+<body class="bg-cream font-inter min-h-screen flex items-center justify-center p-4">
+    <main class="glass-card rounded-3xl shadow-2xl p-8 w-full max-w-[420px] animate-fade-slide-up">
+        <!-- Logo -->
+        <div class="w-12 h-12 bg-coral rounded-xl flex items-center justify-center mb-6 text-white" aria-hidden="true">
+            <i data-lucide="zap" class="w-6 h-6"></i>
+        </div>
 
-    <script type="module" src="../js/main.js"></script>
+        <!-- Header -->
+        <h1 class="font-quicksand font-bold text-3xl text-gray-800 mb-2">Bem-vindo de volta</h1>
+        <p class="text-gray-600 mb-8">Entre na sua Pokédex</p>
+
+        <!-- Form -->
+        <form id="login-form" class="space-y-6">
+            <div class="space-y-2">
+                <label for="email" class="block text-sm font-semibold text-gray-800">E-mail</label>
+                <input 
+                    type="email" 
+                    id="email" 
+                    name="email" 
+                    class="w-full px-4 py-3 rounded-xl border border-black/10 bg-white/50 focus:outline-none focus:ring-4 focus:ring-coral/10 focus:border-coral transition-all text-gray-800 placeholder:text-gray-400" 
+                    placeholder="seu@email.com" 
+                    required 
+                    autocomplete="email"
+                >
+            </div>
+
+            <div class="space-y-2">
+                <label for="password" class="block text-sm font-semibold text-gray-800">Senha</label>
+                <div class="relative">
+                    <input 
+                        type="password" 
+                        id="password" 
+                        name="password" 
+                        class="w-full px-4 py-3 rounded-xl border border-black/10 bg-white/50 focus:outline-none focus:ring-4 focus:ring-coral/10 focus:border-coral transition-all text-gray-800 placeholder:text-gray-400 pr-12" 
+                        placeholder="••••••••" 
+                        required 
+                        autocomplete="current-password"
+                    >
+                    <button type="button" class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-coral transition-colors" id="toggle-password" aria-label="Mostrar senha">
+                        <i data-lucide="eye" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            </div>
+
+            <button type="submit" class="w-full py-4 bg-coral hover:bg-coral-hover text-white rounded-xl font-quicksand font-bold text-lg shadow-lg shadow-coral/20 transform active:scale-[0.98] transition-all">
+                Entrar
+            </button>
+        </form>
+
+        <!-- Footer -->
+        <footer class="mt-8 text-center text-sm text-gray-600">
+            <p>Não tem uma conta? <a href="register.html" class="text-coral font-semibold hover:underline">Crie uma agora</a></p>
+        </footer>
+    </main>
+
+    <!-- Scripts -->
     <script type="module">
         import auth from '../js/auth.js';
         
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // Password visibility toggle
+        const passwordInput = document.getElementById('password');
+        const toggleButton = document.getElementById('toggle-password');
+
+        toggleButton.addEventListener('click', () => {
+            const type = passwordInput.type === 'password' ? 'text' : 'password';
+            passwordInput.type = type;
+            
+            // Update icon
+            const iconName = type === 'password' ? 'eye' : 'eye-off';
+            toggleButton.innerHTML = `<i data-lucide="${iconName}" class="w-5 h-5"></i>`;
+            lucide.createIcons();
+            
+            toggleButton.setAttribute('aria-label', type === 'password' ? 'Mostrar senha' : 'Ocultar senha');
+        });
+
+        // Form submission
         document.getElementById('login-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
             
-            const result = await auth.login(email, password);
-            if (result.success) {
-                window.location.href = 'dashboard.html';
-            } else {
-                alert(result.message);
+            try {
+                const result = await auth.login(email, password);
+                if (result.success) {
+                    window.location.href = 'dashboard.html';
+                } else {
+                    alert(result.message || 'Erro ao fazer login');
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                alert('Erro de conexão com o servidor');
             }
         });
     </script>
