@@ -7,6 +7,10 @@ const PokemonController = require('../controllers/pokemonController');
  * Prefixo: /api/pokemons
  */
 
+// Endpoint: GET /api/pokemons/:id
+// Descrição: Retorna os dados completos de um Pokémon pelo seu ID.
+router.get('/:id', PokemonController.getPokemonDetails);
+
 // Endpoint: GET /api/pokemons/id/:id
 // Descrição: Busca um Pokémon pelo seu ID (Pokédex number).
 router.get('/id/:id', PokemonController.getById);

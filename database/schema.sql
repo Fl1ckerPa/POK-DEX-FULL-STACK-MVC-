@@ -22,7 +22,10 @@ CREATE TABLE IF NOT EXISTS pokemons (
     type VARCHAR(50) NOT NULL,
     height DECIMAL(5,2),
     weight DECIMAL(5,2),
+    base_experience INT,
     image_url VARCHAR(255),
+    front_default_url VARCHAR(255),
+    back_default_url VARCHAR(255),
     stats_hp INT,
     stats_attack INT,
     stats_defense INT,
@@ -30,6 +33,7 @@ CREATE TABLE IF NOT EXISTS pokemons (
     stats_sp_defense INT,
     stats_speed INT,
     abilities JSON,
+    types_json JSON,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );

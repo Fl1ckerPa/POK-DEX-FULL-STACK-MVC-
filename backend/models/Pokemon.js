@@ -48,7 +48,7 @@ class Pokemon {
     static async create(pokemonData) {
         try {
             const {
-                id, name, types, height, weight, sprites, stats, abilities
+                id, name, types, height, weight, base_experience, sprites, stats, abilities
             } = pokemonData;
 
             const hp = stats.find(s => s.name === 'hp')?.value || 0;
@@ -60,15 +60,17 @@ class Pokemon {
 
             const [result] = await db.query(
                 `INSERT INTO pokemons (
-                    pokemon_id, name, type, height, weight, image_url, 
+                    pokemon_id, name, type, height, weight, base_experience,
+                    image_url, front_default_url, back_default_url,
                     stats_hp, stats_attack, stats_defense, 
                     stats_sp_attack, stats_sp_defense, stats_speed, 
-                    abilities
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                    abilities, types_json
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
                 [
-                    id, name, types[0], height, weight, sprites.official_artwork,
+                    id, name, types[0], height, weight, base_experience,
+                    sprites.official_artwork, sprites.front_default, sprites.back_default,
                     hp, attack, defense, sp_attack, sp_defense, speed,
-                    JSON.stringify(abilities)
+                    JSON.stringify(abilities), JSON.stringify(types)
                 ]
             );
             return result.insertId;
@@ -86,7 +88,7 @@ class Pokemon {
     static async update(pokemonData) {
         try {
             const {
-                id, name, types, height, weight, sprites, stats, abilities
+                id, name, types, height, weight, base_experience, sprites, stats, abilities
             } = pokemonData;
 
             const hp = stats.find(s => s.name === 'hp')?.value || 0;
@@ -98,15 +100,17 @@ class Pokemon {
 
             const [result] = await db.query(
                 `UPDATE pokemons SET 
-                    name = ?, type = ?, height = ?, weight = ?, image_url = ?, 
+                    name = ?, type = ?, height = ?, weight = ?, base_experience = ?,
+                    image_url = ?, front_default_url = ?, back_default_url = ?,
                     stats_hp = ?, stats_attack = ?, stats_defense = ?, 
                     stats_sp_attack = ?, stats_sp_defense = ?, stats_speed = ?, 
-                    abilities = ?, updated_at = CURRENT_TIMESTAMP
+                    abilities = ?, types_json = ?, updated_at = CURRENT_TIMESTAMP
                 WHERE pokemon_id = ?`,
                 [
-                    name, types[0], height, weight, sprites.official_artwork,
+                    name, types[0], height, weight, base_experience,
+                    sprites.official_artwork, sprites.front_default, sprites.back_default,
                     hp, attack, defense, sp_attack, sp_defense, speed,
-                    JSON.stringify(abilities), id
+                    JSON.stringify(abilities), JSON.stringify(types), id
                 ]
             );
             return result.affectedRows > 0;
