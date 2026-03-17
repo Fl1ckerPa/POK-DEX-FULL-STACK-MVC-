@@ -30,7 +30,8 @@ CREATE TABLE IF NOT EXISTS pokemons (
     stats_sp_defense INT,
     stats_speed INT,
     abilities JSON,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
 -- TABELA: favorites

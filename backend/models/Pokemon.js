@@ -77,6 +77,44 @@ class Pokemon {
             throw error;
         }
     }
+
+    /**
+     * Atualiza os dados de um Pokémon no cache.
+     * @param {Object} pokemonData - Dados atualizados do Pokémon.
+     * @returns {Promise<boolean>} Retorna true se atualizado com sucesso.
+     */
+    static async update(pokemonData) {
+        try {
+            const {
+                id, name, types, height, weight, sprites, stats, abilities
+            } = pokemonData;
+
+            const hp = stats.find(s => s.name === 'hp')?.value || 0;
+            const attack = stats.find(s => s.name === 'attack')?.value || 0;
+            const defense = stats.find(s => s.name === 'defense')?.value || 0;
+            const sp_attack = stats.find(s => s.name === 'special-attack')?.value || 0;
+            const sp_defense = stats.find(s => s.name === 'special-defense')?.value || 0;
+            const speed = stats.find(s => s.name === 'speed')?.value || 0;
+
+            const [result] = await db.query(
+                `UPDATE pokemons SET 
+                    name = ?, type = ?, height = ?, weight = ?, image_url = ?, 
+                    stats_hp = ?, stats_attack = ?, stats_defense = ?, 
+                    stats_sp_attack = ?, stats_sp_defense = ?, stats_speed = ?, 
+                    abilities = ?, updated_at = CURRENT_TIMESTAMP
+                WHERE pokemon_id = ?`,
+                [
+                    name, types[0], height, weight, sprites.official_artwork,
+                    hp, attack, defense, sp_attack, sp_defense, speed,
+                    JSON.stringify(abilities), id
+                ]
+            );
+            return result.affectedRows > 0;
+        } catch (error) {
+            console.error(`Erro ao atualizar Pokémon no cache:`, error.message);
+            throw error;
+        }
+    }
 }
 
 module.exports = Pokemon;
