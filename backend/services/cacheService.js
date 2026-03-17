@@ -117,17 +117,22 @@ class CacheService {
             name: cached.name,
             height: cached.height,
             weight: cached.weight,
-            type: cached.type,
-            image_url: cached.image_url,
-            stats: {
-                hp: cached.stats_hp,
-                attack: cached.stats_attack,
-                defense: cached.stats_defense,
-                sp_attack: cached.stats_sp_attack,
-                sp_defense: cached.stats_sp_defense,
-                speed: cached.stats_speed
+            base_experience: cached.base_experience,
+            sprites: {
+                front_default: cached.front_default_url,
+                back_default: cached.back_default_url,
+                official_artwork: cached.image_url
             },
-            abilities: typeof cached.abilities === 'string' ? JSON.parse(cached.abilities) : cached.abilities
+            types: cached.types_json ? (typeof cached.types_json === 'string' ? JSON.parse(cached.types_json) : cached.types_json) : [cached.type],
+            abilities: typeof cached.abilities === 'string' ? JSON.parse(cached.abilities) : cached.abilities,
+            stats: [
+                { name: 'hp', value: cached.stats_hp },
+                { name: 'attack', value: cached.stats_attack },
+                { name: 'defense', value: cached.stats_defense },
+                { name: 'special-attack', value: cached.stats_sp_attack },
+                { name: 'special-defense', value: cached.stats_sp_defense },
+                { name: 'speed', value: cached.stats_speed }
+            ]
         };
     }
 }
