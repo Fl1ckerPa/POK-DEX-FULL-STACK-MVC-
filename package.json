@@ -4,7 +4,9 @@
   "description": "Projeto Pokédex Fullstack com arquitetura MVC.",
   "scripts": {
     "dev": "npm run dev --prefix backend",
-    "start:backend": "npm run dev --prefix backend",
+    "setup:db": "node backend/scripts/setup-db.js",
+    "test:backend": "npm test --prefix backend",
+    "start:backend": "npm start --prefix backend",
     "start:frontend": "live-server frontend"
   },
   "keywords": [

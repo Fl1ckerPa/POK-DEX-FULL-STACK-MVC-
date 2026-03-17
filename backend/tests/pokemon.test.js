@@ -1,6 +1,6 @@
 const request = require('supertest');
-const app = require('../backend/app'); // Ajuste o caminho para o seu app Express principal
-const db = require('../backend/config/database');
+const app = require('../app'); 
+const db = require('../config/database');
 
 // Descreve o conjunto de testes para a rota de Pokémon
 describe('GET /api/pokemons/id/:id', () => {
@@ -38,7 +38,6 @@ describe('GET /api/pokemons/id/:id', () => {
         expect(response.body.success).toBe(true);
         expect(response.body.data.id).toBe(4);
         expect(response.body.data.name).toBe('charmander');
-        // Aqui, poderíamos adicionar um mock para garantir que a API externa não foi chamada na segunda vez
     });
 
     test('deve retornar 404 para um Pokémon inexistente', async () => {

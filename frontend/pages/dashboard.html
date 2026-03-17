@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pokédex - Dashboard</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
     <link rel="stylesheet" href="../css/style.css">
 </head>
 <body>
@@ -12,22 +14,7 @@
         <div id="user-info"></div>
         <button id="logout-btn">Sair</button>
     </div>
-
-    <script type="module" src="../js/main.js"></script>
-    <script type="module">
-        import auth from '../js/auth.js';
-
-        document.addEventListener('DOMContentLoaded', () => {
-            const userStr = localStorage.getItem('user');
-            if (userStr) {
-                const user = JSON.parse(userStr);
-                document.getElementById('user-info').innerText = `Olá, ${user.name || user.email}!`;
-            }
-
-            document.getElementById('logout-btn').addEventListener('click', () => {
-                auth.logout();
-            });
-        });
-    </script>
 </body>
+
+<script type="module" src="../js/main.js"></script>
 </html>

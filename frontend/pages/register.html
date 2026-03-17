@@ -4,49 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pokédex - Criar conta</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        coral: {
-                            DEFAULT: 'hsl(0, 100%, 71%)',
-                            hover: 'hsl(0, 100%, 65%)',
-                        },
-                        cream: 'hsl(40, 33%, 98%)',
-                    },
-                    fontFamily: {
-                        inter: ['Inter', 'sans-serif'],
-                        quicksand: ['Quicksand', 'sans-serif'],
-                    },
-                    borderRadius: {
-                        '3xl': '2rem',
-                    }
-                }
-            }
-        }
-    </script>
-    <style>
-        @keyframes fadeSlideUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .animate-fade-slide-up {
-            animation: fadeSlideUp 0.5s ease-out forwards;
-        }
-        .glass-card {
-            background: rgba(255, 255, 255, 0.4);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.5);
-        }
-    </style>
+    <!-- Tailwind Config -->
+    <script src="../js/tailwind-config.js"></script>
+    <!-- Styles -->
+    <link rel="stylesheet" href="../css/style.css">
 </head>
 <body class="bg-cream font-inter min-h-screen flex items-center justify-center p-4">
     <main class="glass-card rounded-3xl shadow-2xl p-8 w-full max-w-[420px] animate-fade-slide-up">
@@ -120,28 +89,8 @@
             <p>Já tem uma conta? <a href="login.html" class="text-coral font-semibold hover:underline">Faça login</a></p>
         </footer>
     </main>
-
-    <!-- Scripts -->
-    <script type="module" src="../js/register.js"></script>
-    <script type="module">
-        // Initialize Lucide icons
-        lucide.createIcons();
-
-        // Password visibility toggle
-        const passwordInput = document.getElementById('password');
-        const toggleButton = document.getElementById('toggle-password');
-
-        toggleButton.addEventListener('click', () => {
-            const type = passwordInput.type === 'password' ? 'text' : 'password';
-            passwordInput.type = type;
-            
-            // Update icon
-            const iconName = type === 'password' ? 'eye' : 'eye-off';
-            toggleButton.innerHTML = `<i data-lucide="${iconName}" class="w-5 h-5"></i>`;
-            lucide.createIcons();
-            
-            toggleButton.setAttribute('aria-label', type === 'password' ? 'Mostrar senha' : 'Ocultar senha');
-        });
-    </script>
 </body>
+
+<!-- Scripts -->
+<script type="module" src="../js/register.js"></script>
 </html>

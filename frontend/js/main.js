@@ -9,6 +9,24 @@ document.addEventListener('DOMContentLoaded', () => {
     // Atualizar UI com base no estado de autenticação
     updateAuthUI();
 
+    // Lógica para o dashboard
+    const userInfo = document.getElementById('user-info');
+    const logoutBtn = document.getElementById('logout-btn');
+
+    if (userInfo) {
+        const userStr = localStorage.getItem('user');
+        if (userStr) {
+            const user = JSON.parse(userStr);
+            userInfo.innerText = `Olá, ${user.name || user.email}!`;
+        }
+    }
+
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', () => {
+            auth.logout();
+        });
+    }
+
     // Outras inicializações globais podem vir aqui
 });
 
