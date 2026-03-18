@@ -34,10 +34,12 @@ const authController = {
             });
 
         } catch (error) {
-            console.error('Erro no controller register:', error);
+            console.error('❌ Erro no controller register:', error);
+            console.error('Stack trace:', error.stack);
             return res.status(500).json({
                 success: false,
-                message: 'Erro interno do servidor ao processar registro'
+                message: 'Erro interno do servidor ao processar registro',
+                error_detail: error.message
             });
         }
     },
