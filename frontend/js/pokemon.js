@@ -13,6 +13,14 @@ const pokemon = {
     async init() {
         console.log('Pokemon module initialized');
         this.setupEventListeners();
+        
+        // Check for pokemonId in URL
+        const params = new URLSearchParams(window.location.search);
+        const pokemonId = params.get('pokemonId');
+        if (pokemonId) {
+            ui.showPokemonDetails(pokemonId);
+        }
+
         await this.fetchAndRender();
     },
 

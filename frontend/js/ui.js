@@ -1,6 +1,7 @@
 /**
  * UI Service - Handles all UI rendering and updates
  */
+import api from './api.js';
 
 const ui = {
     /**
@@ -106,10 +107,250 @@ const ui = {
         // Add click event for details
         template.addEventListener('click', (e) => {
             if (e.target.closest('.favorite-btn')) return;
-            window.location.href = `dashmon-details.html?id=${pokemon.id}`;
+            this.showPokemonDetails(pokemon.id);
         });
 
         return template;
+    },
+
+    /**
+     * Show Pokémon details in a slide-in panel
+     * @param {number} pokemonId - ID of the Pokémon to show
+     */
+    async showPokemonDetails(pokemonId) {
+        // Create overlay if it doesn't exist
+        let overlay = document.getElementById('pokemon-detail-overlay');
+        if (!overlay) {
+            overlay = document.createElement('div');
+            overlay.id = 'pokemon-detail-overlay';
+            overlay.className = 'detail-panel-overlay animate-fade-in';
+            document.body.appendChild(overlay);
+        }
+
+        // Show loading state in panel
+        overlay.innerHTML = `
+            <div class="detail-panel animate-spring-in p-8 flex flex-col items-center justify-center">
+                <button class="absolute top-6 right-6 p-2 rounded-xl hover:bg-black/5 transition-all close-btn">
+                    <i data-lucide="x" class="w-6 h-6 text-gray-400"></i>
+                </button>
+                <div class="w-16 h-16 border-4 border-coral/20 border-t-coral rounded-full animate-spin"></div>
+                <p class="mt-4 text-gray-500 font-medium">Carregando dados...</p>
+            </div>
+        `;
+        if (window.lucide) lucide.createIcons();
+
+        // Close logic
+        const closePanel = () => {
+            const panel = overlay.querySelector('.detail-panel');
+            panel.classList.replace('animate-spring-in', 'animate-slide-out');
+            overlay.classList.replace('animate-fade-in', 'animate-fade-out');
+            setTimeout(() => {
+                overlay.remove();
+            }, 300);
+        };
+
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay || e.target.closest('.close-btn')) {
+                closePanel();
+            }
+        });
+
+        try {
+            // Fetch Pokémon data
+            const result = await api.get(`/pokemon/${pokemonId}`);
+
+            if (!result.success) throw new Error(result.message);
+
+            const pokemon = result.data;
+            this.renderDetailPanel(overlay, pokemon, closePanel);
+        } catch (error) {
+            console.error('Error fetching pokemon details:', error);
+            overlay.innerHTML = `
+                <div class="detail-panel animate-spring-in p-8 flex flex-col items-center justify-center text-center">
+                    <button class="absolute top-6 right-6 p-2 rounded-xl hover:bg-black/5 transition-all close-btn">
+                        <i data-lucide="x" class="w-6 h-6 text-gray-400"></i>
+                    </button>
+                    <div class="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mb-4 text-red-400">
+                        <i data-lucide="alert-circle" class="w-10 h-10"></i>
+                    </div>
+                    <h3 class="text-xl font-quicksand font-bold text-gray-800">Erro ao carregar</h3>
+                    <p class="text-gray-500 mb-6">${error.message || 'Não foi possível carregar os detalhes do Pokémon.'}</p>
+                    <button class="px-6 py-2 bg-coral text-white rounded-xl font-bold hover:shadow-lg transition-all close-btn">
+                        Fechar
+                    </button>
+                </div>
+            `;
+            if (window.lucide) lucide.createIcons();
+        }
+    },
+
+    /**
+     * Render the content of the detail panel
+     * @param {HTMLElement} overlay - Overlay container
+     * @param {Object} pokemon - Pokémon data
+     * @param {Function} closeFn - Function to close the panel
+     */
+    renderDetailPanel(overlay, pokemon, closeFn) {
+        const formattedId = `#${String(pokemon.id).padStart(3, '0')}`;
+        const imageUrl = pokemon.sprites?.official_artwork || `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${pokemon.id}.png`;
+        
+        // Colors for stats
+        const statColors = {
+            'hp': 'var(--hp-color)',
+            'attack': 'var(--attack-color)',
+            'defense': 'var(--defense-color)',
+            'special-attack': 'var(--sp-atk-color)',
+            'special-defense': 'var(--sp-def-color)',
+            'speed': 'var(--speed-color)'
+        };
+
+        const statLabels = {
+            'hp': 'HP',
+            'attack': 'Ataque',
+            'defense': 'Defesa',
+            'special-attack': 'Sp. Atk',
+            'special-defense': 'Sp. Def',
+            'speed': 'Velocidade'
+        };
+
+        overlay.innerHTML = `
+            <div class="detail-panel animate-spring-in flex flex-col">
+                <!-- Header -->
+                <div class="sticky top-0 z-10 p-6 flex items-center justify-between bg-white/80 backdrop-blur-md">
+                    <span class="text-lg font-mono font-bold text-gray-400">${formattedId}</span>
+                    <button class="p-2 rounded-xl hover:bg-black/5 transition-all close-btn">
+                        <i data-lucide="x" class="w-6 h-6 text-gray-600"></i>
+                    </button>
+                </div>
+
+                <!-- Content -->
+                <div class="px-8 pb-12 space-y-8">
+                    <!-- Image & Name -->
+                    <div class="flex flex-col items-center space-y-4">
+                        <div class="relative w-48 h-48 flex items-center justify-center">
+                            <div class="absolute inset-0 bg-gradient-to-br from-coral/10 to-transparent rounded-full blur-2xl"></div>
+                            <div class="absolute inset-4 bg-gray-50 rounded-full border border-black/5 shadow-inner"></div>
+                            <img src="${imageUrl}" alt="${pokemon.name}" class="w-full h-full object-contain relative z-10 drop-shadow-2xl animate-float">
+                        </div>
+                        
+                        <div class="text-center space-y-2">
+                            <h2 class="text-3xl font-quicksand font-bold text-gray-800 capitalize">${pokemon.name}</h2>
+                            <div class="flex justify-center gap-2">
+                                ${pokemon.types.map(type => `
+                                    <span class="type-pill bg-white text-gray-700 shadow-sm">${type}</span>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Stats Grid (Height/Weight) -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="glass-card rounded-2xl p-4 text-center">
+                            <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Altura</p>
+                            <p class="text-xl font-bold text-gray-800">${pokemon.height / 10} m</p>
+                        </div>
+                        <div class="glass-card rounded-2xl p-4 text-center">
+                            <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Peso</p>
+                            <p class="text-xl font-bold text-gray-800">${pokemon.weight / 10} kg</p>
+                        </div>
+                    </div>
+
+                    <!-- Abilities -->
+                    <div class="space-y-3">
+                        <h4 class="font-quicksand font-bold text-gray-800">Habilidades</h4>
+                        <div class="flex flex-wrap gap-2">
+                            ${pokemon.abilities.map(ability => `
+                                <span class="px-4 py-2 bg-gray-100 rounded-xl text-sm font-semibold text-gray-600 capitalize">
+                                    ${ability}
+                                </span>
+                            `).join('')}
+                        </div>
+                    </div>
+
+                    <!-- Base Stats -->
+                    <div class="space-y-4">
+                        <h4 class="font-quicksand font-bold text-gray-800">Estatísticas Base</h4>
+                        <div class="space-y-4">
+                            ${pokemon.stats.map(stat => {
+                                const color = statColors[stat.name] || 'var(--coral)';
+                                const label = statLabels[stat.name] || stat.name;
+                                const percentage = Math.min(100, (stat.value / 255) * 100);
+                                return `
+                                    <div class="space-y-1.5">
+                                        <div class="flex justify-between text-xs font-bold uppercase tracking-wider">
+                                            <span class="text-gray-500">${label}</span>
+                                            <span class="text-gray-800">${stat.value}</span>
+                                        </div>
+                                        <div class="progress-bar-bg">
+                                            <div class="progress-bar-fill" style="width: 0%; background-color: ${color}" data-width="${percentage}%"></div>
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="grid grid-cols-2 gap-4 pt-4">
+                        <button class="btn-action bg-coral text-white shadow-lg shadow-coral/20 hover:scale-[1.02]" id="favorite-detail-btn">
+                            <i data-lucide="heart" class="w-5 h-5"></i>
+                            <span>Favoritar</span>
+                        </button>
+                        <button class="btn-action bg-teal text-white shadow-lg shadow-teal/20 hover:scale-[1.02]" id="add-team-detail-btn">
+                            <i data-lucide="plus" class="w-5 h-5"></i>
+                            <span>No Time</span>
+                        </button>
+                    </div>
+
+                    <!-- Navigation -->
+                    <div class="flex items-center justify-between pt-8 border-t border-black/5">
+                        <button class="flex items-center gap-2 text-gray-500 hover:text-coral transition-colors font-bold nav-prev" data-id="${pokemon.id - 1}">
+                            <i data-lucide="arrow-left" class="w-5 h-5"></i>
+                            Anterior
+                        </button>
+                        <button class="flex items-center gap-2 text-gray-500 hover:text-coral transition-colors font-bold nav-next" data-id="${pokemon.id + 1}">
+                            Próximo
+                            <i data-lucide="arrow-right" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        if (window.lucide) lucide.createIcons();
+
+        // Animate progress bars
+        setTimeout(() => {
+            overlay.querySelectorAll('.progress-bar-fill').forEach(bar => {
+                bar.style.width = bar.dataset.width;
+            });
+        }, 100);
+
+        // Add event listeners for navigation
+        overlay.querySelector('.nav-prev').addEventListener('click', (e) => {
+            const id = parseInt(e.currentTarget.dataset.id);
+            if (id > 0) this.showPokemonDetails(id);
+        });
+        overlay.querySelector('.nav-next').addEventListener('click', (e) => {
+            const id = parseInt(e.currentTarget.dataset.id);
+            this.showPokemonDetails(id);
+        });
+
+        // Favorite button logic
+        const favBtn = overlay.querySelector('#favorite-detail-btn');
+        favBtn.addEventListener('click', () => {
+            console.log('Favoriting pokemon', pokemon.id);
+            this.showNotification(`${pokemon.name} adicionado aos favoritos!`, 'success');
+            document.dispatchEvent(new CustomEvent('toggleFavorite', { detail: { id: pokemon.id } }));
+        });
+
+        // Add to team button logic
+        const teamBtn = overlay.querySelector('#add-team-detail-btn');
+        teamBtn.addEventListener('click', () => {
+            console.log('Adding to team', pokemon.id);
+            this.showNotification(`${pokemon.name} adicionado à sua equipe!`, 'success');
+            document.dispatchEvent(new CustomEvent('addToTeam', { detail: { id: pokemon.id } }));
+        });
     },
 
     /**
@@ -200,6 +441,44 @@ const ui = {
                 </div>
             `;
         }
+    },
+
+    /**
+     * Show a toast notification
+     * @param {string} message - Message to show
+     * @param {string} type - Type of notification (success, error, info)
+     */
+    showNotification(message, type = 'success') {
+        let container = document.getElementById('notification-container');
+        if (!container) {
+            container = document.createElement('div');
+            container.id = 'notification-container';
+            container.className = 'fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] flex flex-col gap-3 pointer-events-none';
+            document.body.appendChild(container);
+        }
+
+        const toast = document.createElement('div');
+        const bgColor = type === 'success' ? 'bg-teal' : type === 'error' ? 'bg-red-500' : 'bg-gray-800';
+        
+        toast.className = `${bgColor} text-white px-6 py-3 rounded-2xl shadow-xl flex items-center gap-3 animate-spring-in pointer-events-auto cursor-pointer`;
+        
+        const icon = type === 'success' ? 'check-circle' : type === 'error' ? 'alert-circle' : 'info';
+        
+        toast.innerHTML = `
+            <i data-lucide="${icon}" class="w-5 h-5"></i>
+            <span class="font-bold text-sm">${message}</span>
+        `;
+        
+        container.appendChild(toast);
+        if (window.lucide) lucide.createIcons();
+
+        const removeToast = () => {
+            toast.classList.replace('animate-spring-in', 'animate-fade-out');
+            setTimeout(() => toast.remove(), 300);
+        };
+
+        toast.onclick = removeToast;
+        setTimeout(removeToast, 4000);
     },
 
     /**
