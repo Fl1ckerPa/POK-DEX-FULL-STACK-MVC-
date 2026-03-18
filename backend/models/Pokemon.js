@@ -5,6 +5,74 @@ const db = require('../config/database');
  */
 class Pokemon {
     /**
+     * Busca todos os Pokémon com paginação e busca opcional.
+     * @param {number} page - Número da página.
+     * @param {number} limit - Limite de resultados por página.
+     * @param {string} search - Termo de busca (nome ou ID).
+     * @returns {Promise<Object>} Um objeto contendo a lista de Pokémon e o total.
+     */
+    static async findAll(page = 1, limit = 20, search = '') {
+        try {
+            const offset = (page - 1) * limit;
+            let query = 'SELECT * FROM pokemons';
+            let countQuery = 'SELECT COUNT(*) as total FROM pokemons';
+            const params = [];
+            const countParams = [];
+
+            if (search) {
+                const isIdSearch = !isNaN(search) && search.trim() !== '';
+                if (isIdSearch) {
+                    query += ' WHERE pokemon_id = ?';
+                    countQuery += ' WHERE pokemon_id = ?';
+                    params.push(parseInt(search));
+                    countParams.push(parseInt(search));
+                } else {
+                    const searchStr = `%${search}%`;
+                    query += ' WHERE name LIKE ?';
+                    countQuery += ' WHERE name LIKE ?';
+                    params.push(searchStr);
+                    countParams.push(searchStr);
+                }
+            }
+
+            query += ' ORDER BY pokemon_id ASC LIMIT ? OFFSET ?';
+            params.push(parseInt(limit), parseInt(offset));
+
+            const [rows] = await db.query(query, params);
+            const [countResult] = await db.query(countQuery, countParams);
+
+            // Helper to safely parse JSON or return original if already object
+            const safeParse = (data) => {
+                if (!data) return null;
+                if (typeof data === 'object') return data;
+                try {
+                    return JSON.parse(data);
+                } catch (e) {
+                    console.error('JSON Parse error:', e.message, data);
+                    return null;
+                }
+            };
+
+            // Parse JSON fields
+            const formattedRows = rows.map(row => ({
+                ...row,
+                id: row.pokemon_id,
+                types: safeParse(row.types_json) || [row.type],
+                abilities: safeParse(row.abilities) || []
+            }));
+
+            return {
+                data: formattedRows,
+                total: countResult[0].total,
+                totalPages: Math.ceil(countResult[0].total / limit)
+            };
+        } catch (error) {
+            console.error(`Erro ao buscar lista de Pokémon no banco:`, error.message);
+            throw error;
+        }
+    }
+
+    /**
      * Busca um Pokémon pelo seu ID da PokéAPI.
      * @param {number} pokemonId - O ID do Pokémon na PokéAPI.
      * @returns {Promise<Object|null>} O Pokémon encontrado ou null.

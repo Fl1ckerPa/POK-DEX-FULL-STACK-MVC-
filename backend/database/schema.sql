@@ -20,8 +20,8 @@ CREATE TABLE IF NOT EXISTS pokemons (
     pokemon_id INT UNIQUE NOT NULL, -- ID da PokéAPI
     name VARCHAR(100) NOT NULL,
     type VARCHAR(50) NOT NULL,
-    height DECIMAL(5,2),
-    weight DECIMAL(5,2),
+    height DECIMAL(10,2),
+    weight DECIMAL(10,2),
     base_experience INT,
     image_url VARCHAR(255),
     front_default_url VARCHAR(255),

@@ -1,9 +1,39 @@
 const CacheService = require('../services/cacheService');
+const Pokemon = require('../models/Pokemon');
 
 /**
  * Controller responsável por lidar com requisições relacionadas a Pokémon.
  */
 class PokemonController {
+    /**
+     * Lista todos os Pokémon com paginação e busca.
+     * @param {Object} req - Objeto de requisição do Express.
+     * @param {Object} res - Objeto de resposta do Express.
+     */
+    static async list(req, res) {
+        try {
+            const page = parseInt(req.query.page) || 1;
+            const limit = parseInt(req.query.limit) || 20;
+            const search = req.query.search || '';
+
+            const { data, total, totalPages } = await Pokemon.findAll(page, limit, search);
+
+            return res.status(200).json({
+                success: true,
+                data,
+                total,
+                totalPages,
+                page,
+                limit
+            });
+        } catch (error) {
+            console.error('Erro em PokemonController.list:', error.message);
+            return res.status(500).json({
+                success: false,
+                message: 'Erro ao listar Pokémon.'
+            });
+        }
+    }
     /**
      * Busca os detalhes completos de um Pokémon pelo seu ID.
      * @param {Object} req - Objeto de requisição do Express.

@@ -31,6 +31,10 @@ const migrate = async () => {
             console.log('➕ Adicionando coluna updated_at...');
             await db.query('ALTER TABLE pokemons ADD COLUMN updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP');
         }
+
+        console.log('🔄 Ajustando tipos de dados para height e weight...');
+        await db.query('ALTER TABLE pokemons MODIFY COLUMN height DECIMAL(10,2)');
+        await db.query('ALTER TABLE pokemons MODIFY COLUMN weight DECIMAL(10,2)');
         
         console.log('✅ Migração concluída com sucesso!');
         process.exit(0);

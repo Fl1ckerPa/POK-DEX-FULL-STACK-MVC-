@@ -20,6 +20,6 @@ app.get('/', (req, res) => {
 
 // Rotas da API
 app.use('/api/auth', authRoutes);
-app.use('/api/pokemons', pokemonRoutes);
+app.use('/api/pokemon', pokemonRoutes);
 
 module.exports = app;
