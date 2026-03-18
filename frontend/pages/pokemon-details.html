@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pokédex - Detalhes do Pokémon</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Tailwind Config -->
+    <script src="../js/tailwind-config.js"></script>
+    <!-- Styles -->
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/animations.css">
+</head>
+<body class="bg-cream font-inter min-h-screen">
+    <!-- This page acts as a redirect/shell to show the details panel on the dashboard -->
+    <div class="flex items-center justify-center min-h-screen">
+        <div class="text-center space-y-4">
+            <div class="w-12 h-12 border-4 border-coral/20 border-t-coral rounded-full animate-spin mx-auto"></div>
+            <p class="text-gray-500 font-medium">Carregando detalhes...</p>
+        </div>
+    </div>
+
+    <script type="module">
+        import auth from '../js/auth.js';
+        import ui from '../js/ui.js';
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Check auth
+            const user = auth.getUser();
+            if (!user) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // Get ID from URL
+            const params = new URLSearchParams(window.location.search);
+            const id = params.get('id');
+
+            if (id) {
+                // Redirect to dashboard with the panel open (optional)
+                // or just show it here on a blurred background
+                // For consistency with the "slide-in" requirement, 
+                // we'll redirect to dashboard with a query param
+                window.location.href = `dashboard.html?pokemonId=${id}`;
+            } else {
+                window.location.href = 'dashboard.html';
+            }
+        });
+    </script>
+</body>
+</html>
