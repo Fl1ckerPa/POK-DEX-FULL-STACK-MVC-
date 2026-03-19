@@ -302,6 +302,15 @@ const ui = {
                         </button>
                     </div>
 
+                    <!-- Ver Detalhes Completos Button -->
+                    <a href="details.html?id=${pokemon.id}" 
+                       class="block w-full text-center rounded-2xl h-12 leading-[3rem] 
+                              font-quicksand font-bold border border-gray-200 dark:border-gray-700 
+                              text-gray-800 dark:text-gray-200 
+                              hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors mt-2"> 
+                      Ver Detalhes Completos 
+                    </a>
+
                     <!-- Navigation -->
                     <div class="flex items-center justify-between pt-8 border-t border-black/5">
                         <button class="flex items-center gap-2 text-gray-500 hover:text-coral transition-colors font-bold nav-prev" data-id="${pokemon.id - 1}">

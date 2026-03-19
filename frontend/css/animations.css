@@ -1,4 +1,20 @@
 /* Animation keyframes */
+@keyframes fadeSlideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fillBar {
+    from { width: 0%; }
+    to { width: var(--fill-width); }
+}
+
 @keyframes slideInRight {
     from {
         transform: translateX(100%);
@@ -52,6 +68,10 @@
 
 .animate-fade-out {
     animation: fadeOut 0.2s ease-in forwards;
+}
+
+.animate-fade-slide-up {
+    animation: fadeSlideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 /* Spring Animation - Custom properties for stiffness and damping */
