@@ -62,10 +62,76 @@
     </section> 
  
     <!-- Abilities --> 
-    <section class="glass-card p-5 opacity-0 animate-fade-slide-up delay-300"> 
-      <h3 class="font-display font-bold text-sm text-gray-500 mb-3 uppercase tracking-wide">Abilities</h3> 
-      <div class="flex flex-wrap gap-2 abilities"></div> 
+    <section class="glass-card p-5 opacity-0 animate-fade-slide-up" style="animation-delay: 0.3s"> 
+      <div class="flex items-center gap-2 mb-4"> 
+        <span class="text-muted-foreground">✨</span> 
+        <h3 class="font-display font-bold text-sm text-gray-500 dark:text-gray-400 uppercase tracking-wide"> 
+          Abilities 
+        </h3> 
+      </div> 
+      <div class="space-y-3 abilities-detailed"></div> 
     </section> 
+ 
+    <!-- Evolution Chain -->
+    <section class="glass-card p-5 opacity-0 animate-fade-slide-up" style="animation-delay: 0.6s"> 
+      <div class="flex items-center gap-2 mb-5"> 
+        <span class="text-gray-400 dark:text-gray-500">🔀</span> 
+        <h3 class="font-display font-bold text-sm text-gray-500 dark:text-gray-400 uppercase tracking-wide"> 
+          Evolution Chain 
+        </h3> 
+      </div> 
+      <div class="flex items-center justify-center flex-wrap gap-2 evolution-chain"></div> 
+    </section>
+
+    <!-- Moves -->
+    <section class="glass-card p-5 opacity-0 animate-fade-slide-up" style="animation-delay: 0.5s"> 
+      <div class="flex items-center gap-2 mb-4"> 
+        <span class="text-gray-400 dark:text-gray-500">⚔️</span> 
+        <h3 class="font-display font-bold text-sm text-gray-500 dark:text-gray-400 uppercase tracking-wide"> 
+          Moves 
+        </h3> 
+        <span class="text-xs text-gray-400 dark:text-gray-500 ml-auto moves-count"></span> 
+      </div> 
+     
+      <!-- Filtros --> 
+      <div class="flex flex-wrap gap-1.5 mb-4 moves-filters"></div> 
+     
+      <!-- Tabela --> 
+      <div class="overflow-x-auto"> 
+        <table class="w-full text-sm"> 
+          <thead> 
+            <tr class="border-b border-gray-200 dark:border-gray-700 text-left"> 
+              <th class="pb-2 font-medium text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wide">Move</th> 
+              <th class="pb-2 font-medium text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wide">Type</th> 
+              <th class="pb-2 font-medium text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wide text-center">Pwr</th> 
+              <th class="pb-2 font-medium text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wide text-center">Acc</th> 
+              <th class="pb-2 font-medium text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wide text-center">PP</th> 
+              <th class="pb-2 font-medium text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wide">Class</th> 
+            </tr> 
+          </thead> 
+          <tbody class="moves-table-body"></tbody> 
+        </table> 
+      </div> 
+     
+      <!-- Botão expandir --> 
+      <div class="moves-expand-container hidden"> 
+        <button class="moves-expand-btn w-full mt-3 py-2 flex items-center justify-center gap-1 
+                       text-sm font-medium text-coral hover:text-coral/80 transition-colors"> 
+        </button> 
+      </div> 
+    </section>
+
+    <!-- Game Appearances -->
+    <section class="glass-card p-5 opacity-0 animate-fade-slide-up" style="animation-delay: 0.7s"> 
+      <div class="flex items-center gap-2 mb-4"> 
+        <span class="text-gray-400 dark:text-gray-500">🎮</span> 
+        <h3 class="font-display font-bold text-sm text-gray-500 dark:text-gray-400 uppercase tracking-wide"> 
+          Game Appearances 
+        </h3> 
+        <span class="text-xs text-gray-400 dark:text-gray-500 ml-auto versions-count"></span> 
+      </div> 
+      <div class="space-y-4 versions-container"></div> 
+    </section>
  
     <!-- Stats --> 
     <section class="glass-card p-5 opacity-0 animate-fade-slide-up delay-400"> 
