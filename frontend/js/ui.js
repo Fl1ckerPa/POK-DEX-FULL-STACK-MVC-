@@ -55,7 +55,7 @@ const ui = {
         // Type badges
         const types = pokemon.types || [];
         const typeBadges = types.map(type => `
-            <span class="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-white/50 text-gray-700 border border-black/5">
+            <span class="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-type-${type} text-white shadow-sm border border-black/5">
                 ${type}
             </span>
         `).join('');
@@ -237,7 +237,7 @@ const ui = {
                             <h2 class="text-3xl font-quicksand font-bold text-gray-800 capitalize">${pokemon.name}</h2>
                             <div class="flex justify-center gap-2">
                                 ${pokemon.types.map(type => `
-                                    <span class="type-pill bg-white text-gray-700 shadow-sm">${type}</span>
+                                    <span class="type-pill bg-type-${type} text-white shadow-sm capitalize">${type}</span>
                                 `).join('')}
                             </div>
                         </div>

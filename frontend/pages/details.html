@@ -3,13 +3,15 @@
 <head> 
   <meta charset="UTF-8"> 
   <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
-  <title>Pokémon Details</title> 
+  <title>Detalhes do Pokémon</title> 
   <!-- Favicon -->
   <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
   <!-- Tailwind Config -->
   <script src="../js/tailwind-config.js"></script>
   <!-- Styles -->
@@ -38,11 +40,13 @@
       <h2 class="font-display font-bold text-3xl capitalize mt-4 pokemon-title"></h2> 
       <div class="flex justify-center gap-2 mt-3 types"></div> 
       <div class="mt-5"> 
-        <button class="cry-btn rounded-2xl h-12 px-6 font-display font-bold 
-                       bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 
-                       transition-colors inline-flex items-center gap-2 active:scale-95"> 
-          <span class="cry-icon">🔊</span> 
-          <span class="cry-text">Play Cry</span> 
+        <button class="cry-btn rounded-full h-12 px-8 font-display font-bold 
+                       bg-[#4FD1C5] hover:bg-[#38B2AC] text-white shadow-lg shadow-teal-500/20
+                       transition-all inline-flex items-center gap-2 active:scale-95"> 
+          <span class="cry-icon-container">
+            <i data-lucide="volume-2" class="w-5 h-5"></i>
+          </span> 
+          <span class="cry-text">Ouvir Som</span> 
         </button> 
       </div> 
     </section> 
@@ -50,13 +54,13 @@
     <!-- Físico --> 
     <section class="grid grid-cols-2 gap-3 opacity-0 animate-fade-slide-up delay-200"> 
       <div class="glass-card p-4 text-center"> 
-        <span class="text-gray-400 text-lg">📏</span> 
-        <p class="text-xs text-gray-500 font-body">Height</p> 
+        <i data-lucide="ruler" class="w-6 h-6 text-coral mx-auto mb-1"></i>
+        <p class="text-xs text-gray-500 font-body">Altura</p> 
         <p class="font-display font-bold text-xl height-value"></p> 
       </div> 
       <div class="glass-card p-4 text-center"> 
-        <span class="text-gray-400 text-lg">⚖️</span> 
-        <p class="text-xs text-gray-500 font-body">Weight</p> 
+        <i data-lucide="weight" class="w-6 h-6 text-coral mx-auto mb-1"></i>
+        <p class="text-xs text-gray-500 font-body">Peso</p> 
         <p class="font-display font-bold text-xl weight-value"></p> 
       </div> 
     </section> 
@@ -64,31 +68,41 @@
     <!-- Abilities --> 
     <section class="glass-card p-5 opacity-0 animate-fade-slide-up" style="animation-delay: 0.3s"> 
       <div class="flex items-center gap-2 mb-4"> 
-        <span class="text-muted-foreground">✨</span> 
+        <i data-lucide="sparkles" class="w-5 h-5 text-coral"></i>
         <h3 class="font-display font-bold text-sm text-gray-500 dark:text-gray-400 uppercase tracking-wide"> 
-          Abilities 
+          Habilidades 
         </h3> 
       </div> 
       <div class="space-y-3 abilities-detailed"></div> 
     </section> 
  
     <!-- Evolution Chain -->
-    <section class="glass-card p-5 opacity-0 animate-fade-slide-up" style="animation-delay: 0.6s"> 
+    <section class="glass-card p-5 opacity-0 animate-fade-slide-up" style="animation-delay: 0.4s"> 
       <div class="flex items-center gap-2 mb-5"> 
-        <span class="text-gray-400 dark:text-gray-500">🔀</span> 
+        <i data-lucide="git-branch" class="w-5 h-5 text-coral"></i>
         <h3 class="font-display font-bold text-sm text-gray-500 dark:text-gray-400 uppercase tracking-wide"> 
-          Evolution Chain 
+          Cadeia de Evolução 
         </h3> 
       </div> 
       <div class="flex items-center justify-center flex-wrap gap-2 evolution-chain"></div> 
     </section>
 
-    <!-- Moves -->
+    <!-- Stats --> 
     <section class="glass-card p-5 opacity-0 animate-fade-slide-up" style="animation-delay: 0.5s"> 
+      <h3 class="font-display font-bold text-sm text-gray-500 mb-4 uppercase tracking-wide">Estatísticas Base</h3> 
+      <div class="space-y-3 stats"></div> 
+      <div class="mt-4 pt-3 border-t border-gray-200 dark:border-gray-700 flex justify-between"> 
+        <span class="font-display font-bold text-sm text-gray-500 uppercase tracking-wide">Total</span> 
+        <span class="font-display font-bold text-lg stat-total"></span> 
+      </div> 
+    </section> 
+
+    <!-- Moves -->
+    <section class="glass-card p-5 opacity-0 animate-fade-slide-up" style="animation-delay: 0.6s"> 
       <div class="flex items-center gap-2 mb-4"> 
-        <span class="text-gray-400 dark:text-gray-500">⚔️</span> 
+        <i data-lucide="swords" class="w-5 h-5 text-coral"></i>
         <h3 class="font-display font-bold text-sm text-gray-500 dark:text-gray-400 uppercase tracking-wide"> 
-          Moves 
+          Ataques 
         </h3> 
         <span class="text-xs text-gray-400 dark:text-gray-500 ml-auto moves-count"></span> 
       </div> 
@@ -101,12 +115,12 @@
         <table class="w-full text-sm"> 
           <thead> 
             <tr class="border-b border-gray-200 dark:border-gray-700 text-left"> 
-              <th class="pb-2 font-medium text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wide">Move</th> 
-              <th class="pb-2 font-medium text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wide">Type</th> 
+              <th class="pb-2 font-medium text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wide">Ataque</th> 
+              <th class="pb-2 font-medium text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wide">Tipo</th> 
               <th class="pb-2 font-medium text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wide text-center">Pwr</th> 
               <th class="pb-2 font-medium text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wide text-center">Acc</th> 
               <th class="pb-2 font-medium text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wide text-center">PP</th> 
-              <th class="pb-2 font-medium text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wide">Class</th> 
+              <th class="pb-2 font-medium text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wide">Classe</th> 
             </tr> 
           </thead> 
           <tbody class="moves-table-body"></tbody> 
@@ -124,24 +138,14 @@
     <!-- Game Appearances -->
     <section class="glass-card p-5 opacity-0 animate-fade-slide-up" style="animation-delay: 0.7s"> 
       <div class="flex items-center gap-2 mb-4"> 
-        <span class="text-gray-400 dark:text-gray-500">🎮</span> 
+        <i data-lucide="gamepad-2" class="w-5 h-5 text-coral"></i>
         <h3 class="font-display font-bold text-sm text-gray-500 dark:text-gray-400 uppercase tracking-wide"> 
-          Game Appearances 
+          Aparições nos Jogos 
         </h3> 
         <span class="text-xs text-gray-400 dark:text-gray-500 ml-auto versions-count"></span> 
       </div> 
       <div class="space-y-4 versions-container"></div> 
     </section>
- 
-    <!-- Stats --> 
-    <section class="glass-card p-5 opacity-0 animate-fade-slide-up delay-400"> 
-      <h3 class="font-display font-bold text-sm text-gray-500 mb-4 uppercase tracking-wide">Base Stats</h3> 
-      <div class="space-y-3 stats"></div> 
-      <div class="mt-4 pt-3 border-t border-gray-200 dark:border-gray-700 flex justify-between"> 
-        <span class="font-display font-bold text-sm text-gray-500 uppercase tracking-wide">Total</span> 
-        <span class="font-display font-bold text-lg stat-total"></span> 
-      </div> 
-    </section> 
   </main> 
  
   <script src="../js/details.js" type="module"></script> 

@@ -2,20 +2,20 @@ import api from './api.js';
 
 const STAT_LABELS = {
   "hp": "HP",
-  "attack": "Attack",
-  "defense": "Defense",
-  "special-attack": "Sp. Atk",
-  "special-defense": "Sp. Def",
-  "speed": "Speed"
+  "attack": "Ataque",
+  "defense": "Defesa",
+  "special-attack": "Ataque Esp.",
+  "special-defense": "Defesa Esp.",
+  "speed": "Velocidade"
 };
 
 const ICONS = {
-  'HP': '❤️',
-  'Attack': '⚔️',
-  'Defense': '🛡️',
-  'Sp. Atk': '⚡',
-  'Sp. Def': '🛡️',
-  'Speed': '⭐'
+  'HP': 'heart',
+  'Ataque': 'swords',
+  'Defesa': 'shield',
+  'Ataque Esp.': 'sparkles',
+  'Defesa Esp.': 'shield-check',
+  'Velocidade': 'zap'
 };
 
 const VERSION_COLORS = { 
@@ -50,16 +50,22 @@ const GEN_LABELS = {
 };
 
 const METHOD_LABELS = { 
-  'level-up': 'Level Up', 
+  'level-up': 'Subir Nível', 
   'machine': 'TM/HM', 
   'tutor': 'Tutor', 
-  'egg': 'Egg' 
+  'egg': 'Ovo' 
 };
 
 const DAMAGE_CLASS_STYLES = { 
   physical: 'bg-red-500/15 text-red-600 dark:text-red-400', 
   special:  'bg-blue-500/15 text-blue-600 dark:text-blue-400', 
   status:   'bg-gray-300/30 text-gray-500 dark:text-gray-400' 
+};
+
+const DAMAGE_CLASS_LABELS = {
+  physical: 'Físico',
+  special: 'Especial',
+  status: 'Status'
 };
 
 let audio = null;
@@ -100,8 +106,6 @@ async function renderAbilities(abilities) {
 
   const abilitiesHtml = await Promise.all(
     abilities.map(async (a, i) => {
-      // a.name is the ability name from our backend/cache
-      // We need to fetch the full details from PokeAPI using its name/ID
       const detail = await fetchAbilityDetail(`https://pokeapi.co/api/v2/ability/${a}`);
 
       return `
@@ -185,7 +189,7 @@ async function renderEvolutionChain(pokemonId) {
   if (stages.length <= 1) {
     container.innerHTML = `
       <p class="text-sm text-gray-500 dark:text-gray-400 text-center py-4"> 
-        This Pokémon does not evolve. 
+        Este Pokémon não evolui. 
       </p>`;
     return;
   }
@@ -291,7 +295,7 @@ async function renderMoves(pokemonId) {
   allMoves = detailed;
   totalMovesCount = totalCount;
 
-  document.querySelector('.moves-count').textContent = `${totalCount} moves`;
+  document.querySelector('.moves-count').textContent = `${totalCount} ataques`;
 
   const methods = [...new Set(detailed.map(m => m.method))];
   renderMoveFilters(methods);
@@ -316,7 +320,7 @@ function renderMoveFilters(methods) {
     <button onclick="setMoveFilter('all')" 
             class="move-filter-btn px-3 py-1 rounded-full text-xs font-medium transition-colors 
                    ${currentFilter === 'all' ? 'bg-coral text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'}">
-      All
+      Todos
     </button>`;
 
   const methodBtns = methods.map(m => `
@@ -351,7 +355,7 @@ function renderMoveTable() {
         ${m.level > 0 ? `<span class="text-xs text-gray-400 ml-1">Lv.${m.level}</span>` : ''} 
       </td> 
       <td class="py-2"> 
-        ${m.type ? `<span class="type-badge type-${m.type}">${m.type}</span>` : ''} 
+        ${m.type ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-type-${m.type} text-white shadow-sm border border-black/5">${m.type}</span>` : ''} 
       </td> 
       <td class="py-2 text-center font-display font-bold text-gray-800 dark:text-gray-200"> 
         ${m.power ?? '—'} 
@@ -366,7 +370,7 @@ function renderMoveTable() {
         ${m.damageClass ? ` 
           <span class="px-2 py-0.5 rounded-full text-xs font-medium capitalize 
                        ${DAMAGE_CLASS_STYLES[m.damageClass] || 'bg-gray-200 text-gray-500'}"> 
-            ${m.damageClass} 
+            ${DAMAGE_CLASS_LABELS[m.damageClass] || m.damageClass} 
           </span>` : ''} 
       </td> 
     </tr> 
@@ -377,8 +381,8 @@ function renderMoveTable() {
     expandContainer.classList.remove('hidden');
     const btn = document.querySelector('.moves-expand-btn');
     btn.textContent = movesExpanded 
-      ? 'Show Less ▲' 
-      : `Show All ${filtered.length} Moves ▼`; 
+      ? 'Mostrar Menos ▲' 
+      : `Mostrar Todos os ${filtered.length} Ataques ▼`; 
     btn.onclick = () => { 
       movesExpanded = !movesExpanded; 
       renderMoveTable(); 
@@ -429,7 +433,7 @@ async function renderGameVersions(pokemonId) {
 
   const versions = await fetchGameVersions(pokemonId);
 
-  document.querySelector('.versions-count').textContent = `${versions.length} games`;
+  document.querySelector('.versions-count').textContent = `${versions.length} jogos`;
 
   const grouped = {};
   versions.forEach(v => {
@@ -462,25 +466,29 @@ function playCry(url) {
   }
   
   const btn = document.querySelector('.cry-text');
-  const icon = document.querySelector('.cry-icon');
+  const iconContainer = document.querySelector('.cry-icon-container');
   
   audio = new Audio(url);
-  btn.textContent = 'Playing...';
-  icon.textContent = '🔇';
+  btn.textContent = 'Tocando...';
+  iconContainer.innerHTML = '<i data-lucide="volume-x" class="w-5 h-5"></i>';
+  if (window.lucide) lucide.createIcons();
   
   audio.play().catch(() => {
-    btn.textContent = 'Play Cry';
-    icon.textContent = '🔊';
+    btn.textContent = 'Ouvir Som';
+    iconContainer.innerHTML = '<i data-lucide="volume-2" class="w-5 h-5"></i>';
+    if (window.lucide) lucide.createIcons();
   });
   
   audio.onended = () => {
-    btn.textContent = 'Play Cry';
-    icon.textContent = '🔊';
+    btn.textContent = 'Ouvir Som';
+    iconContainer.innerHTML = '<i data-lucide="volume-2" class="w-5 h-5"></i>';
+    if (window.lucide) lucide.createIcons();
   };
   
   audio.onerror = () => {
-    btn.textContent = 'Play Cry';
-    icon.textContent = '🔊';
+    btn.textContent = 'Ouvir Som';
+    iconContainer.innerHTML = '<i data-lucide="volume-2" class="w-5 h-5"></i>';
+    if (window.lucide) lucide.createIcons();
   };
 }
 
@@ -511,7 +519,9 @@ function renderStats(stats) {
     return `
       <div class="flex items-center gap-3" 
            style="opacity:0; animation: fadeSlideUp 0.5s ease-out ${0.5 + i * 0.05}s forwards">
-        <span class="w-5 text-center text-gray-400">${ICONS[s.label] || '⚡'}</span>
+        <span class="w-5 flex justify-center text-coral">
+          <i data-lucide="${ICONS[s.label] || 'zap'}" class="w-4 h-4"></i>
+        </span>
         <span class="w-16 text-xs font-medium text-gray-500 uppercase tracking-wide">${s.label}</span>
         <span class="w-10 text-sm font-bold font-display text-right ${textColor}">${s.value}</span>
         <div class="flex-1 h-3 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
@@ -568,7 +578,7 @@ async function init() {
     
     // Types
     document.querySelector('.types').innerHTML = pokemon.types.map(type => `
-      <span class="type-pill bg-white/80 dark:bg-gray-800 text-gray-700 dark:text-gray-200 shadow-sm border border-black/5">
+      <span class="type-pill bg-type-${type} text-white shadow-sm border border-black/5 capitalize">
         ${type}
       </span>
     `).join('');
@@ -595,6 +605,9 @@ async function init() {
     // Cry button
     const cryBtn = document.querySelector('.cry-btn');
     cryBtn.addEventListener('click', () => playCry(pokemon.cry_url));
+
+    // Initialize icons
+    if (window.lucide) lucide.createIcons();
 
   } catch (error) {
     console.error('Erro ao carregar detalhes:', error);
