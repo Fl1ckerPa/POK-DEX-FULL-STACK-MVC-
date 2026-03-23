@@ -1,5 +1,6 @@
 const CacheService = require('../services/cacheService');
 const Pokemon = require('../models/Pokemon');
+const Favorite = require('../models/Favorite');
 
 /**
  * Controller responsável por lidar com requisições relacionadas a Pokémon.
@@ -15,8 +16,17 @@ class PokemonController {
             const page = parseInt(req.query.page) || 1;
             const limit = parseInt(req.query.limit) || 20;
             const search = req.query.search || '';
+            const userId = req.user?.id;
 
             const { data, total, totalPages } = await Pokemon.findAll(page, limit, search);
+
+            // Se o usuário estiver logado, marcar os favoritos
+            if (userId) {
+                const favoriteIds = await Favorite.getFavoritePokemonIds(userId);
+                data.forEach(p => {
+                    p.is_favorite = favoriteIds.includes(p.pokemon_id || p.id);
+                });
+            }
 
             return res.status(200).json({
                 success: true,
@@ -42,6 +52,7 @@ class PokemonController {
     static async getPokemonDetails(req, res) {
         try {
             const { id } = req.params;
+            const userId = req.user?.id;
 
             // 1. Validar ID recebido na requisição
             if (!id || isNaN(id) || parseInt(id) <= 0) {
@@ -56,7 +67,13 @@ class PokemonController {
             // 2. Consultar Pokémon (cache -> PokéAPI)
             const pokemon = await CacheService.getPokemonById(pokemonId);
 
-            // 3. Retornar dados completos do Pokémon e status apropriados
+            // 3. Se o usuário estiver logado, verificar se é favorito
+            if (userId) {
+                const isFavorite = await Favorite.isFavorite(userId, pokemon.id);
+                pokemon.is_favorite = isFavorite;
+            }
+
+            // 4. Retornar dados completos do Pokémon e status apropriados
             return res.status(200).json({
                 success: true,
                 data: pokemon
@@ -89,6 +106,7 @@ class PokemonController {
     static async getById(req, res) {
         try {
             const { id } = req.params;
+            const userId = req.user?.id;
 
             // 1. Validar ID recebido na requisição
             if (!id || isNaN(id) || parseInt(id) <= 0) {
@@ -100,15 +118,25 @@ class PokemonController {
 
             const pokemonId = parseInt(id);
 
-            // 2. Consultar Pokémon (cache -> PokéAPI)
-            const pokemon = await CacheService.getPokemonById(pokemonId);
+            // 2. Consultar Pokémon no cache (através do model Pokemon)
+            const pokemon = await Pokemon.findByPokemonId(pokemonId);
 
-            // 3. Retornar dados e status apropriados
+            if (!pokemon) {
+                return res.status(404).json({
+                    success: false,
+                    message: `Pokémon ID ${pokemonId} não encontrado no sistema.`
+                });
+            }
+
+            // 3. Se o usuário estiver logado, marcar se é favorito
+            if (userId) {
+                pokemon.is_favorite = await Favorite.isFavorite(userId, pokemon.id);
+            }
+
             return res.status(200).json({
                 success: true,
                 data: pokemon
             });
-
         } catch (error) {
             console.error(`Erro em PokemonController.getById:`, error.message);
 

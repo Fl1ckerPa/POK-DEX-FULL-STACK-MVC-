@@ -70,7 +70,7 @@ const ui = {
             </span>
 
             <!-- Favorite Button -->
-            <button class="absolute top-4 right-4 p-2 rounded-xl bg-white/80 text-gray-400 hover:text-coral opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-sm border border-black/5 favorite-btn z-20" data-id="${pokemon.id}">
+            <button class="absolute top-4 right-4 p-2 rounded-xl bg-white/80 text-gray-400 hover:text-coral ${pokemon.is_favorite ? 'opacity-100 shadow-md' : 'opacity-0 group-hover:opacity-100'} transition-all duration-300 shadow-sm border border-black/5 favorite-btn z-20" data-id="${pokemon.id}">
                 <i data-lucide="heart" class="w-5 h-5 ${pokemon.is_favorite ? 'fill-coral text-coral' : ''}"></i>
             </button>
 
@@ -292,9 +292,9 @@ const ui = {
 
                     <!-- Actions -->
                     <div class="grid grid-cols-2 gap-4 pt-4">
-                        <button class="btn-action bg-coral text-white shadow-lg shadow-coral/20 hover:scale-[1.02]" id="favorite-detail-btn">
-                            <i data-lucide="heart" class="w-5 h-5"></i>
-                            <span>Favoritar</span>
+                        <button class="btn-action ${pokemon.is_favorite ? 'bg-coral text-white shadow-coral/20' : 'bg-gray-100 text-gray-600 hover:bg-coral hover:text-white'} shadow-lg hover:scale-[1.02]" id="favorite-detail-btn">
+                            <i data-lucide="heart" class="w-5 h-5 ${pokemon.is_favorite ? 'fill-white' : ''}"></i>
+                            <span>${pokemon.is_favorite ? 'Favoritado' : 'Favoritar'}</span>
                         </button>
                         <button class="btn-action bg-teal text-white shadow-lg shadow-teal/20 hover:scale-[1.02]" id="add-team-detail-btn">
                             <i data-lucide="plus" class="w-5 h-5"></i>
@@ -347,10 +347,26 @@ const ui = {
 
         // Favorite button logic
         const favBtn = overlay.querySelector('#favorite-detail-btn');
-        favBtn.addEventListener('click', () => {
+        favBtn.addEventListener('click', async () => {
             console.log('Favoriting pokemon', pokemon.id);
-            this.showNotification(`${pokemon.name} adicionado aos favoritos!`, 'success');
-            document.dispatchEvent(new CustomEvent('toggleFavorite', { detail: { id: pokemon.id } }));
+            try {
+                const result = await api.post('/favorites', { pokemonId: pokemon.id });
+                if (result.success) {
+                    this.showNotification(`${pokemon.name} adicionado aos favoritos!`, 'success');
+                    favBtn.querySelector('i').classList.add('fill-white');
+                } else {
+                    const removeResult = await api.delete(`/favorites/${pokemon.id}`);
+                    if (removeResult.success) {
+                        this.showNotification(`${pokemon.name} removido dos favoritos!`, 'info');
+                        favBtn.querySelector('i').classList.remove('fill-white');
+                    } else {
+                        this.showNotification(result.message || 'Erro ao atualizar favoritos', 'error');
+                    }
+                }
+                if (window.lucide) lucide.createIcons();
+            } catch (error) {
+                console.error('Error toggling favorite:', error);
+            }
         });
 
         // Add to team button logic
@@ -467,7 +483,8 @@ const ui = {
         }
 
         const toast = document.createElement('div');
-        const bgColor = type === 'success' ? 'bg-teal' : type === 'error' ? 'bg-red-500' : 'bg-gray-800';
+        // Standardize: success and info use dark layout (bg-gray-800)
+        const bgColor = type === 'error' ? 'bg-red-500' : 'bg-gray-800';
         
         toast.className = `${bgColor} text-white px-6 py-3 rounded-2xl shadow-xl flex items-center gap-3 animate-spring-in pointer-events-auto cursor-pointer`;
         

@@ -53,7 +53,37 @@
     100% { transform: translateX(0); }
 }
 
+@keyframes fadeInScale {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes scaleDown {
+    from {
+        opacity: 1;
+        transform: scale(1);
+    }
+    to {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+}
+
 /* Animation classes */
+.animate-fade-in-scale {
+    animation: fadeInScale 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-scale-down {
+    animation: scaleDown 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
 .animate-slide-in {
     animation: slideInRight 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }

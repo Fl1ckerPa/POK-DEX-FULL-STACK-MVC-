@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pokédex - Minha Equipe</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <!-- Tailwind Config -->
+    <script src="../js/tailwind-config.js"></script>
+    <!-- Styles -->
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/animations.css">
+</head>
+<body class="bg-cream font-inter min-h-screen">
+    <div id="app" class="flex min-h-screen">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-white/50 backdrop-blur-md border-r border-black/5 flex-col hidden md:flex sticky top-0 h-screen">
+            <div class="p-6">
+                <div class="flex items-center gap-3 text-coral mb-8">
+                    <div class="w-10 h-10 bg-coral rounded-xl flex items-center justify-center text-white">
+                        <i data-lucide="zap" class="w-6 h-6"></i>
+                    </div>
+                    <span class="font-quicksand font-bold text-xl text-gray-800">Pokédex</span>
+                </div>
+                
+                <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4 px-4">Menu</p>
+
+                <nav class="space-y-2">
+                    <a href="dashboard.html" class="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-600 hover:bg-black/5 hover:text-gray-900 transition-all">
+                        <i data-lucide="home" class="w-5 h-5"></i>
+                        Dashboard
+                    </a>
+                    <a href="favorites.html" class="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-600 hover:bg-black/5 hover:text-gray-900 transition-all">
+                        <i data-lucide="heart" class="w-5 h-5"></i>
+                        Favorites
+                    </a>
+                    <a href="team.html" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-coral/10 text-coral font-semibold transition-all">
+                        <i data-lucide="users" class="w-5 h-5"></i>
+                        Teams
+                    </a>
+                    <a href="history.html" class="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-600 hover:bg-black/5 hover:text-gray-900 transition-all">
+                        <i data-lucide="clock" class="w-5 h-5"></i>
+                        History
+                    </a>
+                    <a href="profile.html" class="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-600 hover:bg-black/5 hover:text-gray-900 transition-all">
+                        <i data-lucide="user" class="w-5 h-5"></i>
+                        Profile
+                    </a>
+                </nav>
+            </div>
+            
+            <div class="mt-auto p-6 border-t border-black/5">
+                <button id="logout-btn" class="flex items-center gap-3 px-4 py-3 w-full rounded-xl text-red-500 hover:bg-red-50 transition-all font-semibold">
+                    <i data-lucide="log-out" class="w-5 h-5"></i>
+                    Sair
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 flex flex-col min-w-0">
+            <!-- Top Bar -->
+            <header class="sticky top-0 z-30 bg-cream/80 backdrop-blur-md border-b border-black/5 py-4">
+                <div class="max-w-7xl mx-auto px-6 flex items-center justify-between">
+                    <div class="flex items-center gap-4 md:hidden">
+                        <button id="mobile-menu-btn" class="p-2 hover:bg-black/5 rounded-lg transition-colors">
+                            <i data-lucide="menu" class="w-6 h-6 text-gray-600"></i>
+                        </button>
+                        <span class="font-quicksand font-bold text-xl text-gray-800">Pokédex</span>
+                    </div>
+                    
+                    <div id="user-display" class="hidden md:flex items-center gap-3 ml-auto">
+                        <div class="text-right">
+                            <p id="user-name" class="text-sm font-semibold text-gray-800">...</p>
+                            <p id="user-email" class="text-xs text-gray-500">...</p>
+                        </div>
+                        <div class="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center text-gray-600 border-2 border-white shadow-sm overflow-hidden">
+                            <i data-lucide="user" class="w-6 h-6"></i>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Team Content -->
+            <div class="p-6 space-y-8 max-w-7xl mx-auto w-full animate-fade-in-scale">
+                <!-- Header -->
+                <div class="space-y-1">
+                    <h1 class="text-3xl font-quicksand font-bold text-gray-800">Minha Equipe</h1>
+                    <p class="text-gray-500 font-medium">Monte seu time de 6 Pokémon para a batalha</p>
+                </div>
+
+                <!-- Empty State -->
+                <div class="flex flex-col items-center justify-center py-20 text-center space-y-6">
+                    <div class="w-32 h-32 bg-white rounded-full flex items-center justify-center shadow-sm border border-black/5 text-teal/30">
+                        <i data-lucide="users" class="w-16 h-16 fill-current"></i>
+                    </div>
+                    <div class="space-y-2 max-w-sm">
+                        <h3 class="text-2xl font-quicksand font-bold text-gray-800">Equipe vazia</h3>
+                        <p class="text-gray-500">
+                            Você ainda não adicionou nenhum Pokémon à sua equipe. Explore a Pokédex e clique em "No Time" para começar.
+                        </p>
+                    </div>
+                    <a href="dashboard.html" class="px-8 py-3 bg-coral text-white rounded-2xl font-bold shadow-lg shadow-coral/20 hover:scale-105 transition-transform">
+                        Explorar Pokédex
+                    </a>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script type="module" src="../js/main.js"></script>
+    <script type="module" src="../js/team.js"></script>
+</body>
+</html>

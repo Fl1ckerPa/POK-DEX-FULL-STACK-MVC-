@@ -36,6 +36,10 @@
 }
 
 /* Base Styles */
+html {
+    scrollbar-gutter: stable;
+}
+
 body {
     background-color: #f8f9fa;
     color: #1e293b;
@@ -126,4 +130,47 @@ body {
 
 .btn-action:active {
     transform: scale(0.95);
+}
+
+/* Favorite Button Styles */
+.favorite-btn {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.favorite-btn:hover {
+    transform: scale(1.1);
+    background-color: white !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    color: #ff6b6b !important;
+}
+
+.favorite-btn:active {
+    transform: scale(0.9);
+}
+
+/* Favorites Page - Always show heart buttons */
+.show-favorites .favorite-btn {
+    opacity: 1 !important;
+}
+
+.show-favorites .favorite-btn svg,
+.show-favorites .favorite-btn i {
+    fill: #ff6b6b;
+    color: #ff6b6b;
+}
+
+/* Base entry animation for favorites */
+.animate-fade-in-scale {
+    animation: fadeInScale 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes fadeInScale {
+    from {
+        opacity: 0;
+        transform: scale(0.95) translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
 }

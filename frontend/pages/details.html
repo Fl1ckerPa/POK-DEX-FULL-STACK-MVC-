@@ -11,7 +11,7 @@
   <!-- Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
   <!-- Lucide Icons -->
-  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
   <!-- Tailwind Config -->
   <script src="../js/tailwind-config.js"></script>
   <!-- Styles -->
@@ -29,6 +29,9 @@
     </button> 
     <span class="font-display font-bold text-gray-400 pokemon-number"></span> 
     <h1 class="font-display font-bold text-lg capitalize pokemon-name"></h1> 
+    <button id="favorite-btn" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors ml-auto favorite-btn">
+      <i data-lucide="heart" class="w-6 h-6 text-gray-400"></i>
+    </button>
   </header> 
  
   <main class="max-w-2xl mx-auto px-4 pt-6 pb-12 space-y-6"> 

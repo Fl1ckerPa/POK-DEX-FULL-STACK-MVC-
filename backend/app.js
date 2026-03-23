@@ -12,6 +12,7 @@ app.use(express.urlencoded({ extended: true }));
 // Importar rotas
 const authRoutes = require('./routes/authRoutes');
 const pokemonRoutes = require('./routes/pokemonRoutes');
+const favoriteRoutes = require('./routes/favoriteRoutes');
 
 // Rota básica de teste
 app.get('/', (req, res) => {
@@ -21,5 +22,6 @@ app.get('/', (req, res) => {
 // Rotas da API
 app.use('/api/auth', authRoutes);
 app.use('/api/pokemon', pokemonRoutes);
+app.use('/api/favorites', favoriteRoutes);
 
 module.exports = app;

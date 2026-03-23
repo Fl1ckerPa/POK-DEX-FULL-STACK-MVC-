@@ -44,6 +44,28 @@ const api = {
             console.error('API POST Error:', error);
             throw error;
         }
+    },
+
+    async delete(endpoint) {
+        const token = localStorage.getItem('token');
+        const headers = {
+            'Content-Type': 'application/json'
+        };
+
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
+
+        try {
+            const response = await fetch(`${API_URL}${endpoint}`, {
+                method: 'DELETE',
+                headers
+            });
+            return await response.json();
+        } catch (error) {
+            console.error('API DELETE Error:', error);
+            throw error;
+        }
     }
 };
 

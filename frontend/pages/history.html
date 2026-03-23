@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pokédex - Favoritos</title>
+    <title>Pokédex - Histórico</title>
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
     <!-- Tailwind CSS -->
@@ -37,7 +37,7 @@
                         <i data-lucide="home" class="w-5 h-5"></i>
                         Dashboard
                     </a>
-                    <a href="favorites.html" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-coral/10 text-coral font-semibold transition-all">
+                    <a href="favorites.html" class="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-600 hover:bg-black/5 hover:text-gray-900 transition-all">
                         <i data-lucide="heart" class="w-5 h-5"></i>
                         Favorites
                     </a>
@@ -45,7 +45,7 @@
                         <i data-lucide="users" class="w-5 h-5"></i>
                         Teams
                     </a>
-                    <a href="history.html" class="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-600 hover:bg-black/5 hover:text-gray-900 transition-all">
+                    <a href="history.html" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-coral/10 text-coral font-semibold transition-all">
                         <i data-lucide="clock" class="w-5 h-5"></i>
                         History
                     </a>
@@ -88,34 +88,23 @@
                 </div>
             </header>
 
-            <!-- Favorites Content -->
-            <div id="favorites-container" class="p-6 space-y-8 max-w-7xl mx-auto w-full animate-fade-in-scale">
+            <!-- History Content -->
+            <div class="p-6 space-y-8 max-w-7xl mx-auto w-full animate-fade-in-scale">
                 <!-- Header -->
-                <div class="flex items-end justify-between">
-                    <div class="space-y-1">
-                        <h1 class="text-3xl font-quicksand font-bold text-gray-800">Favoritos</h1>
-                        <p id="favorites-count" class="text-gray-500 font-medium">0 Pokémon na sua coleção</p>
-                    </div>
-                    <button id="clear-favorites-btn" class="hidden flex items-center gap-2 px-4 py-2 rounded-xl text-red-500 hover:bg-red-50 transition-all font-semibold text-sm border border-transparent hover:border-red-100">
-                        <i data-lucide="trash-2" class="w-4 h-4"></i>
-                        Limpar Favoritos
-                    </button>
+                <div class="space-y-1">
+                    <h1 class="text-3xl font-quicksand font-bold text-gray-800">Histórico</h1>
+                    <p class="text-gray-500 font-medium">Veja os últimos Pokémon que você visualizou</p>
                 </div>
 
-                <!-- Pokémon Grid -->
-                <div id="pokemon-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6 show-favorites">
-                    <!-- Cards will be injected here -->
-                </div>
-
-                <!-- Empty State (Hidden by default) -->
-                <div id="empty-state" class="hidden flex flex-col items-center justify-center py-20 text-center space-y-6">
-                    <div class="w-32 h-32 bg-white rounded-full flex items-center justify-center shadow-sm border border-black/5 text-coral/30">
-                        <i data-lucide="heart" class="w-16 h-16 fill-current"></i>
+                <!-- Empty State -->
+                <div class="flex flex-col items-center justify-center py-20 text-center space-y-6">
+                    <div class="w-32 h-32 bg-white rounded-full flex items-center justify-center shadow-sm border border-black/5 text-coral/20">
+                        <i data-lucide="clock" class="w-16 h-16 fill-current"></i>
                     </div>
                     <div class="space-y-2 max-w-sm">
-                        <h3 class="text-2xl font-quicksand font-bold text-gray-800">Nenhum favorito ainda</h3>
+                        <h3 class="text-2xl font-quicksand font-bold text-gray-800">Nenhum histórico</h3>
                         <p class="text-gray-500">
-                            Sua coleção está vazia! Explore a Pokédex e clique no ícone de coração para salvar seus Pokémon favoritos aqui.
+                            Você ainda não visualizou nenhum Pokémon. Comece sua jornada explorando a Pokédex!
                         </p>
                     </div>
                     <a href="dashboard.html" class="px-8 py-3 bg-coral text-white rounded-2xl font-bold shadow-lg shadow-coral/20 hover:scale-105 transition-transform">
@@ -127,6 +116,6 @@
     </div>
 
     <!-- Scripts -->
-    <script type="module" src="../js/favorites.js"></script>
+    <script type="module" src="../js/main.js"></script>
 </body>
 </html>

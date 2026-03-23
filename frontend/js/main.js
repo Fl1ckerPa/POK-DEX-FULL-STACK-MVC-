@@ -4,16 +4,16 @@ import pokemon from './pokemon.js';
 document.addEventListener('DOMContentLoaded', () => {
     console.log('App inicializado...');
     
+    // Initialize Lucide icons immediately for static elements
+    if (window.lucide) {
+        lucide.createIcons();
+    }
+
     // Verificar autenticação ao carregar a página
     auth.checkAuthOnLoad();
 
     // Atualizar UI com base no estado de autenticação
     updateAuthUI();
-
-    // Initialize Lucide icons
-    if (window.lucide) {
-        lucide.createIcons();
-    }
 
     // Lógica para o dashboard
     const userInfo = document.getElementById('user-info');
@@ -25,8 +25,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const userStr = localStorage.getItem('user');
     if (userStr) {
         const user = JSON.parse(userStr);
-        if (userInfo) userInfo.innerText = `Olá, ${user.name || user.email}!`;
-        if (userName) userName.innerText = user.name || 'Treinador';
+        if (userInfo) userInfo.innerText = `Olá, ${user.username || user.email}!`;
+        if (userName) userName.innerText = user.username || 'Treinador';
         if (userEmail) userEmail.innerText = user.email;
     }
 

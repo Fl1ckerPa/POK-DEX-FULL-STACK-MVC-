@@ -538,6 +538,11 @@ function renderStats(stats) {
  * Inicializa a página de detalhes
  */
 async function init() {
+  // Initialize Lucide icons
+  if (window.lucide) {
+    lucide.createIcons();
+  }
+
   const params = new URLSearchParams(window.location.search);
   const id = params.get('id');
 
