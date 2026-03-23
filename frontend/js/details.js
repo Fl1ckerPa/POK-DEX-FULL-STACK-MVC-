@@ -57,9 +57,9 @@ const METHOD_LABELS = {
 };
 
 const DAMAGE_CLASS_STYLES = { 
-  physical: 'bg-red-500/15 text-red-600 dark:text-red-400', 
-  special:  'bg-blue-500/15 text-blue-600 dark:text-blue-400', 
-  status:   'bg-gray-300/30 text-gray-500 dark:text-gray-400' 
+  physical: 'bg-red-500/15 text-red-600', 
+  special:  'bg-blue-500/15 text-blue-600', 
+  status:   'bg-gray-300/30 text-gray-500' 
 };
 
 const DAMAGE_CLASS_LABELS = {
@@ -109,16 +109,16 @@ async function renderAbilities(abilities) {
       const detail = await fetchAbilityDetail(`https://pokeapi.co/api/v2/ability/${a}`);
 
       return `
-        <div class="rounded-2xl bg-gray-100/50 dark:bg-gray-800/50 p-4 
-                    border border-gray-200/50 dark:border-gray-700/50 
+        <div class="rounded-2xl bg-gray-100/50 p-4 
+                    border border-gray-200/50 
                     opacity-0 animate-fade-slide-up" 
              style="animation-delay: ${0.4 + i * 0.1}s"> 
           <div class="flex items-center gap-2 mb-1.5"> 
-            <span class="font-display font-bold text-gray-800 dark:text-gray-200 capitalize"> 
+            <span class="font-display font-bold text-gray-800 capitalize"> 
               ${a.replace(/-/g, ' ')} 
             </span> 
           </div> 
-          <p class="text-sm text-gray-500 dark:text-gray-400 leading-relaxed"> 
+          <p class="text-sm text-gray-500 leading-relaxed"> 
             ${detail.description} 
           </p> 
         </div>`;
@@ -188,7 +188,7 @@ async function renderEvolutionChain(pokemonId) {
 
   if (stages.length <= 1) {
     container.innerHTML = `
-      <p class="text-sm text-gray-500 dark:text-gray-400 text-center py-4"> 
+      <p class="text-sm text-gray-500 text-center py-4"> 
         Este Pokémon não evolui. 
       </p>`;
     return;
@@ -203,31 +203,31 @@ async function renderEvolutionChain(pokemonId) {
          class="flex flex-col items-center gap-1.5 p-3 rounded-2xl transition-colors 
                 ${isCurrent 
                   ? 'bg-coral/10 ring-2 ring-coral/30' 
-                  : 'hover:bg-gray-100 dark:hover:bg-gray-800'} 
+                  : 'hover:bg-gray-100'} 
                 opacity-0 animate-fade-slide-up" 
          style="animation-delay: ${0.7 + i * 0.15}s"> 
         <div class="h-20 w-20 rounded-full flex items-center justify-center 
-                    ${isCurrent ? 'bg-coral/5' : 'bg-gray-100/50 dark:bg-gray-800/50'}"> 
+                    ${isCurrent ? 'bg-coral/5' : 'bg-gray-100/50'}"> 
           <img src="${stage.image}" alt="${stage.name}" 
                class="h-16 w-16 object-contain drop-shadow-md"> 
         </div> 
-        <span class="font-display font-bold text-xs capitalize text-gray-800 dark:text-gray-200"> 
+        <span class="font-display font-bold text-xs capitalize text-gray-800"> 
           ${stage.name} 
         </span> 
-        <span class="text-[10px] text-gray-400 dark:text-gray-500"> 
+        <span class="text-[10px] text-gray-400"> 
           #${String(stage.id).padStart(3, '0')} 
         </span> 
       </a>`;
 
     const arrowHtml = (i < stages.length - 1) ? ` 
       <div class="flex flex-col items-center gap-0.5 px-1"> 
-        <span class="text-gray-400 dark:text-gray-500">→</span> 
+        <span class="text-gray-400">→</span> 
         ${nextStage?.minLevel ? ` 
-          <span class="text-[10px] text-gray-400 dark:text-gray-500 font-medium"> 
+          <span class="text-[10px] text-gray-400 font-medium"> 
             Lv.${nextStage.minLevel} 
           </span>` : ''} 
         ${nextStage?.item ? ` 
-          <span class="text-[10px] text-gray-400 dark:text-gray-500 font-medium capitalize"> 
+          <span class="text-[10px] text-gray-400 font-medium capitalize"> 
             ${nextStage.item.replace(/-/g, ' ')} 
           </span>` : ''} 
       </div>` : '';
@@ -319,14 +319,14 @@ function renderMoveFilters(methods) {
   const allBtn = `
     <button onclick="setMoveFilter('all')" 
             class="move-filter-btn px-3 py-1 rounded-full text-xs font-medium transition-colors 
-                   ${currentFilter === 'all' ? 'bg-coral text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'}">
+                   ${currentFilter === 'all' ? 'bg-coral text-white' : 'bg-gray-200 text-gray-600 hover:bg-gray-300'}">
       Todos
     </button>`;
 
   const methodBtns = methods.map(m => `
     <button onclick="setMoveFilter('${m}')" 
             class="move-filter-btn px-3 py-1 rounded-full text-xs font-medium capitalize transition-colors 
-                   ${currentFilter === m ? 'bg-coral text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'}">
+                   ${currentFilter === m ? 'bg-coral text-white' : 'bg-gray-200 text-gray-600 hover:bg-gray-300'}">
       ${METHOD_LABELS[m] || m}
     </button>`).join('');
 
@@ -347,23 +347,23 @@ function renderMoveTable() {
   if (!tbody) return;
 
   tbody.innerHTML = displayed.map((m, i) => `
-    <tr class="border-b border-gray-200/50 dark:border-gray-700/50 last:border-0 
+    <tr class="border-b border-gray-200/50 last:border-0 
                opacity-0 animate-fade-slide-up" 
         style="animation-delay: ${i * 0.02}s"> 
-      <td class="py-2 font-medium capitalize text-gray-800 dark:text-gray-200"> 
+      <td class="py-2 font-medium capitalize text-gray-800"> 
         ${m.name.replace(/-/g, ' ')} 
         ${m.level > 0 ? `<span class="text-xs text-gray-400 ml-1">Lv.${m.level}</span>` : ''} 
       </td> 
       <td class="py-2"> 
         ${m.type ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-type-${m.type} text-white shadow-sm border border-black/5">${m.type}</span>` : ''} 
       </td> 
-      <td class="py-2 text-center font-display font-bold text-gray-800 dark:text-gray-200"> 
+      <td class="py-2 text-center font-display font-bold text-gray-800"> 
         ${m.power ?? '—'} 
       </td> 
-      <td class="py-2 text-center text-gray-500 dark:text-gray-400"> 
+      <td class="py-2 text-center text-gray-500"> 
         ${m.accuracy ? m.accuracy + '%' : '—'} 
       </td> 
-      <td class="py-2 text-center text-gray-500 dark:text-gray-400"> 
+      <td class="py-2 text-center text-gray-500"> 
         ${m.pp ?? '—'} 
       </td> 
       <td class="py-2"> 
@@ -444,11 +444,11 @@ async function renderGameVersions(pokemonId) {
 
   container.innerHTML = Object.entries(grouped).map(([gen, vList], gi) => ` 
     <div class="opacity-0 animate-fade-slide-up" style="animation-delay: ${0.8 + gi * 0.05}s"> 
-      <p class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">${gen}</p> 
+      <p class="text-xs font-medium text-gray-500 mb-1.5">${gen}</p> 
       <div class="flex flex-wrap gap-1.5"> 
         ${vList.map(v => ` 
           <span class="px-3 py-1 rounded-full text-xs font-medium capitalize 
-                       ${VERSION_COLORS[v.name] || 'bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400'}"> 
+                       ${VERSION_COLORS[v.name] || 'bg-gray-200 text-gray-500'}"> 
             ${v.name} 
           </span>`).join('')} 
       </div> 
@@ -524,7 +524,7 @@ function renderStats(stats) {
         </span>
         <span class="w-16 text-xs font-medium text-gray-500 uppercase tracking-wide">${s.label}</span>
         <span class="w-10 text-sm font-bold font-display text-right ${textColor}">${s.value}</span>
-        <div class="flex-1 h-3 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
+        <div class="flex-1 h-3 rounded-full bg-gray-200 overflow-hidden">
           <div class="${barColor} h-full rounded-full" 
                style="width:0%; animation: fillBar 0.8s ease-out ${0.5 + i * 0.05}s forwards; --fill-width:${pct}%"></div>
         </div>

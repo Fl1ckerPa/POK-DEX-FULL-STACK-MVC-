@@ -305,9 +305,9 @@ const ui = {
                     <!-- Ver Detalhes Completos Button -->
                     <a href="details.html?id=${pokemon.id}" 
                        class="block w-full text-center rounded-2xl h-12 leading-[3rem] 
-                              font-quicksand font-bold border border-gray-200 dark:border-gray-700 
-                              text-gray-800 dark:text-gray-200 
-                              hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors mt-2"> 
+                              font-quicksand font-bold border border-gray-200 
+                              text-gray-800 
+                              hover:bg-gray-100 transition-colors mt-2"> 
                       Ver Detalhes Completos 
                     </a>
 

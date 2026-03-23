@@ -18,18 +18,18 @@
   <link rel="stylesheet" href="../css/style.css">
   <link rel="stylesheet" href="../css/animations.css">
 </head> 
-<body class="bg-cream dark:bg-gray-900 min-h-screen font-body text-gray-800 dark:text-gray-200"> 
+<body class="bg-cream min-h-screen font-body text-gray-800"> 
  
-  <header class="sticky top-0 z-20 bg-cream/80 dark:bg-gray-900/80 backdrop-blur-md 
-                 border-b border-gray-200 dark:border-gray-700 px-4 py-3 flex items-center gap-3"> 
-    <button onclick="history.back()" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"> 
+  <header class="sticky top-0 z-20 bg-cream/80 backdrop-blur-md 
+                 border-b border-gray-200 px-4 py-3 flex items-center gap-3"> 
+    <button onclick="history.back()" class="p-2 rounded-full hover:bg-gray-200 transition-colors"> 
       <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"> 
         <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/> 
       </svg> 
     </button> 
     <span class="font-display font-bold text-gray-400 pokemon-number"></span> 
     <h1 class="font-display font-bold text-lg capitalize pokemon-name"></h1> 
-    <button id="favorite-btn" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors ml-auto favorite-btn">
+    <button id="favorite-btn" class="p-2 rounded-full hover:bg-gray-200 transition-colors ml-auto favorite-btn">
       <i data-lucide="heart" class="w-6 h-6 text-gray-400"></i>
     </button>
   </header> 
@@ -37,7 +37,7 @@
   <main class="max-w-2xl mx-auto px-4 pt-6 pb-12 space-y-6"> 
     <!-- Hero --> 
     <section class="glass-card p-8 text-center opacity-0 animate-fade-slide-up delay-100"> 
-      <div class="h-56 w-56 mx-auto rounded-full bg-gray-100 dark:bg-gray-800/50 flex items-center justify-center"> 
+      <div class="h-56 w-56 mx-auto rounded-full bg-gray-100 flex items-center justify-center"> 
         <img class="h-48 w-48 object-contain drop-shadow-xl pokemon-image" src="" alt=""> 
       </div> 
       <h2 class="font-display font-bold text-3xl capitalize mt-4 pokemon-title"></h2> 
@@ -72,7 +72,7 @@
     <section class="glass-card p-5 opacity-0 animate-fade-slide-up" style="animation-delay: 0.3s"> 
       <div class="flex items-center gap-2 mb-4"> 
         <i data-lucide="sparkles" class="w-5 h-5 text-coral"></i>
-        <h3 class="font-display font-bold text-sm text-gray-500 dark:text-gray-400 uppercase tracking-wide"> 
+        <h3 class="font-display font-bold text-sm text-gray-500 uppercase tracking-wide"> 
           Habilidades 
         </h3> 
       </div> 
@@ -83,7 +83,7 @@
     <section class="glass-card p-5 opacity-0 animate-fade-slide-up" style="animation-delay: 0.4s"> 
       <div class="flex items-center gap-2 mb-5"> 
         <i data-lucide="git-branch" class="w-5 h-5 text-coral"></i>
-        <h3 class="font-display font-bold text-sm text-gray-500 dark:text-gray-400 uppercase tracking-wide"> 
+        <h3 class="font-display font-bold text-sm text-gray-500 uppercase tracking-wide"> 
           Cadeia de Evolução 
         </h3> 
       </div> 
@@ -94,7 +94,7 @@
     <section class="glass-card p-5 opacity-0 animate-fade-slide-up" style="animation-delay: 0.5s"> 
       <h3 class="font-display font-bold text-sm text-gray-500 mb-4 uppercase tracking-wide">Estatísticas Base</h3> 
       <div class="space-y-3 stats"></div> 
-      <div class="mt-4 pt-3 border-t border-gray-200 dark:border-gray-700 flex justify-between"> 
+      <div class="mt-4 pt-3 border-t border-gray-200 flex justify-between"> 
         <span class="font-display font-bold text-sm text-gray-500 uppercase tracking-wide">Total</span> 
         <span class="font-display font-bold text-lg stat-total"></span> 
       </div> 
