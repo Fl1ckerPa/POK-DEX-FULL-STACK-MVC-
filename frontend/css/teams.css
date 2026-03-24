@@ -1,0 +1,164 @@
+/* Animações específicas para a página de Times */
+.animate-fade-scale-up {
+    animation: fadeScaleUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes fadeScaleUp {
+    from {
+        opacity: 0;
+        transform: scale(0.9) translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+/* Staggered items logic */
+.teams-list > *:nth-child(1) { animation-delay: 0.1s; }
+.teams-list > *:nth-child(2) { animation-delay: 0.2s; }
+.teams-list > *:nth-child(3) { animation-delay: 0.3s; }
+.teams-list > *:nth-child(4) { animation-delay: 0.4s; }
+
+/* Slot styling base */
+.slot-item {
+    transition: all 0.2s ease;
+    border: none !important;
+    background: transparent !important;
+    padding: 0 !important;
+}
+
+.slot-number-circle {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 1px dashed #ddd;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    color: #999;
+    flex-shrink: 0;
+}
+
+.slot-search-container {
+    flex: 1;
+    position: relative;
+}
+
+.slot-search-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    background: #f8f8f8;
+    border: 1px solid transparent;
+    border-radius: 18px;
+    padding: 0 16px;
+    height: 44px;
+    transition: all 0.2s ease;
+}
+
+.slot-search-input-wrapper:focus-within {
+    border-color: #ff6b6b;
+    background: #fff;
+    box-shadow: 0 0 0 4px rgba(255, 107, 107, 0.1);
+}
+
+.slot-search-input-wrapper i {
+    color: #999;
+    margin-right: 10px;
+}
+
+.slot-search-input-wrapper input {
+    width: 100%;
+    background: transparent;
+    border: none;
+    outline: none;
+    font-size: 15px;
+    color: #333;
+}
+
+/* Search dropdown results */
+.search-results {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    right: 0;
+    background: #fff;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    max-height: 400px;
+    overflow-y: auto;
+    z-index: 100;
+    padding: 8px 0;
+    border: 1px solid #f0f0f0;
+}
+
+.search-result-item {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    padding: 12px 20px;
+    gap: 16px;
+    transition: background 0.2s ease;
+    text-align: left;
+}
+
+.search-result-item:hover {
+    background-color: #f3efea;
+}
+
+.search-result-item img {
+    width: 36px;
+    height: 36px;
+    object-fit: contain;
+}
+
+.search-result-item .pokemon-name {
+    font-weight: 700;
+    font-size: 15px;
+    color: #333;
+    flex: 1;
+    text-transform: capitalize;
+}
+
+.search-result-item .pokemon-id {
+    font-size: 13px;
+    color: #999;
+    font-weight: 500;
+}
+
+/* Custom Scrollbar for results */
+.search-results::-webkit-scrollbar {
+    width: 6px;
+}
+.search-results::-webkit-scrollbar-track {
+    background: transparent;
+}
+.search-results::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 10px;
+}
+
+/* Modal styles overrides */
+#create-modal .bg-white {
+    border-radius: 32px;
+}
+
+#save-team-btn {
+    background: #ff6b6b !important;
+    border-radius: 9999px !important;
+    height: 56px !important;
+    font-weight: 700 !important;
+    font-size: 18px !important;
+}
+
+/* Toast animations */
+.toast-in {
+    animation: toastIn 0.3s ease-out forwards;
+}
+
+@keyframes toastIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
