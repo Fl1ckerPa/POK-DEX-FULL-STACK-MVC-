@@ -13,6 +13,7 @@ app.use(express.urlencoded({ extended: true }));
 const authRoutes = require('./routes/authRoutes');
 const pokemonRoutes = require('./routes/pokemonRoutes');
 const favoriteRoutes = require('./routes/favoriteRoutes');
+const teamsRoutes = require('./routes/teamsRoutes');
 
 // Rota básica de teste
 app.get('/', (req, res) => {
@@ -23,5 +24,6 @@ app.get('/', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/pokemon', pokemonRoutes);
 app.use('/api/favorites', favoriteRoutes);
+app.use('/api/teams', teamsRoutes);
 
 module.exports = app;

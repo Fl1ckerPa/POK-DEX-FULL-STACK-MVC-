@@ -1,122 +1,175 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pokédex - Minha Equipe</title>
-    <!-- Favicon -->
-    <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
-    <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
-    <!-- Tailwind Config -->
-    <script src="../js/tailwind-config.js"></script>
-    <!-- Styles -->
-    <link rel="stylesheet" href="../css/style.css">
-    <link rel="stylesheet" href="../css/animations.css">
-</head>
-<body class="bg-cream font-inter min-h-screen">
-    <div id="app" class="flex min-h-screen">
-        <!-- Sidebar -->
-        <aside class="w-64 bg-white/50 backdrop-blur-md border-r border-black/5 flex-col hidden md:flex sticky top-0 h-screen">
-            <div class="p-6">
-                <div class="flex items-center gap-3 text-coral mb-8">
-                    <div class="w-10 h-10 bg-coral rounded-xl flex items-center justify-center text-white">
-                        <i data-lucide="zap" class="w-6 h-6"></i>
-                    </div>
-                    <span class="font-quicksand font-bold text-xl text-gray-800">Pokédex</span>
+<!DOCTYPE html> 
+<html lang="pt-BR"> 
+<head> 
+  <meta charset="UTF-8"> 
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+  <title>Teams | Pokédex</title> 
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <!-- Tailwind Config -->
+  <script src="../js/tailwind-config.js"></script>
+  <!-- Styles -->
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <link rel="stylesheet" href="../css/teams.css">
+</head> 
+<body class="bg-cream dark:bg-gray-900 min-h-screen font-inter"> 
+ 
+  <div id="app" class="flex min-h-screen">
+    <!-- Sidebar -->
+    <aside class="w-64 bg-white/50 backdrop-blur-md border-r border-black/5 flex-col hidden md:flex sticky top-0 h-screen">
+        <div class="p-6">
+            <div class="flex items-center gap-3 text-coral mb-8">
+                <div class="w-10 h-10 bg-coral rounded-xl flex items-center justify-center text-white">
+                    <i data-lucide="zap" class="w-6 h-6"></i>
                 </div>
-                
-                <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4 px-4">Menu</p>
-
-                <nav class="space-y-2">
-                    <a href="dashboard.html" class="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-600 hover:bg-black/5 hover:text-gray-900 transition-all">
-                        <i data-lucide="home" class="w-5 h-5"></i>
-                        Dashboard
-                    </a>
-                    <a href="favorites.html" class="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-600 hover:bg-black/5 hover:text-gray-900 transition-all">
-                        <i data-lucide="heart" class="w-5 h-5"></i>
-                        Favorites
-                    </a>
-                    <a href="team.html" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-coral/10 text-coral font-semibold transition-all">
-                        <i data-lucide="users" class="w-5 h-5"></i>
-                        Teams
-                    </a>
-                    <a href="history.html" class="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-600 hover:bg-black/5 hover:text-gray-900 transition-all">
-                        <i data-lucide="clock" class="w-5 h-5"></i>
-                        History
-                    </a>
-                    <a href="profile.html" class="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-600 hover:bg-black/5 hover:text-gray-900 transition-all">
-                        <i data-lucide="user" class="w-5 h-5"></i>
-                        Profile
-                    </a>
-                </nav>
+                <span class="font-quicksand font-bold text-xl text-gray-800">Pokédex</span>
             </div>
             
-            <div class="mt-auto p-6 border-t border-black/5">
-                <button id="logout-btn" class="flex items-center gap-3 px-4 py-3 w-full rounded-xl text-red-500 hover:bg-red-50 transition-all font-semibold">
-                    <i data-lucide="log-out" class="w-5 h-5"></i>
-                    Sair
-                </button>
-            </div>
-        </aside>
+            <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4 px-4">Menu</p>
 
-        <!-- Main Content -->
-        <main class="flex-1 flex flex-col min-w-0">
-            <!-- Top Bar -->
-            <header class="sticky top-0 z-30 bg-cream/80 backdrop-blur-md border-b border-black/5 py-4">
-                <div class="max-w-7xl mx-auto px-6 flex items-center justify-between">
-                    <div class="flex items-center gap-4 md:hidden">
-                        <button id="mobile-menu-btn" class="p-2 hover:bg-black/5 rounded-lg transition-colors">
-                            <i data-lucide="menu" class="w-6 h-6 text-gray-600"></i>
-                        </button>
-                        <span class="font-quicksand font-bold text-xl text-gray-800">Pokédex</span>
-                    </div>
-                    
-                    <div id="user-display" class="hidden md:flex items-center gap-3 ml-auto">
-                        <div class="text-right">
-                            <p id="user-name" class="text-sm font-semibold text-gray-800">...</p>
-                            <p id="user-email" class="text-xs text-gray-500">...</p>
-                        </div>
-                        <div class="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center text-gray-600 border-2 border-white shadow-sm overflow-hidden">
-                            <i data-lucide="user" class="w-6 h-6"></i>
-                        </div>
-                    </div>
-                </div>
-            </header>
+            <nav class="space-y-2">
+                <a href="dashboard.html" class="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-600 hover:bg-black/5 hover:text-gray-900 transition-all">
+                    <i data-lucide="home" class="w-5 h-5"></i>
+                    Dashboard
+                </a>
+                <a href="favorites.html" class="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-600 hover:bg-black/5 hover:text-gray-900 transition-all">
+                    <i data-lucide="heart" class="w-5 h-5"></i>
+                    Favorites
+                </a>
+                <a href="team.html" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-teal/10 text-teal font-semibold transition-all">
+                    <i data-lucide="users" class="w-5 h-5"></i>
+                    Teams
+                </a>
+                <a href="history.html" class="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-600 hover:bg-black/5 hover:text-gray-900 transition-all">
+                    <i data-lucide="clock" class="w-5 h-5"></i>
+                    History
+                </a>
+                <a href="profile.html" class="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-600 hover:bg-black/5 hover:text-gray-900 transition-all">
+                    <i data-lucide="user" class="w-5 h-5"></i>
+                    Profile
+                </a>
+            </nav>
+        </div>
+        
+        <div class="mt-auto p-6 border-t border-black/5">
+            <button id="logout-btn" class="flex items-center gap-3 px-4 py-3 w-full rounded-xl text-red-500 hover:bg-red-50 transition-all font-semibold">
+                <i data-lucide="log-out" class="w-5 h-5"></i>
+                Sair
+            </button>
+        </div>
+    </aside>
 
-            <!-- Team Content -->
-            <div class="p-6 space-y-8 max-w-7xl mx-auto w-full animate-fade-in-scale">
-                <!-- Header -->
-                <div class="space-y-1">
-                    <h1 class="text-3xl font-quicksand font-bold text-gray-800">Minha Equipe</h1>
-                    <p class="text-gray-500 font-medium">Monte seu time de 6 Pokémon para a batalha</p>
-                </div>
+    <main class="flex-1 flex flex-col min-w-0 p-6 lg:p-8 space-y-6"> 
+  
+      <!-- Cabeçalho --> 
+      <div class="flex items-center justify-between"> 
+        <div> 
+          <h1 class="font-quicksand font-bold text-3xl text-gray-800 dark:text-gray-100">Teams</h1> 
+          <p class="text-sm text-gray-500 dark:text-gray-400 mt-1 teams-subtitle">0 times criados</p> 
+        </div> 
+        <button id="open-modal-btn" 
+                class="flex items-center gap-2 px-6 py-3 rounded-full 
+                       bg-teal text-white shadow-lg shadow-teal/20
+                       hover:scale-105 font-quicksand font-bold text-lg transition-all"> 
+          <i data-lucide="plus" class="w-5 h-5"></i>
+          New Team 
+        </button> 
+      </div> 
+  
+      <!-- Estado vazio --> 
+      <div class="teams-empty hidden"> 
+        <div class="flex flex-col items-center justify-center py-20 px-6 text-center 
+                    opacity-0 animate-fade-slide-up"> 
+          <div class="h-16 w-16 rounded-full bg-gray-200 dark:bg-gray-700 
+                      flex items-center justify-center mb-4 text-gray-400"> 
+            <i data-lucide="users" class="w-7 h-7"></i>
+          </div> 
+          <h3 class="font-quicksand font-bold text-xl text-gray-800 dark:text-gray-100 mb-1"> 
+            No teams created 
+          </h3> 
+          <p class="text-sm text-gray-500 dark:text-gray-400 max-w-xs"> 
+            Build your first team by clicking "New Team" above. 
+          </p> 
+        </div> 
+      </div> 
+  
+      <!-- Lista de times --> 
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 teams-list"></div> 
+  
+    </main> 
+  </div>
 
-                <!-- Empty State -->
-                <div class="flex flex-col items-center justify-center py-20 text-center space-y-6">
-                    <div class="w-32 h-32 bg-white rounded-full flex items-center justify-center shadow-sm border border-black/5 text-teal/30">
-                        <i data-lucide="users" class="w-16 h-16 fill-current"></i>
-                    </div>
-                    <div class="space-y-2 max-w-sm">
-                        <h3 class="text-2xl font-quicksand font-bold text-gray-800">Equipe vazia</h3>
-                        <p class="text-gray-500">
-                            Você ainda não adicionou nenhum Pokémon à sua equipe. Explore a Pokédex e clique em "No Time" para começar.
-                        </p>
-                    </div>
-                    <a href="dashboard.html" class="px-8 py-3 bg-coral text-white rounded-2xl font-bold shadow-lg shadow-coral/20 hover:scale-105 transition-transform">
-                        Explorar Pokédex
-                    </a>
-                </div>
-            </div>
-        </main>
-    </div>
-
-    <!-- Scripts -->
-    <script type="module" src="../js/main.js"></script>
-    <script type="module" src="../js/team.js"></script>
-</body>
+  <!-- Modal de criação (overlay + card) --> 
+  <div id="create-modal" class="fixed inset-0 z-50 hidden"> 
+    <!-- Backdrop --> 
+    <div class="absolute inset-0 bg-black/20 backdrop-blur-sm" id="modal-backdrop"></div> 
+ 
+    <!-- Card do modal --> 
+    <div class="absolute inset-0 flex items-center justify-center p-4"> 
+      <div class="relative w-full max-w-lg max-h-[90vh] overflow-y-auto 
+                  rounded-3xl bg-white dark:bg-gray-800 
+                  border border-gray-200 dark:border-gray-700 
+                  shadow-xl p-6 space-y-5 
+                  opacity-0 animate-fade-scale-up"> 
+ 
+        <!-- Header do modal --> 
+        <div class="flex items-center justify-between"> 
+          <h2 class="font-quicksand font-bold text-2xl text-gray-800 dark:text-gray-100">Novo Time</h2> 
+          <button id="close-modal-btn" 
+                  class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"> 
+            <i data-lucide="x" class="w-5 h-5 text-gray-400"></i>
+          </button> 
+        </div> 
+ 
+        <!-- Input nome --> 
+        <div class="space-y-2"> 
+          <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest"> 
+            Nome do Time 
+          </label> 
+          <input type="text" id="team-name-input" 
+                 placeholder="ex: Dream Team" maxlength="30" 
+                 class="w-full h-11 px-4 rounded-2xl 
+                        bg-gray-100/50 dark:bg-gray-700/50 
+                        border border-gray-200 dark:border-gray-600 
+                        text-gray-800 dark:text-gray-200 
+                        placeholder:text-gray-400 dark:placeholder:text-gray-500 
+                        focus:outline-none focus:ring-2 focus:ring-teal/50 
+                        text-sm transition-colors"> 
+        </div> 
+ 
+        <!-- Slots --> 
+        <div> 
+          <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-widest"> 
+            Pokémon Slots (<span class="filled-count">0</span>/6) 
+          </label> 
+          <div class="space-y-3 slots-container"> 
+            <!-- 6 slots serão gerados via JS --> 
+          </div> 
+        </div> 
+ 
+        <!-- Botão criar --> 
+        <button id="save-team-btn" 
+                class="w-full h-12 rounded-2xl bg-teal text-white 
+                       hover:bg-teal/90 font-quicksand font-bold text-lg shadow-lg shadow-teal/20 
+                       transition-all active:scale-[0.98]"> 
+          Create Team 
+        </button> 
+      </div> 
+    </div> 
+  </div> 
+ 
+  <!-- Toast container --> 
+  <div id="toast-container" class="fixed bottom-6 right-6 z-[100] space-y-2"></div> 
+ 
+  <!-- Scripts -->
+  <script type="module" src="../js/main.js"></script>
+  <script type="module" src="../js/teams.js"></script> 
+</body> 
 </html>

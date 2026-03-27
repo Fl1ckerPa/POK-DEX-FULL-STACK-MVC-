@@ -52,26 +52,26 @@ CREATE TABLE IF NOT EXISTS favorites (
 
 -- TABELA: teams
 -- FINALIDADE: Armazenar times de Pokémon criados pelos usuários
-CREATE TABLE IF NOT EXISTS teams (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    user_id INT NOT NULL,
-    team_name VARCHAR(100) NOT NULL,
-    slot_1 INT,
-    slot_2 INT,
-    slot_3 INT,
-    slot_4 INT,
-    slot_5 INT,
-    slot_6 INT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (slot_1) REFERENCES pokemons(id) ON DELETE SET NULL,
-    FOREIGN KEY (slot_2) REFERENCES pokemons(id) ON DELETE SET NULL,
-    FOREIGN KEY (slot_3) REFERENCES pokemons(id) ON DELETE SET NULL,
-    FOREIGN KEY (slot_4) REFERENCES pokemons(id) ON DELETE SET NULL,
-    FOREIGN KEY (slot_5) REFERENCES pokemons(id) ON DELETE SET NULL,
-    FOREIGN KEY (slot_6) REFERENCES pokemons(id) ON DELETE SET NULL
-);
+CREATE TABLE IF NOT EXISTS teams ( 
+   id VARCHAR(36) PRIMARY KEY DEFAULT (UUID()), 
+   user_id INT NOT NULL, 
+   name VARCHAR(30) NOT NULL, 
+   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, 
+   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE 
+); 
+
+-- TABELA: team_slots
+-- FINALIDADE: Armazenar os Pokémon que compõem cada time (máx 6)
+CREATE TABLE IF NOT EXISTS team_slots ( 
+   id INT AUTO_INCREMENT PRIMARY KEY, 
+   team_id VARCHAR(36) NOT NULL, 
+   slot_index TINYINT NOT NULL CHECK (slot_index BETWEEN 0 AND 5), 
+   pokemon_id INT NOT NULL, 
+   pokemon_name VARCHAR(50) NOT NULL, 
+   pokemon_image VARCHAR(255) NOT NULL, 
+   FOREIGN KEY (team_id) REFERENCES teams(id) ON DELETE CASCADE, 
+   UNIQUE (team_id, slot_index) 
+); 
 
 -- TABELA: view_history
 -- FINALIDADE: Rastrear Pokémon visualizados por cada usuário
