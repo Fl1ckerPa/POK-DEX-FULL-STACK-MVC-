@@ -34,6 +34,8 @@ CREATE TABLE IF NOT EXISTS pokemons (
     stats_speed INT,
     abilities JSON,
     types_json JSON,
+    flavor_text TEXT,
+    varieties_json JSON,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
@@ -72,6 +74,15 @@ CREATE TABLE IF NOT EXISTS team_slots (
    FOREIGN KEY (team_id) REFERENCES teams(id) ON DELETE CASCADE, 
    UNIQUE (team_id, slot_index) 
 ); 
+
+-- TABELA: team_slot_moves
+-- FINALIDADE: Armazenar os movimentos de cada Pokémon no time
+CREATE TABLE IF NOT EXISTS team_slot_moves (
+   id INT AUTO_INCREMENT PRIMARY KEY,
+   slot_id INT NOT NULL,
+   move_name VARCHAR(100) NOT NULL,
+   FOREIGN KEY (slot_id) REFERENCES team_slots(id) ON DELETE CASCADE
+);
 
 -- TABELA: view_history
 -- FINALIDADE: Rastrear Pokémon visualizados por cada usuário

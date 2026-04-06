@@ -5,10 +5,9 @@ const { POKEAPI_BASE_URL } = require('../config/constants');
  */
 class PokeApiService {
     /**
-     * Obtém um Pokémon pelo ID.
+     * Obtém um Pokémon pelo ID, incluindo dados da espécie.
      * @param {number|string} id - O ID do Pokémon.
      * @returns {Promise<Object>} Os dados do Pokémon formatados.
-     * @throws {Error} Se o Pokémon não for encontrado ou houver erro na API.
      */
     static async getById(id) {
         try {
@@ -22,7 +21,21 @@ class PokeApiService {
             }
 
             const data = await response.json();
-            return this._formatPokemonData(data);
+            
+            // Buscar dados da espécie para flavor text e variedades
+            let speciesData = null;
+            try {
+                // Se for um ID de forma especial (> 10000), precisamos do ID da espécie base
+                const speciesUrl = data.species.url;
+                const speciesResponse = await fetch(speciesUrl);
+                if (speciesResponse.ok) {
+                    speciesData = await speciesResponse.json();
+                }
+            } catch (err) {
+                console.warn(`Aviso: Não foi possível buscar espécie para Pokémon ${id}`);
+            }
+
+            return this._formatPokemonData(data, speciesData);
         } catch (error) {
             console.error(`Erro em PokeApiService.getById(${id}):`, error.message);
             throw error;
@@ -30,10 +43,9 @@ class PokeApiService {
     }
 
     /**
-     * Obtém um Pokémon pelo nome.
+     * Obtém um Pokémon pelo nome, incluindo dados da espécie.
      * @param {string} name - O nome do Pokémon.
      * @returns {Promise<Object>} Os dados do Pokémon formatados.
-     * @throws {Error} Se o Pokémon não for encontrado ou houver erro na API.
      */
     static async getByName(name) {
         try {
@@ -48,7 +60,20 @@ class PokeApiService {
             }
 
             const data = await response.json();
-            return this._formatPokemonData(data);
+
+            // Buscar dados da espécie
+            let speciesData = null;
+            try {
+                const speciesUrl = data.species.url;
+                const speciesResponse = await fetch(speciesUrl);
+                if (speciesResponse.ok) {
+                    speciesData = await speciesResponse.json();
+                }
+            } catch (err) {
+                console.warn(`Aviso: Não foi possível buscar espécie para Pokémon ${name}`);
+            }
+
+            return this._formatPokemonData(data, speciesData);
         } catch (error) {
             console.error(`Erro em PokeApiService.getByName('${name}'):`, error.message);
             throw error;
@@ -57,17 +82,29 @@ class PokeApiService {
 
     /**
      * Formata os dados brutos da PokéAPI para o padrão do sistema.
-     * @param {Object} data - Dados brutos da API.
-     * @returns {Object} Dados padronizados (id, name, types, height, weight, stats, abilities, sprites).
+     * @param {Object} data - Dados brutos do Pokémon.
+     * @param {Object} speciesData - Dados brutos da espécie (opcional).
+     * @returns {Object} Dados padronizados.
      * @private
      */
-    static _formatPokemonData(data) {
+    static _formatPokemonData(data, speciesData = null) {
+        const flavorTextEntry = speciesData?.flavor_text_entries?.find(e => e.language.name === 'en');
+        const flavorText = flavorTextEntry ? flavorTextEntry.flavor_text.replace(/[\n\f]/g, ' ') : '';
+        
+        const varieties = speciesData?.varieties?.map(v => ({
+            name: v.pokemon.name,
+            is_default: v.is_default,
+            id: parseInt(v.pokemon.url.split('/').filter(Boolean).pop())
+        })) || [];
+
         return {
             id: data.id,
             name: data.name,
             height: data.height,
             weight: data.weight,
             base_experience: data.base_experience,
+            flavor_text: flavorText,
+            varieties: varieties,
             sprites: {
                 front_default: data.sprites.front_default,
                 back_default: data.sprites.back_default,

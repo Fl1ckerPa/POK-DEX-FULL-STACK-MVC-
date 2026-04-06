@@ -17,6 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let teams = [];
     let allPokemon = []; // Cache para a lista completa
     let currentSlots = Array(6).fill(null);
+    let editingTeamId = null;
 
     // Pré-carregar lista de Pokémon para busca rápida
     async function preloadPokemon() {
@@ -35,33 +36,69 @@ document.addEventListener('DOMContentLoaded', () => {
         slotsContainer.innerHTML = '';
         currentSlots.forEach((slot, index) => {
             const slotDiv = document.createElement('div');
-            slotDiv.className = 'slot-item flex items-center gap-4';
-            
+            slotDiv.className = 'slot-item flex flex-col gap-2 p-4 rounded-2xl bg-gray-50/50 border border-black/5 dark:border-white/5 transition-all';
+            slotDiv.draggable = !!slot;
+            slotDiv.dataset.index = index;
+
             if (slot) {
                 slotDiv.innerHTML = `
-                    <div class="slot-number-circle">${index + 1}</div>
-                    <div class="slot-search-input-wrapper flex-1">
-                        <img src="${slot.pokemon_image}" class="w-8 h-8 object-contain" alt="${slot.pokemon_name}">
-                        <span class="ml-3 text-sm font-bold capitalize text-gray-800">${slot.pokemon_name}</span>
-                        <span class="ml-auto text-xs text-gray-400 font-medium">#${String(slot.pokemon_id).padStart(3, '0')}</span>
-                        <button class="ml-4 p-1 text-gray-400 hover:text-red-500 transition-colors" onclick="window.removeSlot(${index})">
-                            <i data-lucide="x" class="w-4 h-4"></i>
-                        </button>
+                    <div class="flex items-center gap-4">
+                        <div class="slot-number-circle">${index + 1}</div>
+                        <div class="flex-1 flex items-center bg-white dark:bg-gray-800 rounded-xl px-4 py-2 border border-black/5">
+                            <img src="${slot.pokemon_image}" class="w-8 h-8 object-contain" alt="${slot.pokemon_name}">
+                            <span class="ml-3 text-sm font-bold capitalize text-gray-800 dark:text-gray-100">${slot.pokemon_name}</span>
+                            <span class="ml-auto text-xs text-gray-400 font-medium">#${String(slot.pokemon_id).padStart(3, '0')}</span>
+                            <button class="ml-4 p-1 text-gray-400 hover:text-red-500 transition-colors" onclick="window.removeSlot(${index})">
+                                <i data-lucide="x" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <!-- Move Selection -->
+                    <div class="ml-12 space-y-2">
+                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Movimentos (Máx 4)</p>
+                        <div class="grid grid-cols-2 gap-2">
+                            ${(slot.moves || []).map((move, mIdx) => `
+                                <div class="flex items-center justify-between px-3 py-1.5 bg-white dark:bg-gray-800 rounded-lg border border-black/5 text-[10px] font-bold text-gray-600 dark:text-gray-300 capitalize">
+                                    <span>${move.replace(/-/g, ' ')}</span>
+                                    <button onclick="window.removeMove(${index}, ${mIdx})" class="text-gray-400 hover:text-red-500">
+                                        <i data-lucide="x" class="w-3 h-3"></i>
+                                    </button>
+                                </div>
+                            `).join('')}
+                            ${(slot.moves || []).length < 4 ? `
+                                <div class="relative col-span-2">
+                                    <input type="text" 
+                                           placeholder="Adicionar movimento..." 
+                                           class="w-full px-3 py-1.5 bg-white dark:bg-gray-800 rounded-lg border border-dashed border-gray-300 dark:border-gray-600 text-[10px] focus:outline-none focus:border-coral"
+                                           oninput="window.handleMoveSearch(event, ${index})">
+                                    <div class="move-results hidden absolute z-20 left-0 right-0 top-full mt-1 bg-white dark:bg-gray-800 border border-black/5 rounded-xl shadow-xl max-h-40 overflow-y-auto"></div>
+                                </div>
+                            ` : ''}
+                        </div>
                     </div>
                 `;
             } else {
                 slotDiv.innerHTML = `
-                    <div class="slot-number-circle">${index + 1}</div>
-                    <div class="slot-search-container">
-                        <div class="slot-search-input-wrapper">
-                            <i data-lucide="search" class="w-4 h-4"></i>
-                            <input type="text" placeholder="Buscar Pokémon..." 
-                                   oninput="window.handleSlotSearch(event, ${index})">
+                    <div class="flex items-center gap-4">
+                        <div class="slot-number-circle">${index + 1}</div>
+                        <div class="slot-search-container flex-1">
+                            <div class="slot-search-input-wrapper">
+                                <i data-lucide="search" class="w-4 h-4"></i>
+                                <input type="text" placeholder="Buscar Pokémon..." 
+                                       oninput="window.handleSlotSearch(event, ${index})">
+                            </div>
+                            <div class="search-results hidden"></div>
                         </div>
-                        <div class="search-results hidden"></div>
                     </div>
                 `;
             }
+
+            // Drag & Drop events
+            slotDiv.addEventListener('dragstart', handleDragStart);
+            slotDiv.addEventListener('dragover', handleDragOver);
+            slotDiv.addEventListener('drop', handleDrop);
+            slotDiv.addEventListener('dragend', handleDragEnd);
+
             slotsContainer.appendChild(slotDiv);
         });
         
@@ -69,16 +106,106 @@ document.addEventListener('DOMContentLoaded', () => {
         updateFilledCount();
     }
 
+    // Drag & Drop logic
+    let dragSrcIndex = null;
+    function handleDragStart(e) {
+        if (!this.draggable) return;
+        dragSrcIndex = this.dataset.index;
+        this.classList.add('opacity-50', 'scale-95');
+        e.dataTransfer.effectAllowed = 'move';
+    }
+
+    function handleDragOver(e) {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        return false;
+    }
+
+    function handleDrop(e) {
+        e.stopPropagation();
+        const targetIndex = this.dataset.index;
+        if (dragSrcIndex !== targetIndex) {
+            const temp = currentSlots[dragSrcIndex];
+            currentSlots[dragSrcIndex] = currentSlots[targetIndex];
+            currentSlots[targetIndex] = temp;
+            initSlotsUI();
+        }
+        return false;
+    }
+
+    function handleDragEnd() {
+        this.classList.remove('opacity-50', 'scale-95');
+    }
+
+    // Move search logic
+    window.handleMoveSearch = async (event, slotIndex) => {
+        const query = event.target.value.toLowerCase().trim();
+        const resultsDiv = event.target.nextElementSibling;
+        const pokemonId = currentSlots[slotIndex].pokemon_id;
+
+        if (query.length < 2) {
+            resultsDiv.classList.add('hidden');
+            return;
+        }
+
+        try {
+            const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${pokemonId}`);
+            const data = await res.json();
+            const filtered = data.moves
+                .filter(m => m.move.name.includes(query))
+                .slice(0, 10);
+
+            if (filtered.length > 0) {
+                resultsDiv.innerHTML = filtered.map(m => `
+                    <button class="w-full text-left px-4 py-2 text-[10px] font-bold text-gray-600 hover:bg-gray-50 capitalize"
+                            onclick="window.addMove(${slotIndex}, '${m.move.name}')">
+                        ${m.move.name.replace(/-/g, ' ')}
+                    </button>
+                `).join('');
+                resultsDiv.classList.remove('hidden');
+            } else {
+                resultsDiv.classList.add('hidden');
+            }
+        } catch (error) {
+            console.error('Erro ao buscar movimentos:', error);
+        }
+    };
+
+    window.addMove = (slotIndex, moveName) => {
+        if (!currentSlots[slotIndex].moves) currentSlots[slotIndex].moves = [];
+        if (currentSlots[slotIndex].moves.includes(moveName)) return;
+        
+        currentSlots[slotIndex].moves.push(moveName);
+        initSlotsUI();
+    };
+
+    window.removeMove = (slotIndex, moveIndex) => {
+        currentSlots[slotIndex].moves.splice(moveIndex, 1);
+        initSlotsUI();
+    };
+
     function updateFilledCount() {
         const filled = currentSlots.filter(s => s !== null).length;
         filledCountSpan.textContent = filled;
     }
 
     // Modal Logic
-    function openCreateModal() {
+    function openCreateModal(team = null) {
         createModal.classList.remove('hidden');
-        teamNameInput.value = '';
-        currentSlots = Array(6).fill(null);
+        if (team) {
+            editingTeamId = team.id;
+            teamNameInput.value = team.name;
+            currentSlots = Array(6).fill(null);
+            team.slots.forEach(s => {
+                currentSlots[s.slot_index] = { ...s };
+            });
+            saveTeamBtn.textContent = 'Atualizar Time';
+        } else {
+            editingTeamId = null;
+            teamNameInput.value = '';
+            currentSlots = Array(6).fill(null);
+            saveTeamBtn.textContent = 'Criar Time';
+        }
         initSlotsUI();
     }
 
@@ -131,7 +258,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     window.selectPokemon = (index, name, id) => {
         // Check for duplicates
-        if (currentSlots.some(s => s && s.pokemon_id === id)) {
+        if (currentSlots.some((s, idx) => s && s.pokemon_id === id && idx !== index)) {
             showToast('Este Pokémon já está no time!', 'error');
             return;
         }
@@ -139,14 +266,17 @@ document.addEventListener('DOMContentLoaded', () => {
         currentSlots[index] = {
             pokemon_id: id,
             pokemon_name: name,
-            pokemon_image: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`
+            pokemon_image: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`,
+            moves: []
         };
         initSlotsUI();
     };
 
     async function handleCreateTeam() {
         const name = teamNameInput.value.trim();
-        const filledSlots = currentSlots.filter(s => s !== null);
+        const filledSlots = currentSlots
+            .map((s, i) => s ? { ...s, slot_index: i } : null)
+            .filter(s => s !== null);
 
         if (!name) {
             showToast('Nome do time é obrigatório', 'error');
@@ -158,10 +288,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         try {
-            const res = await api.post('/teams', { 
-                name, 
-                slots: filledSlots.map((s, i) => ({ ...s, slot_index: i })) 
-            });
+            let res;
+            if (editingTeamId) {
+                res = await api.put(`/teams/${editingTeamId}`, { name, slots: filledSlots });
+            } else {
+                res = await api.post('/teams', { name, slots: filledSlots });
+            }
 
             if (res.success) {
                 showToast(res.message, 'success');
@@ -171,7 +303,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 showToast(res.message, 'error');
             }
         } catch (error) {
-            showToast('Erro ao criar time', 'error');
+            showToast(editingTeamId ? 'Erro ao atualizar time' : 'Erro ao criar time', 'error');
         }
     }
 
@@ -205,18 +337,33 @@ document.addEventListener('DOMContentLoaded', () => {
                         <h3 class="font-quicksand font-bold text-xl text-gray-800 dark:text-gray-100">${team.name}</h3>
                         <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">${team.slots.length}/6 slots</p>
                     </div>
-                    <button class="p-2 text-gray-300 hover:text-red-500 transition-colors" onclick="window.deleteTeam('${team.id}')">
-                        <i data-lucide="trash-2" class="w-5 h-5"></i>
-                    </button>
+                    <div class="flex items-center gap-2">
+                        <button class="p-2 text-gray-400 hover:text-coral transition-colors" onclick="window.editTeam('${team.id}')">
+                            <i data-lucide="edit-3" class="w-5 h-5"></i>
+                        </button>
+                        <button class="p-2 text-gray-300 hover:text-red-500 transition-colors" onclick="window.deleteTeam('${team.id}')">
+                            <i data-lucide="trash-2" class="w-5 h-5"></i>
+                        </button>
+                    </div>
                 </div>
-                <div class="flex items-center gap-2 overflow-x-auto pb-2">
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
                     ${team.slots.map(slot => `
-                        <div class="h-12 w-12 rounded-xl bg-gray-50 dark:bg-gray-800/50 flex items-center justify-center p-1 border border-black/5 dark:border-white/5" title="${slot.pokemon_name}">
-                            <img src="${slot.pokemon_image}" class="h-10 w-10 object-contain" alt="${slot.pokemon_name}">
+                        <div class="p-3 rounded-2xl bg-gray-50 dark:bg-gray-800/50 border border-black/5 dark:border-white/5 space-y-2">
+                            <div class="flex items-center gap-2">
+                                <img src="${slot.pokemon_image}" class="h-10 w-10 object-contain" alt="${slot.pokemon_name}">
+                                <span class="text-[10px] font-bold capitalize text-gray-800 dark:text-gray-100 truncate">${slot.pokemon_name}</span>
+                            </div>
+                            <div class="flex flex-wrap gap-1">
+                                ${(slot.moves || []).map(move => `
+                                    <span class="px-1.5 py-0.5 bg-white dark:bg-gray-800 rounded text-[8px] font-bold text-gray-400 border border-black/5 capitalize truncate">
+                                        ${move.replace(/-/g, ' ')}
+                                    </span>
+                                `).join('')}
+                            </div>
                         </div>
                     `).join('')}
                     ${Array(6 - team.slots.length).fill(0).map(() => `
-                        <div class="h-12 w-12 rounded-xl border border-dashed border-gray-200 dark:border-gray-700 flex items-center justify-center text-gray-200">
+                        <div class="h-12 w-full rounded-xl border border-dashed border-gray-200 dark:border-gray-700 flex items-center justify-center text-gray-200">
                             <i data-lucide="plus" class="w-4 h-4"></i>
                         </div>
                     `).join('')}
@@ -226,6 +373,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (window.lucide) window.lucide.createIcons();
     }
+
+    window.editTeam = (id) => {
+        const team = teams.find(t => t.id === id);
+        if (team) openCreateModal(team);
+    };
 
     window.deleteTeam = async (id) => {
         if (!confirm('Tem certeza que deseja excluir este time?')) return;

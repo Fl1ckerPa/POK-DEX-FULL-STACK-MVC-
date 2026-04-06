@@ -118,6 +118,8 @@ class CacheService {
             height: cached.height,
             weight: cached.weight,
             base_experience: cached.base_experience,
+            flavor_text: cached.flavor_text || '',
+            varieties: typeof cached.varieties_json === 'string' ? JSON.parse(cached.varieties_json) : (cached.varieties_json || []),
             sprites: {
                 front_default: cached.front_default_url,
                 back_default: cached.back_default_url,

@@ -1,6 +1,7 @@
 const CacheService = require('../services/cacheService');
 const Pokemon = require('../models/Pokemon');
 const Favorite = require('../models/Favorite');
+const ViewHistory = require('../models/ViewHistory');
 
 /**
  * Controller responsável por lidar com requisições relacionadas a Pokémon.
@@ -18,7 +19,30 @@ class PokemonController {
             const search = req.query.search || '';
             const userId = req.user?.id;
 
-            const { data, total, totalPages } = await Pokemon.findAll(page, limit, search);
+            // Suporte a múltiplas regiões enviadas como JSON ou string separada por vírgula
+            let regions = [];
+            if (req.query.regions) {
+                try {
+                    regions = JSON.parse(req.query.regions);
+                } catch (e) {
+                    regions = req.query.regions.split(',').map(r => {
+                        const [start, end] = r.split('-');
+                        return { start: parseInt(start), end: parseInt(end) };
+                    });
+                }
+            }
+
+            // Suporte a múltiplos tipos
+            let types = [];
+            if (req.query.types) {
+                try {
+                    types = JSON.parse(req.query.types);
+                } catch (e) {
+                    types = req.query.types.split(',');
+                }
+            }
+
+            const { data, total, totalPages } = await Pokemon.findAll(page, limit, search, regions, types);
 
             // Se o usuário estiver logado, marcar os favoritos
             if (userId) {
@@ -67,10 +91,13 @@ class PokemonController {
             // 2. Consultar Pokémon (cache -> PokéAPI)
             const pokemon = await CacheService.getPokemonById(pokemonId);
 
-            // 3. Se o usuário estiver logado, verificar se é favorito
+            // 3. Se o usuário estiver logado, verificar se é favorito e registrar histórico
             if (userId) {
                 const isFavorite = await Favorite.isFavorite(userId, pokemon.id);
                 pokemon.is_favorite = isFavorite;
+                
+                // Registrar no histórico de visualização (assíncrono, não bloqueia a resposta)
+                ViewHistory.add(userId, pokemon.id).catch(err => console.error('Erro ao registrar histórico:', err));
             }
 
             // 4. Retornar dados completos do Pokémon e status apropriados

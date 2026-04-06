@@ -14,6 +14,7 @@ const authRoutes = require('./routes/authRoutes');
 const pokemonRoutes = require('./routes/pokemonRoutes');
 const favoriteRoutes = require('./routes/favoriteRoutes');
 const teamsRoutes = require('./routes/teamsRoutes');
+const historyRoutes = require('./routes/historyRoutes');
 
 // Rota básica de teste
 app.get('/', (req, res) => {
@@ -25,5 +26,6 @@ app.use('/api/auth', authRoutes);
 app.use('/api/pokemon', pokemonRoutes);
 app.use('/api/favorites', favoriteRoutes);
 app.use('/api/teams', teamsRoutes);
+app.use('/api/history', historyRoutes);
 
 module.exports = app;
