@@ -16,7 +16,11 @@ const api = {
                 method: 'GET',
                 headers
             });
-            return await response.json();
+            const data = await response.json();
+            if (response.status === 401) {
+                data.isUnauthorized = true;
+            }
+            return data;
         } catch (error) {
             console.error('API GET Error:', error);
             throw error;
@@ -39,7 +43,11 @@ const api = {
                 headers,
                 body: JSON.stringify(data)
             });
-            return await response.json();
+            const result = await response.json();
+            if (response.status === 401) {
+                result.isUnauthorized = true;
+            }
+            return result;
         } catch (error) {
             console.error('API POST Error:', error);
             throw error;
@@ -61,7 +69,11 @@ const api = {
                 method: 'DELETE',
                 headers
             });
-            return await response.json();
+            const data = await response.json();
+            if (response.status === 401) {
+                data.isUnauthorized = true;
+            }
+            return data;
         } catch (error) {
             console.error('API DELETE Error:', error);
             throw error;

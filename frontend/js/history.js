@@ -38,15 +38,15 @@ const history = {
 
         // Create grid
         const grid = document.createElement('div');
-        grid.className = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6';
+        grid.className = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 history-grid';
         
         grid.innerHTML = items.map((item, index) => {
             const date = new Date(item.viewed_at);
             const timeAgo = this.getTimeAgo(date);
             
             return `
-                <div class="glass-card p-4 flex items-center gap-4 hover:scale-[1.02] transition-all cursor-pointer" 
-                     onclick="location.href='details.html?id=${item.id}'">
+                <div class="glass-card p-4 flex items-center gap-4 hover:scale-[1.02] transition-all cursor-pointer history-item" 
+                     data-id="${item.id}">
                     <div class="w-16 h-16 bg-gray-100 rounded-xl flex items-center justify-center p-2">
                         <img src="${item.image_url}" alt="${item.name}" class="w-full h-full object-contain">
                     </div>
@@ -63,6 +63,15 @@ const history = {
                 </div>
             `;
         }).join('');
+
+        // Add event delegation for history items
+        grid.addEventListener('click', (e) => {
+            const item = e.target.closest('.history-item');
+            if (item) {
+                const id = item.dataset.id;
+                window.location.href = `details.html?id=${id}`;
+            }
+        });
 
         container.appendChild(grid);
         if (window.lucide) window.lucide.createIcons();

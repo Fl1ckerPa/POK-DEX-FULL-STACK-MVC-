@@ -1,6 +1,6 @@
-import api from '../js/api.js';
-import ui from '../js/ui.js';
-import auth from '../js/auth.js';
+import api from './api.js';
+import ui from './ui.js';
+import auth from './auth.js';
 
 const search = {
     selectedTypes: new Set(),
@@ -9,6 +9,8 @@ const search = {
     currentPage: 1,
 
     async init() {
+        ui.init();
+        auth.checkAuthOnLoad();
         this.cacheDOM();
         this.bindEvents();
         this.updateUserDisplay();
@@ -29,7 +31,7 @@ const search = {
     bindEvents() {
         // Handle Limit Selection
         this.limitBtns.forEach(btn => {
-            btn.onclick = () => {
+            btn.addEventListener('click', () => {
                 this.limitBtns.forEach(b => {
                     b.classList.remove('bg-white', 'text-coral', 'shadow-sm', 'active');
                     b.classList.add('text-slate-500', 'hover:bg-white/50');
@@ -37,12 +39,12 @@ const search = {
                 btn.classList.remove('text-slate-500', 'hover:bg-white/50');
                 btn.classList.add('bg-white', 'text-coral', 'shadow-sm', 'active');
                 this.currentLimit = parseInt(btn.dataset.limit);
-            };
+            });
         });
 
         // Handle Type Pills (Multiple Selection)
         this.typeBtns.forEach(btn => {
-            btn.onclick = () => {
+            btn.addEventListener('click', () => {
                 const type = btn.dataset.type;
                 if (this.selectedTypes.has(type)) {
                     this.selectedTypes.delete(type);
@@ -53,12 +55,12 @@ const search = {
                     btn.classList.add('active', 'ring-4', 'ring-coral/20', 'scale-105');
                     btn.classList.remove('border-transparent');
                 }
-            };
+            });
         });
 
         // Handle Region Pills (Multiple Selection)
         this.regionBtns.forEach(btn => {
-            btn.onclick = () => {
+            btn.addEventListener('click', () => {
                 const region = btn.dataset.region;
                 
                 if (region === "") { // Botão "All"
@@ -89,10 +91,10 @@ const search = {
                         btn.classList.remove('bg-slate-100', 'text-slate-500', 'hover:bg-slate-200');
                     }
                 }
-            };
+            });
         });
 
-        this.searchBtn.onclick = () => this.performSearch(1);
+        this.searchBtn.addEventListener('click', () => this.performSearch(1));
 
         this.searchInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') this.searchBtn.click();
