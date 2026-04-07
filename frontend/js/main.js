@@ -36,8 +36,9 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Initialize Pokémon grid if on dashboard
-    if (document.getElementById('pokemon-grid')) {
+    // Initialize Pokémon grid if on dashboard and grid exists
+    const grid = document.getElementById('pokemon-grid');
+    if (grid) {
         pokemon.init();
     }
 });

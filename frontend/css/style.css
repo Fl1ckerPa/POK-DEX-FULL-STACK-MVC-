@@ -107,15 +107,48 @@ body {
 }
 
 /* Type colors & pills */
-.type-pill {
-    padding: 0.35rem 1rem;
+.type-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     border-radius: 9999px;
-    font-size: 0.75rem;
+    font-family: 'Quicksand', sans-serif;
     font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    border: 1px solid rgba(0, 0, 0, 0.05);
+    text-transform: capitalize;
+    color: #FFFFFF !important;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
 }
+
+.type-badge-sm {
+    padding: 0.25rem 1rem;
+    font-size: 0.75rem;
+}
+
+.type-badge-md {
+    padding: 0.375rem 1.25rem;
+    font-size: 0.875rem;
+}
+
+/* Background classes for each type */
+.bg-type-grass    { background-color: hsl(148, 45%, 72%) !important; }
+.bg-type-fire     { background-color: hsl(25, 95%, 73%) !important; }
+.bg-type-water    { background-color: hsl(216, 73%, 72%) !important; }
+.bg-type-electric { background-color: hsl(45, 95%, 65%) !important; }
+.bg-type-psychic  { background-color: hsl(330, 65%, 70%) !important; }
+.bg-type-ice      { background-color: hsl(195, 60%, 75%) !important; }
+.bg-type-dragon   { background-color: hsl(260, 55%, 60%) !important; }
+.bg-type-dark     { background-color: hsl(220, 10%, 30%) !important; }
+.bg-type-fairy    { background-color: hsl(340, 60%, 78%) !important; }
+.bg-type-normal   { background-color: hsl(30, 15%, 70%) !important; }
+.bg-type-fighting { background-color: hsl(15, 70%, 50%) !important; }
+.bg-type-flying   { background-color: hsl(240, 40%, 75%) !important; }
+.bg-type-poison   { background-color: hsl(280, 50%, 55%) !important; }
+.bg-type-ground   { background-color: hsl(35, 50%, 60%) !important; }
+.bg-type-rock     { background-color: hsl(40, 30%, 50%) !important; }
+.bg-type-bug      { background-color: hsl(75, 60%, 50%) !important; }
+.bg-type-ghost    { background-color: hsl(265, 30%, 50%) !important; }
+.bg-type-steel    { background-color: hsl(210, 10%, 65%) !important; }
+.bg-type-fallback { background-color: hsl(210, 10%, 80%) !important; }
 
 /* Action Buttons */
 .btn-action {
@@ -143,6 +176,10 @@ body {
     background-color: white !important;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     color: #ff6b6b !important;
+}
+
+.hidden {
+    display: none;
 }
 
 .favorite-btn:active {

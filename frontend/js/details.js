@@ -419,7 +419,7 @@ function renderMoveTable() {
         ${m.level > 0 ? `<span class="text-xs text-gray-400 ml-1">Lv.${m.level}</span>` : ''} 
       </td> 
       <td class="py-2"> 
-        ${m.type ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-type-${m.type} text-white shadow-sm border border-black/5">${m.type}</span>` : ''} 
+        ${m.type ? `<span class="type-badge type-badge-sm bg-type-${m.type}">${m.type}</span>` : ''} 
       </td> 
       <td class="py-2 text-center font-display font-bold text-gray-800"> 
         ${m.power ?? '—'} 
@@ -629,6 +629,11 @@ function renderStats(stats) {
  * Inicializa a página de detalhes
  */
 async function init() {
+  const backBtn = document.getElementById('back-btn');
+  if (backBtn) {
+    backBtn.addEventListener('click', () => history.back());
+  }
+
   // Initialize Lucide icons
   if (window.lucide) {
     lucide.createIcons();
@@ -685,7 +690,7 @@ async function init() {
     
     // Types
     document.querySelector('.types').innerHTML = pokemon.types.map(type => `
-      <span class="type-pill bg-type-${type} text-white shadow-sm border border-black/5 capitalize">
+      <span class="type-badge type-badge-md bg-type-${type}">
         ${type}
       </span>
     `).join('');
@@ -794,4 +799,16 @@ async function setupFavoriteButton(pokemonId, isFavorite) {
 }
 
 // Inicializar quando o DOM estiver pronto
-document.addEventListener('DOMContentLoaded', init);
+document.addEventListener('DOMContentLoaded', () => {
+  init();
+  
+  // Logout logic
+  const logoutBtn = document.getElementById('logout-btn');
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', () => {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      window.location.href = 'login.html';
+    });
+  }
+});
