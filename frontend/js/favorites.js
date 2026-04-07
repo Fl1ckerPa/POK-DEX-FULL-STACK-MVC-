@@ -1,5 +1,6 @@
 import api from './api.js';
 import ui from './ui.js';
+import auth from './auth.js';
 
 /**
  * Favorites Module - Handles the favorites page logic
@@ -13,6 +14,12 @@ const favorites = {
      */
     async init() {
         console.log('Initializing favorites page...');
+        
+        // Inicializa serviços globais de UI
+        ui.init();
+        
+        // Verificar autenticação ao carregar a página
+        auth.checkAuthOnLoad();
         
         // Update user display immediately from localStorage
         this.updateUserDisplay();
@@ -31,6 +38,7 @@ const favorites = {
      */
     async loadFavorites() {
         try {
+            ui.showLoading();
             const result = await api.get('/favorites');
             
             if (result.success) {
@@ -38,11 +46,14 @@ const favorites = {
                 this.render();
             } else {
                 console.error('Failed to load favorites:', result.message);
-                // If not authenticated, the API middleware should handle it,
-                // but we can also handle it here if needed.
+                if (result.isUnauthorized) {
+                    ui.showNotification('Sessão expirada. Faça login novamente.', 'error');
+                    auth.logout();
+                }
             }
         } catch (error) {
             console.error('Error loading favorites:', error);
+            ui.showError('Erro ao carregar seus favoritos. Tente novamente mais tarde.');
         }
     },
 
@@ -55,12 +66,15 @@ const favorites = {
         const countElement = document.getElementById('favorites-count');
         const clearBtn = document.getElementById('clear-favorites-btn');
 
+        if (!grid || !emptyState || !countElement) return;
+
         // Update count
         const count = this.items.length;
         countElement.textContent = `${count} ${count === 1 ? 'Pokémon' : 'Pokémon'} na sua coleção`;
 
         if (count === 0) {
             grid.classList.add('hidden');
+            grid.innerHTML = '';
             emptyState.classList.remove('hidden');
             if (clearBtn) clearBtn.classList.add('hidden');
             // Re-initialize Lucide icons for the empty state
@@ -69,7 +83,14 @@ const favorites = {
             grid.classList.remove('hidden');
             emptyState.classList.add('hidden');
             if (clearBtn) clearBtn.classList.remove('hidden');
-            ui.renderPokemonGrid(this.items);
+            
+            // Garantir que os itens tenham a propriedade is_favorite para a UI renderizar o coração vermelho
+            const itemsToRender = this.items.map(item => ({
+                ...item,
+                is_favorite: true
+            }));
+            
+            ui.renderPokemonGrid(itemsToRender);
         }
     },
 
@@ -77,18 +98,23 @@ const favorites = {
      * Setup event listeners for the page
      */
     setupEventListeners() {
-        // Handle favorite button clicks in the grid
-        const grid = document.getElementById('pokemon-grid');
-        if (grid) {
-            grid.addEventListener('click', async (e) => {
-                const favoriteBtn = e.target.closest('.favorite-btn');
-                if (favoriteBtn) {
-                    e.stopPropagation();
-                    const pokemonId = favoriteBtn.dataset.id;
-                    await this.removeFavorite(pokemonId, favoriteBtn.closest('.glass-card'));
+        // Escuta mudanças globais de favoritos
+        document.addEventListener('favoriteChanged', (e) => {
+            const { id, isFavorited } = e.detail;
+            
+            // Se o item foi removido dos favoritos e estamos na página de favoritos, remova-o da grade
+            if (!isFavorited) {
+                const card = document.querySelector(`.favorite-btn[data-id="${id}"]`)?.closest('.glass-card');
+                if (card) {
+                    card.classList.add('animate-scale-down');
+                    setTimeout(() => {
+                        card.remove();
+                        this.items = this.items.filter(item => item.id != id);
+                        this.updateUIAfterRemoval();
+                    }, 300);
                 }
-            });
-        }
+            }
+        });
 
         // Handle clear favorites button
         const clearBtn = document.getElementById('clear-favorites-btn');
@@ -104,8 +130,20 @@ const favorites = {
         const logoutBtn = document.getElementById('logout-btn');
         if (logoutBtn) {
             logoutBtn.addEventListener('click', () => {
-                localStorage.clear();
-                window.location.href = 'login.html';
+                auth.logout();
+            });
+        }
+
+        // Mobile menu toggle
+        const mobileBtn = document.getElementById('mobile-menu-btn');
+        const sidebar = document.querySelector('aside');
+        if (mobileBtn && sidebar) {
+            mobileBtn.addEventListener('click', () => {
+                sidebar.classList.toggle('hidden');
+                sidebar.classList.toggle('flex');
+                sidebar.classList.toggle('fixed');
+                sidebar.classList.toggle('z-50');
+                sidebar.classList.toggle('w-full');
             });
         }
     },
@@ -139,53 +177,21 @@ const favorites = {
     },
 
     /**
-     * Remove a Pokémon from favorites
-     * @param {string} pokemonId - The external ID of the Pokémon
-     * @param {HTMLElement} cardElement - The card element to animate and remove
-     */
-    async removeFavorite(pokemonId, cardElement) {
-        try {
-            const result = await api.delete(`/favorites/${pokemonId}`);
-            
-            if (result.success) {
-                // Add removal animation
-                cardElement.classList.add('animate-scale-down');
-                
-                // Wait for animation to finish
-                setTimeout(() => {
-                    // Remove from local state
-                    this.items = this.items.filter(item => item.id != pokemonId);
-                    
-                    // Remove from DOM
-                    cardElement.remove();
-                    
-                    // Update UI (count and empty state)
-                    this.updateUIAfterRemoval();
-                    
-                    ui.showNotification('Pokémon removido dos favoritos!', 'info');
-                }, 300); // Match animation duration in CSS
-            } else {
-                console.error('Failed to remove favorite:', result.message);
-            }
-        } catch (error) {
-            console.error('Error removing favorite:', error);
-        }
-    },
-
-    /**
      * Update the UI after a favorite is removed from the DOM
      */
     updateUIAfterRemoval() {
         const countElement = document.getElementById('favorites-count');
         const grid = document.getElementById('pokemon-grid');
         const emptyState = document.getElementById('empty-state');
+        const clearBtn = document.getElementById('clear-favorites-btn');
         
         const count = this.items.length;
-        countElement.textContent = `${count} ${count === 1 ? 'Pokémon' : 'Pokémon'} na sua coleção`;
+        if (countElement) countElement.textContent = `${count} ${count === 1 ? 'Pokémon' : 'Pokémon'} na sua coleção`;
         
         if (count === 0) {
-            grid.classList.add('hidden');
-            emptyState.classList.remove('hidden');
+            if (grid) grid.classList.add('hidden');
+            if (emptyState) emptyState.classList.remove('hidden');
+            if (clearBtn) clearBtn.classList.add('hidden');
             // Re-initialize Lucide icons for the empty state
             if (window.lucide) window.lucide.createIcons();
         }
@@ -200,9 +206,11 @@ const favorites = {
             const user = JSON.parse(userJson);
             const nameEl = document.getElementById('user-name');
             const emailEl = document.getElementById('user-email');
+            const userDisplay = document.getElementById('user-display');
             
             if (nameEl) nameEl.textContent = user.username || 'Usuário';
             if (emailEl) emailEl.textContent = user.email || 'email@exemplo.com';
+            if (userDisplay) userDisplay.classList.remove('hidden');
         }
     }
 };

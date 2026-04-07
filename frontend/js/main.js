@@ -1,8 +1,12 @@
 import auth from './auth.js';
 import pokemon from './pokemon.js';
+import ui from './ui.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     console.log('App inicializado...');
+    
+    // Inicializa serviços globais de UI
+    ui.init();
     
     // Initialize Lucide icons immediately for static elements
     if (window.lucide) {

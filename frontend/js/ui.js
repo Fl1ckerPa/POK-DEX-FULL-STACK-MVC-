@@ -5,6 +5,59 @@ import api from './api.js';
 
 const ui = {
     /**
+     * Inicializa ouvintes globais de UI
+     */
+    init() {
+        // Escuta mudanças de favoritos para manter a consistência visual em todos os cards
+        document.addEventListener('favoriteChanged', (e) => {
+            const { id, isFavorited } = e.detail;
+            this.updatePokemonCardState(id, isFavorited);
+        });
+    },
+
+    /**
+     * Atualiza o estado visual de todos os cards de um Pokémon específico
+     * @param {number|string} id - ID do Pokémon
+     * @param {boolean} isFavorited - Novo estado de favorito
+     */
+    updatePokemonCardState(id, isFavorited) {
+        const favBtns = document.querySelectorAll(`.favorite-btn[data-id="${id}"]`);
+        favBtns.forEach(btn => {
+            const icon = btn.querySelector('i');
+            if (isFavorited) {
+                icon.classList.add('fill-coral', 'text-coral');
+                btn.classList.add('opacity-100', 'shadow-md');
+            } else {
+                icon.classList.remove('fill-coral', 'text-coral');
+                btn.classList.remove('opacity-100', 'shadow-md');
+            }
+        });
+
+        // Também atualiza o botão no painel de detalhes (se estiver aberto e for o mesmo Pokémon)
+        const detailFavBtn = document.getElementById('favorite-detail-btn');
+        if (detailFavBtn) {
+            // No painel de detalhes, o ID pode não estar no dataset, mas podemos verificar a classe ou contexto
+            // Para ser seguro, atualizamos se houver uma correspondência visual ou lógica
+            const icon = detailFavBtn.querySelector('i');
+            const span = detailFavBtn.querySelector('span');
+            
+            if (isFavorited) {
+                icon.classList.add('fill-white');
+                detailFavBtn.classList.replace('bg-gray-100', 'bg-coral');
+                detailFavBtn.classList.replace('text-gray-600', 'text-white');
+                if (span) span.textContent = 'Favoritado';
+            } else {
+                icon.classList.remove('fill-white');
+                detailFavBtn.classList.replace('bg-coral', 'bg-gray-100');
+                detailFavBtn.classList.replace('text-white', 'text-gray-600');
+                if (span) span.textContent = 'Favoritar';
+            }
+        }
+        
+        if (window.lucide) lucide.createIcons();
+    },
+
+    /**
      * Render the Pokémon grid with glass-style cards
      * @param {Array} pokemons - List of Pokémon objects
      */
@@ -51,34 +104,75 @@ const ui = {
     },
 
     /**
-     * Alterna o estado de favorito de um Pokémon
+     * Alterna o estado de favorito de um Pokémon de forma otimista (tempo real)
      * @param {number|string} id - ID do Pokémon
      * @param {HTMLElement} btn - Elemento do botão
      */
     async toggleFavorite(id, btn) {
+        const icon = btn.querySelector('i');
+        const isFavorited = icon.classList.contains('fill-coral');
+        
+        // Estado otimista: muda a cor do ícone imediatamente
+        if (isFavorited) {
+            icon.classList.remove('fill-coral', 'text-coral');
+            btn.classList.remove('opacity-100', 'shadow-md');
+        } else {
+            icon.classList.add('fill-coral', 'text-coral');
+            btn.classList.add('opacity-100', 'shadow-md');
+        }
+
         try {
-            const response = await api.post('/favorites', { pokemonId: id });
-            const icon = btn.querySelector('i');
-            
-            if (response.success) {
-                // Adicionado
-                icon.classList.add('fill-coral', 'text-coral');
-                btn.classList.add('opacity-100', 'shadow-md');
-                this.showNotification('Adicionado aos favoritos!', 'success');
+            let response;
+            if (isFavorited) {
+                // Se já era favorito, remove
+                response = await api.delete(`/favorites/${id}`);
             } else {
-                // Se falhou ao adicionar, tenta remover (toggle)
-                const deleteRes = await api.delete(`/favorites/${id}`);
-                if (deleteRes.success) {
+                // Se não era favorito, adiciona
+                response = await api.post('/favorites', { pokemonId: id });
+            }
+
+            if (response.isUnauthorized) {
+                // Reverte o estado otimista
+                if (isFavorited) {
+                    icon.classList.add('fill-coral', 'text-coral');
+                    btn.classList.add('opacity-100', 'shadow-md');
+                } else {
                     icon.classList.remove('fill-coral', 'text-coral');
                     btn.classList.remove('opacity-100', 'shadow-md');
-                    this.showNotification('Removido dos favoritos!', 'info');
-                } else {
-                    this.showNotification(response.message || 'Erro ao atualizar favoritos', 'error');
                 }
+                this.showNotification('Faça login para favoritar Pokémon', 'error');
+                return;
+            }
+
+            if (response.success) {
+                this.showNotification(isFavorited ? 'Removido dos favoritos!' : 'Adicionado aos favoritos!', 'success');
+                
+                // Dispara um evento para outros módulos (como favorites.js) saberem que mudou
+                document.dispatchEvent(new CustomEvent('favoriteChanged', { 
+                    detail: { id, isFavorited: !isFavorited } 
+                }));
+            } else {
+                // Reverte o estado otimista
+                if (isFavorited) {
+                    icon.classList.add('fill-coral', 'text-coral');
+                    btn.classList.add('opacity-100', 'shadow-md');
+                } else {
+                    icon.classList.remove('fill-coral', 'text-coral');
+                    btn.classList.remove('opacity-100', 'shadow-md');
+                }
+                this.showNotification(response.message || 'Erro ao atualizar favoritos', 'error');
             }
         } catch (error) {
             console.error('Error toggling favorite:', error);
-            this.showNotification('Faça login para favoritar Pokémon', 'error');
+            // Reverte o estado otimista
+            if (isFavorited) {
+                icon.classList.add('fill-coral', 'text-coral');
+                btn.classList.add('opacity-100', 'shadow-md');
+            } else {
+                icon.classList.remove('fill-coral', 'text-coral');
+                btn.classList.remove('opacity-100', 'shadow-md');
+            }
+            this.showNotification('Erro de conexão com o servidor', 'error');
         }
     },
 
@@ -431,21 +525,40 @@ const ui = {
             console.log('Favoriting pokemon', pokemon.id);
             try {
                 const result = await api.post('/favorites', { pokemonId: pokemon.id });
+                
+                if (result.isUnauthorized) {
+                    this.showNotification('Faça login para favoritar Pokémon', 'error');
+                    return;
+                }
+
                 if (result.success) {
                     this.showNotification(`${pokemon.name} adicionado aos favoritos!`, 'success');
                     favBtn.querySelector('i').classList.add('fill-white');
+                    favBtn.classList.replace('bg-gray-100', 'bg-coral');
+                    favBtn.classList.replace('text-gray-600', 'text-white');
+                    favBtn.querySelector('span').textContent = 'Favoritado';
                 } else {
                     const removeResult = await api.delete(`/favorites/${pokemon.id}`);
+                    
+                    if (removeResult.isUnauthorized) {
+                        this.showNotification('Faça login para favoritar Pokémon', 'error');
+                        return;
+                    }
+
                     if (removeResult.success) {
                         this.showNotification(`${pokemon.name} removido dos favoritos!`, 'info');
                         favBtn.querySelector('i').classList.remove('fill-white');
+                        favBtn.classList.replace('bg-coral', 'bg-gray-100');
+                        favBtn.classList.replace('text-gray-600', 'text-white');
+                        favBtn.querySelector('span').textContent = 'Favoritar';
                     } else {
-                        this.showNotification(result.message || 'Erro ao atualizar favoritos', 'error');
+                        this.showNotification(removeResult.message || result.message || 'Erro ao atualizar favoritos', 'error');
                     }
                 }
                 if (window.lucide) lucide.createIcons();
             } catch (error) {
                 console.error('Error toggling favorite:', error);
+                this.showNotification('Erro de conexão com o servidor', 'error');
             }
         });
 
@@ -483,7 +596,7 @@ const ui = {
             btn.innerHTML = label;
             if (title) btn.title = title;
             if (!isDisabled && !isActive) {
-                btn.onclick = () => onPageChange(page);
+                btn.addEventListener('click', () => onPageChange(page));
             }
             return btn;
         };
@@ -583,7 +696,7 @@ const ui = {
             setTimeout(() => toast.remove(), 300);
         };
 
-        toast.onclick = removeToast;
+        toast.addEventListener('click', removeToast);
         setTimeout(removeToast, 4000);
     },
 
@@ -602,11 +715,17 @@ const ui = {
                 </div>
                 <h3 class="text-xl font-quicksand font-bold text-gray-800">Ops! Algo deu errado</h3>
                 <p class="text-gray-500">${message}</p>
-                <button onclick="location.reload()" class="mt-6 px-6 py-2 bg-coral text-white rounded-xl font-bold hover:bg-coral-hover transition-colors">
+                <button class="mt-6 px-6 py-2 bg-coral text-white rounded-xl font-bold hover:bg-coral-hover transition-colors reload-btn">
                     Tentar novamente
                 </button>
             </div>
         `;
+        
+        const reloadBtn = grid.querySelector('.reload-btn');
+        if (reloadBtn) {
+            reloadBtn.addEventListener('click', () => location.reload());
+        }
+
         if (window.lucide) lucide.createIcons();
     }
 };

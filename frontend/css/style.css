@@ -20,6 +20,14 @@
   --teal: #20c997;
 }
 
+/* Color Utilities */
+.text-coral { color: var(--coral); }
+.bg-coral { background-color: var(--coral); }
+.fill-coral { fill: var(--coral); }
+.text-teal { color: var(--teal); }
+.bg-teal { background-color: var(--teal); }
+.fill-white { fill: white; }
+
 /* Glassmorphism */
 .glass-card {
     background: rgba(255, 255, 255, 0.4);

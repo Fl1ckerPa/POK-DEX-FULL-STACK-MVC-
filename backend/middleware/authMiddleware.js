@@ -48,4 +48,28 @@ const verifyToken = (req, res, next) => {
     }
 };
 
-module.exports = { verifyToken };
+const optionalVerifyToken = (req, res, next) => {
+    const authHeader = req.headers['authorization'];
+    
+    if (!authHeader) {
+        return next();
+    }
+
+    const token = authHeader.split(' ')[1];
+
+    if (!token) {
+        return next();
+    }
+
+    try {
+        const decoded = jwt.verify(token, config.auth.jwtSecret);
+        req.userId = decoded.id;
+        req.user = decoded;
+        next();
+    } catch (error) {
+        // Se o token for inválido ou expirado, apenas prossegue sem o usuário
+        next();
+    }
+};
+
+module.exports = { verifyToken, optionalVerifyToken };

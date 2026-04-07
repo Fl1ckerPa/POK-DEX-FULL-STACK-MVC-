@@ -1,4 +1,5 @@
 import api from './api.js';
+import ui from './ui.js';
 
 const STAT_LABELS = {
   "hp": "HP",
@@ -132,7 +133,7 @@ function setupStatsToggle(stats) {
 
   if (!barBtn || !radarBtn) return;
 
-  barBtn.onclick = () => {
+  barBtn.addEventListener('click', () => {
     barBtn.classList.add('bg-white', 'shadow-sm', 'text-coral');
     barBtn.classList.remove('text-gray-400');
     radarBtn.classList.remove('bg-white', 'shadow-sm', 'text-coral');
@@ -140,9 +141,9 @@ function setupStatsToggle(stats) {
     
     barView.classList.remove('hidden');
     radarView.classList.add('hidden');
-  };
+  });
 
-  radarBtn.onclick = () => {
+  radarBtn.addEventListener('click', () => {
     radarBtn.classList.add('bg-white', 'shadow-sm', 'text-coral');
     radarBtn.classList.remove('text-gray-400');
     barBtn.classList.remove('bg-white', 'shadow-sm', 'text-coral');
@@ -152,7 +153,7 @@ function setupStatsToggle(stats) {
     barView.classList.add('hidden');
     
     renderRadarChart(stats);
-  };
+  });
 }
 
 /**
@@ -373,28 +374,32 @@ function renderMoveFilters(methods) {
   const container = document.querySelector('.moves-filters');
   if (!container) return;
 
-  window.setMoveFilter = (filter) => {
-    currentFilter = filter;
-    movesExpanded = false;
-    renderMoveFilters(methods);
-    renderMoveTable();
-  };
-
   const allBtn = `
-    <button onclick="setMoveFilter('all')" 
+    <button data-filter="all" 
             class="move-filter-btn px-3 py-1 rounded-full text-xs font-medium transition-colors 
                    ${currentFilter === 'all' ? 'bg-coral text-white' : 'bg-gray-200 text-gray-600 hover:bg-gray-300'}">
       Todos
     </button>`;
 
   const methodBtns = methods.map(m => `
-    <button onclick="setMoveFilter('${m}')" 
+    <button data-filter="${m}" 
             class="move-filter-btn px-3 py-1 rounded-full text-xs font-medium capitalize transition-colors 
                    ${currentFilter === m ? 'bg-coral text-white' : 'bg-gray-200 text-gray-600 hover:bg-gray-300'}">
       ${METHOD_LABELS[m] || m}
     </button>`).join('');
 
   container.innerHTML = allBtn + methodBtns;
+
+  // Add event listeners to filter buttons
+  container.querySelectorAll('.move-filter-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const filter = e.currentTarget.dataset.filter;
+      currentFilter = filter;
+      movesExpanded = false;
+      renderMoveFilters(methods);
+      renderMoveTable();
+    });
+  });
 }
 
 /**
@@ -447,10 +452,15 @@ function renderMoveTable() {
     btn.textContent = movesExpanded 
       ? 'Mostrar Menos ▲' 
       : `Mostrar Todos os ${filtered.length} Ataques ▼`; 
-    btn.onclick = () => { 
+    
+    // Replace old listeners to avoid multiple attachments if re-rendered
+    const newBtn = btn.cloneNode(true);
+    btn.parentNode.replaceChild(newBtn, btn);
+    
+    newBtn.addEventListener('click', () => { 
       movesExpanded = !movesExpanded; 
       renderMoveTable(); 
-    }; 
+    }); 
   } else {
     expandContainer.classList.add('hidden');
   }
@@ -629,6 +639,7 @@ function renderStats(stats) {
  * Inicializa a página de detalhes
  */
 async function init() {
+  ui.init();
   const backBtn = document.getElementById('back-btn');
   if (backBtn) {
     backBtn.addEventListener('click', () => history.back());
@@ -779,23 +790,63 @@ async function setupFavoriteButton(pokemonId, isFavorite) {
     icon.classList.add('fill-coral', 'text-coral');
   }
 
-  favBtn.onclick = async () => {
+  // Use addEventListener instead of onclick
+  favBtn.addEventListener('click', async () => {
+    const isFavorited = icon.classList.contains('fill-coral');
+    
+    // Optimistic Update
+    if (isFavorited) {
+      icon.classList.remove('fill-coral', 'text-coral');
+    } else {
+      icon.classList.add('fill-coral', 'text-coral');
+    }
+
     try {
-      const response = await api.post('/favorites', { pokemonId });
-      
-      if (response.success) {
-        icon.classList.add('fill-coral', 'text-coral');
+      let response;
+      if (isFavorited) {
+        response = await api.delete(`/favorites/${pokemonId}`);
       } else {
-        // Tenta remover se já for favorito
-        const deleteRes = await api.delete(`/favorites/${pokemonId}`);
-        if (deleteRes.success) {
+        response = await api.post('/favorites', { pokemonId });
+      }
+      
+      if (response.isUnauthorized) {
+        // Revert
+        if (isFavorited) {
+          icon.classList.add('fill-coral', 'text-coral');
+        } else {
           icon.classList.remove('fill-coral', 'text-coral');
         }
+        ui.showNotification('Faça login para favoritar Pokémon', 'error');
+        return;
+      }
+
+      if (response.success) {
+        ui.showNotification(isFavorited ? 'Removido dos favoritos!' : 'Adicionado aos favoritos!', 'success');
+        
+        // Dispatch event for other views to update (like the grid)
+        document.dispatchEvent(new CustomEvent('favoriteChanged', { 
+            detail: { id: pokemonId, isFavorited: !isFavorited } 
+        }));
+      } else {
+        // Revert
+        if (isFavorited) {
+          icon.classList.add('fill-coral', 'text-coral');
+        } else {
+          icon.classList.remove('fill-coral', 'text-coral');
+        }
+        ui.showNotification(response.message || 'Erro ao atualizar favoritos', 'error');
       }
     } catch (error) {
-      console.error('Erro ao favoritar:', error);
+      console.error('Error toggling favorite:', error);
+      // Revert
+      if (isFavorited) {
+        icon.classList.add('fill-coral', 'text-coral');
+      } else {
+        icon.classList.remove('fill-coral', 'text-coral');
+      }
+      ui.showNotification('Erro de conexão com o servidor', 'error');
     }
-  };
+  });
 }
 
 // Inicializar quando o DOM estiver pronto
