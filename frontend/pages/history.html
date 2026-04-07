@@ -37,6 +37,10 @@
                         <i data-lucide="home" class="w-5 h-5"></i>
                         Dashboard
                     </a>
+                    <a href="advanced-search.html" class="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-600 hover:bg-black/5 hover:text-gray-900 transition-all">
+                        <i data-lucide="search" class="w-5 h-5"></i>
+                        Busca Avançada
+                    </a>
                     <a href="favorites.html" class="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-600 hover:bg-black/5 hover:text-gray-900 transition-all">
                         <i data-lucide="heart" class="w-5 h-5"></i>
                         Favorites
@@ -89,7 +93,7 @@
             </header>
 
             <!-- History Content -->
-            <div class="p-6 space-y-8 max-w-7xl mx-auto w-full animate-fade-in-scale">
+            <div class="p-6 space-y-8 max-w-7xl mx-auto w-full animate-fade-in-scale history-content-area">
                 <!-- Header -->
                 <div class="space-y-1">
                     <h1 class="text-3xl font-quicksand font-bold text-gray-800">Histórico</h1>
@@ -97,7 +101,7 @@
                 </div>
 
                 <!-- Empty State -->
-                <div class="flex flex-col items-center justify-center py-20 text-center space-y-6">
+                <div class="flex flex-col items-center justify-center py-20 text-center space-y-6 history-empty-state">
                     <div class="w-32 h-32 bg-white rounded-full flex items-center justify-center shadow-sm border border-black/5 text-coral/20">
                         <i data-lucide="clock" class="w-16 h-16 fill-current"></i>
                     </div>
@@ -116,6 +120,6 @@
     </div>
 
     <!-- Scripts -->
-    <script type="module" src="../js/main.js"></script>
+    <script type="module" src="../js/history.js"></script>
 </body>
 </html>

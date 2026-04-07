@@ -69,10 +69,182 @@ const DAMAGE_CLASS_LABELS = {
 };
 
 let audio = null;
+let statsChart = null;
 let movesExpanded = false; 
 let currentFilter = 'all'; 
 let allMoves = []; 
 let totalMovesCount = 0; 
+
+/**
+ * Renderiza o gráfico de radar das estatísticas
+ */
+function renderRadarChart(stats) {
+  const ctx = document.getElementById('stats-radar-chart');
+  if (!ctx) return;
+
+  if (statsChart) {
+    statsChart.destroy();
+  }
+
+  const labels = stats.map(s => s.label);
+  const values = stats.map(s => s.value);
+
+  statsChart = new Chart(ctx, {
+    type: 'radar',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: 'Base Stats',
+        data: values,
+        backgroundColor: 'rgba(255, 122, 122, 0.2)',
+        borderColor: 'rgba(255, 122, 122, 1)',
+        borderWidth: 2,
+        pointBackgroundColor: 'rgba(255, 122, 122, 1)',
+        pointBorderColor: '#fff',
+        pointHoverBackgroundColor: '#fff',
+        pointHoverBorderColor: 'rgba(255, 122, 122, 1)'
+      }]
+    },
+    options: {
+      scales: {
+        r: {
+          angleLines: { display: true },
+          suggestedMin: 0,
+          suggestedMax: 150,
+          ticks: { display: false }
+        }
+      },
+      plugins: {
+        legend: { display: false }
+      }
+    }
+  });
+}
+
+/**
+ * Alterna entre visualização de barra e radar
+ */
+function setupStatsToggle(stats) {
+  const barBtn = document.getElementById('stats-bar-btn');
+  const radarBtn = document.getElementById('stats-radar-btn');
+  const barView = document.getElementById('stats-bar-view');
+  const radarView = document.getElementById('stats-radar-view');
+
+  if (!barBtn || !radarBtn) return;
+
+  barBtn.onclick = () => {
+    barBtn.classList.add('bg-white', 'shadow-sm', 'text-coral');
+    barBtn.classList.remove('text-gray-400');
+    radarBtn.classList.remove('bg-white', 'shadow-sm', 'text-coral');
+    radarBtn.classList.add('text-gray-400');
+    
+    barView.classList.remove('hidden');
+    radarView.classList.add('hidden');
+  };
+
+  radarBtn.onclick = () => {
+    radarBtn.classList.add('bg-white', 'shadow-sm', 'text-coral');
+    radarBtn.classList.remove('text-gray-400');
+    barBtn.classList.remove('bg-white', 'shadow-sm', 'text-coral');
+    barBtn.classList.add('text-gray-400');
+    
+    radarView.classList.remove('hidden');
+    barView.classList.add('hidden');
+    
+    renderRadarChart(stats);
+  };
+}
+
+/**
+ * Busca a cadeia de evolução com requisitos detalhados
+ */
+async function fetchEvolutionChain(pokemonId) {
+  try {
+    const speciesRes = await fetch(`https://pokeapi.co/api/v2/pokemon-species/${pokemonId}`);
+    const speciesData = await speciesRes.json();
+    const evoRes = await fetch(speciesData.evolution_chain.url);
+    const evoData = await evoRes.json();
+
+    const stages = [];
+    function walk(chain) {
+      const id = parseInt(chain.species.url.split('/').filter(Boolean).pop());
+      const details = chain.evolution_details?.[0];
+      
+      let condition = null;
+      if (details) {
+        if (details.min_level) condition = `Nível ${details.min_level}`;
+        else if (details.item) condition = `Usar ${details.item.name.replace(/-/g, ' ')}`;
+        else if (details.trigger?.name === 'trade') condition = `Troca`;
+        else if (details.held_item) condition = `Segurando ${details.held_item.name.replace(/-/g, ' ')}`;
+        else if (details.location) condition = `Em ${details.location.name.replace(/-/g, ' ')}`;
+        else if (details.known_move) condition = `Conhecendo ${details.known_move.name.replace(/-/g, ' ')}`;
+        else if (details.min_happiness) condition = `Felicidade`;
+      }
+
+      stages.push({
+        id,
+        name: chain.species.name,
+        image: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`,
+        condition
+      });
+
+      if (chain.evolves_to && chain.evolves_to.length > 0) {
+        chain.evolves_to.forEach(walk);
+      }
+    }
+
+    walk(evoData.chain);
+    return stages;
+  } catch (error) {
+    console.error('Erro ao buscar cadeia de evolução:', error);
+    return [];
+  }
+}
+
+/**
+ * Renderiza a cadeia de evolução
+ */
+async function renderEvolutionChain(pokemonId) {
+  const container = document.querySelector('.evolution-chain');
+  if (!container) return;
+
+  container.innerHTML = '<div class="w-8 h-8 border-4 border-coral/20 border-t-coral rounded-full animate-spin"></div>';
+
+  const stages = await fetchEvolutionChain(pokemonId);
+
+  if (stages.length <= 1) {
+    container.innerHTML = '<p class="text-sm text-gray-500 py-4">Este Pokémon não possui evoluções.</p>';
+    return;
+  }
+
+  container.innerHTML = stages.map((stage, i) => {
+    const isCurrent = stage.id === pokemonId;
+    const arrow = i < stages.length - 1 ? `
+      <div class="flex flex-col items-center gap-1 px-2">
+        <span class="text-gray-300 text-xl">→</span>
+        ${stages[i+1].condition ? `
+          <span class="text-[10px] font-bold text-coral bg-coral/5 px-2 py-0.5 rounded-full whitespace-nowrap">
+            ${stages[i+1].condition}
+          </span>
+        ` : ''}
+      </div>
+    ` : '';
+
+    return `
+      <div class="flex items-center">
+        <a href="details.html?id=${stage.id}" 
+           class="flex flex-col items-center gap-1.5 p-3 rounded-2xl transition-all hover:scale-105
+                  ${isCurrent ? 'bg-coral/10 ring-2 ring-coral/30' : 'hover:bg-gray-100'}">
+          <div class="h-16 w-16 flex items-center justify-center">
+            <img src="${stage.image}" alt="${stage.name}" class="h-14 w-14 object-contain">
+          </div>
+          <span class="font-display font-bold text-[10px] capitalize text-gray-800">${stage.name}</span>
+        </a>
+        ${arrow}
+      </div>
+    `;
+  }).join('');
+}
 
 /**
  * Busca detalhes de uma habilidade
@@ -126,114 +298,6 @@ async function renderAbilities(abilities) {
   );
 
   container.innerHTML = abilitiesHtml.join('');
-}
-
-/**
- * Busca a cadeia de evolução
- */
-async function fetchEvolutionChain(pokemonId) {
-  try {
-    // 1. Buscar species para pegar URL da cadeia
-    const speciesRes = await fetch(`https://pokeapi.co/api/v2/pokemon-species/${pokemonId}`);
-    const speciesData = await speciesRes.json();
-
-    // 2. Buscar cadeia de evolução
-    const evoRes = await fetch(speciesData.evolution_chain.url);
-    const evoData = await evoRes.json();
-
-    // 3. Extrair estágios recursivamente
-    const stages = [];
-
-    function extractId(url) {
-      const parts = url.replace(/\/$/, '').split('/');
-      return parseInt(parts[parts.length - 1]);
-    }
-
-    function walk(chain) {
-      const speciesId = extractId(chain.species.url);
-      const details = chain.evolution_details?.[0];
-
-      stages.push({
-        id: speciesId,
-        name: chain.species.name,
-        image: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${speciesId}.png`,
-        minLevel: details?.min_level || null,
-        trigger: details?.trigger?.name || null,
-        item: details?.item?.name || details?.held_item?.name || null
-      });
-
-      if (chain.evolves_to && chain.evolves_to.length > 0) {
-        chain.evolves_to.forEach(walk);
-      }
-    }
-
-    walk(evoData.chain);
-    return stages;
-  } catch (error) {
-    console.error('Error fetching evolution chain:', error);
-    return [];
-  }
-}
-
-/**
- * Renderiza a cadeia de evolução
- */
-async function renderEvolutionChain(pokemonId) {
-  const container = document.querySelector('.evolution-chain');
-  if (!container) return;
-
-  container.innerHTML = '<div class="w-8 h-8 border-4 border-coral/20 border-t-coral rounded-full animate-spin"></div>';
-
-  const stages = await fetchEvolutionChain(pokemonId);
-
-  if (stages.length <= 1) {
-    container.innerHTML = `
-      <p class="text-sm text-gray-500 text-center py-4"> 
-        Este Pokémon não evolui. 
-      </p>`;
-    return;
-  }
-
-  container.innerHTML = stages.map((stage, i) => {
-    const isCurrent = stage.id === pokemonId;
-    const nextStage = stages[i + 1];
-
-    const stageHtml = `
-      <a href="details.html?id=${stage.id}" 
-         class="flex flex-col items-center gap-1.5 p-3 rounded-2xl transition-colors 
-                ${isCurrent 
-                  ? 'bg-coral/10 ring-2 ring-coral/30' 
-                  : 'hover:bg-gray-100'} 
-                opacity-0 animate-fade-slide-up" 
-         style="animation-delay: ${0.7 + i * 0.15}s"> 
-        <div class="h-20 w-20 rounded-full flex items-center justify-center 
-                    ${isCurrent ? 'bg-coral/5' : 'bg-gray-100/50'}"> 
-          <img src="${stage.image}" alt="${stage.name}" 
-               class="h-16 w-16 object-contain drop-shadow-md"> 
-        </div> 
-        <span class="font-display font-bold text-xs capitalize text-gray-800"> 
-          ${stage.name} 
-        </span> 
-        <span class="text-[10px] text-gray-400"> 
-          #${String(stage.id).padStart(3, '0')} 
-        </span> 
-      </a>`;
-
-    const arrowHtml = (i < stages.length - 1) ? ` 
-      <div class="flex flex-col items-center gap-0.5 px-1"> 
-        <span class="text-gray-400">→</span> 
-        ${nextStage?.minLevel ? ` 
-          <span class="text-[10px] text-gray-400 font-medium"> 
-            Lv.${nextStage.minLevel} 
-          </span>` : ''} 
-        ${nextStage?.item ? ` 
-          <span class="text-[10px] text-gray-400 font-medium capitalize"> 
-            ${nextStage.item.replace(/-/g, ' ')} 
-          </span>` : ''} 
-      </div>` : '';
-
-    return stageHtml + arrowHtml;
-  }).join('');
 }
 
 /**
@@ -355,7 +419,7 @@ function renderMoveTable() {
         ${m.level > 0 ? `<span class="text-xs text-gray-400 ml-1">Lv.${m.level}</span>` : ''} 
       </td> 
       <td class="py-2"> 
-        ${m.type ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-type-${m.type} text-white shadow-sm border border-black/5">${m.type}</span>` : ''} 
+        ${m.type ? `<span class="type-badge type-badge-sm bg-type-${m.type}">${m.type}</span>` : ''} 
       </td> 
       <td class="py-2 text-center font-display font-bold text-gray-800"> 
         ${m.power ?? '—'} 
@@ -457,6 +521,33 @@ async function renderGameVersions(pokemonId) {
 }
 
 /**
+ * Renderiza as variedades/formas do Pokémon
+ */
+function renderVarieties(pokemon) {
+  const container = document.querySelector('.varieties-container');
+  if (!container) return;
+
+  if (!pokemon.varieties || pokemon.varieties.length <= 1) {
+    container.parentElement.classList.add('hidden');
+    return;
+  }
+
+  container.parentElement.classList.remove('hidden');
+  container.innerHTML = pokemon.varieties.map(v => {
+    const isCurrent = v.id === pokemon.id;
+    return `
+      <a href="details.html?id=${v.id}" 
+         class="px-4 py-2 rounded-xl text-xs font-bold border transition-all 
+                ${isCurrent 
+                  ? 'bg-coral text-white border-coral shadow-md active' 
+                  : 'bg-white text-gray-500 border-black/5 hover:bg-black/5'}">
+        ${v.name.replace(pokemon.name + '-', '').replace('-', ' ') || 'Normal'}
+      </a>
+    `;
+  }).join('');
+}
+
+/**
  * Toca o áudio do Pokémon com feedback visual
  */
 function playCry(url) {
@@ -499,7 +590,7 @@ function renderStats(stats) {
   const maxVal = Math.max(...stats.map(s => s.value));
   const minVal = Math.min(...stats.map(s => s.value));
   
-  const statsContainer = document.querySelector('.stats');
+  const statsContainer = document.getElementById('stats-bar-view');
   if (!statsContainer) return;
 
   statsContainer.innerHTML = stats.map((s, i) => {
@@ -538,6 +629,11 @@ function renderStats(stats) {
  * Inicializa a página de detalhes
  */
 async function init() {
+  const backBtn = document.getElementById('back-btn');
+  if (backBtn) {
+    backBtn.addEventListener('click', () => history.back());
+  }
+
   // Initialize Lucide icons
   if (window.lucide) {
     lucide.createIcons();
@@ -566,6 +662,8 @@ async function init() {
       height: data.height,
       weight: data.weight,
       abilities: data.abilities || [],
+      flavor_text: data.flavor_text || '',
+      varieties: data.varieties || [],
       stats: data.stats.map(s => ({ 
         label: STAT_LABELS[s.name] || s.name, 
         value: s.value 
@@ -580,10 +678,19 @@ async function init() {
     document.querySelector('.pokemon-title').textContent = pokemon.name;
     document.querySelector('.pokemon-image').src = pokemon.image_url;
     document.querySelector('.pokemon-image').alt = pokemon.name;
+
+    // Flavor Text
+    const flavorTextContainer = document.querySelector('.flavor-text');
+    if (flavorTextContainer) {
+      flavorTextContainer.textContent = pokemon.flavor_text ? `"${pokemon.flavor_text}"` : '';
+    }
+
+    // Varieties Selector
+    renderVarieties(pokemon);
     
     // Types
     document.querySelector('.types').innerHTML = pokemon.types.map(type => `
-      <span class="type-pill bg-type-${type} text-white shadow-sm border border-black/5 capitalize">
+      <span class="type-badge type-badge-md bg-type-${type}">
         ${type}
       </span>
     `).join('');
@@ -593,33 +700,115 @@ async function init() {
     document.querySelector('.weight-value').textContent = `${pokemon.weight / 10} kg`;
 
     // Abilities (Detailed)
-    renderAbilities(pokemon.abilities);
+    try {
+      await renderAbilities(pokemon.abilities);
+    } catch (e) {
+      console.error('Erro ao renderizar habilidades:', e);
+    }
 
     // Evolution Chain
-    renderEvolutionChain(pokemon.id);
+    try {
+      await renderEvolutionChain(pokemon.id);
+    } catch (e) {
+      console.error('Erro ao renderizar evolução:', e);
+    }
 
     // Moves
-    renderMoves(pokemon.id);
+    try {
+      await renderMoves(pokemon.id);
+    } catch (e) {
+      console.error('Erro ao renderizar movimentos:', e);
+    }
 
     // Game Versions
-    renderGameVersions(pokemon.id);
+    try {
+      await renderGameVersions(pokemon.id);
+    } catch (e) {
+      console.error('Erro ao renderizar versões:', e);
+    }
 
     // Stats
-    renderStats(pokemon.stats);
+    try {
+      renderStats(pokemon.stats);
+      setupStatsToggle(pokemon.stats);
+    } catch (e) {
+      console.error('Erro ao renderizar stats:', e);
+    }
+
+    // Favorite Button Logic
+    setupFavoriteButton(pokemon.id, data.is_favorite);
 
     // Cry button
     const cryBtn = document.querySelector('.cry-btn');
-    cryBtn.addEventListener('click', () => playCry(pokemon.cry_url));
+    if (cryBtn) {
+      cryBtn.addEventListener('click', () => playCry(pokemon.cry_url));
+    }
 
     // Initialize icons
     if (window.lucide) lucide.createIcons();
 
+    // Hide loading overlay
+    const overlay = document.getElementById('loading-overlay');
+    if (overlay) {
+      overlay.classList.add('opacity-0');
+      setTimeout(() => overlay.remove(), 500);
+    }
+
   } catch (error) {
-    console.error('Erro ao carregar detalhes:', error);
+    console.error('Erro crítico no init:', error);
+    
+    // Hide loading overlay on error too
+    const overlay = document.getElementById('loading-overlay');
+    if (overlay) overlay.remove();
+
     alert('Erro ao carregar detalhes do Pokémon.');
-    window.location.href = 'dashboard.html';
+    // window.location.href = 'dashboard.html';
   }
 }
 
+/**
+ * Configura o botão de favoritos
+ */
+async function setupFavoriteButton(pokemonId, isFavorite) {
+  const favBtn = document.getElementById('favorite-btn');
+  if (!favBtn) return;
+
+  const icon = favBtn.querySelector('i');
+  
+  if (isFavorite) {
+    icon.classList.add('fill-coral', 'text-coral');
+  }
+
+  favBtn.onclick = async () => {
+    try {
+      const response = await api.post('/favorites', { pokemonId });
+      
+      if (response.success) {
+        icon.classList.add('fill-coral', 'text-coral');
+      } else {
+        // Tenta remover se já for favorito
+        const deleteRes = await api.delete(`/favorites/${pokemonId}`);
+        if (deleteRes.success) {
+          icon.classList.remove('fill-coral', 'text-coral');
+        }
+      }
+    } catch (error) {
+      console.error('Erro ao favoritar:', error);
+    }
+  };
+}
+
 // Inicializar quando o DOM estiver pronto
-document.addEventListener('DOMContentLoaded', init);
+document.addEventListener('DOMContentLoaded', () => {
+  init();
+  
+  // Logout logic
+  const logoutBtn = document.getElementById('logout-btn');
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', () => {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      window.location.href = 'login.html';
+    });
+  }
+});

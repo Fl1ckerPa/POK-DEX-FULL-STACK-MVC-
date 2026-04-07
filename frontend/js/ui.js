@@ -33,8 +33,53 @@ const ui = {
             grid.appendChild(card);
         });
 
+        // Setup global listener for favorites on this grid (delegated)
+        if (!grid.dataset.favListener) {
+            grid.addEventListener('click', async (e) => {
+                const favBtn = e.target.closest('.favorite-btn');
+                if (favBtn) {
+                    e.stopPropagation();
+                    const id = favBtn.dataset.id;
+                    await this.toggleFavorite(id, favBtn);
+                }
+            });
+            grid.dataset.favListener = 'true';
+        }
+
         // Initialize Lucide icons for the new cards
         if (window.lucide) lucide.createIcons();
+    },
+
+    /**
+     * Alterna o estado de favorito de um Pokémon
+     * @param {number|string} id - ID do Pokémon
+     * @param {HTMLElement} btn - Elemento do botão
+     */
+    async toggleFavorite(id, btn) {
+        try {
+            const response = await api.post('/favorites', { pokemonId: id });
+            const icon = btn.querySelector('i');
+            
+            if (response.success) {
+                // Adicionado
+                icon.classList.add('fill-coral', 'text-coral');
+                btn.classList.add('opacity-100', 'shadow-md');
+                this.showNotification('Adicionado aos favoritos!', 'success');
+            } else {
+                // Se falhou ao adicionar, tenta remover (toggle)
+                const deleteRes = await api.delete(`/favorites/${id}`);
+                if (deleteRes.success) {
+                    icon.classList.remove('fill-coral', 'text-coral');
+                    btn.classList.remove('opacity-100', 'shadow-md');
+                    this.showNotification('Removido dos favoritos!', 'info');
+                } else {
+                    this.showNotification(response.message || 'Erro ao atualizar favoritos', 'error');
+                }
+            }
+        } catch (error) {
+            console.error('Error toggling favorite:', error);
+            this.showNotification('Faça login para favoritar Pokémon', 'error');
+        }
     },
 
     /**
@@ -55,7 +100,7 @@ const ui = {
         // Type badges
         const types = pokemon.types || [];
         const typeBadges = types.map(type => `
-            <span class="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-type-${type} text-white shadow-sm border border-black/5">
+            <span class="type-badge type-badge-sm bg-type-${type}">
                 ${type}
             </span>
         `).join('');
@@ -237,10 +282,37 @@ const ui = {
                             <h2 class="text-3xl font-quicksand font-bold text-gray-800 capitalize">${pokemon.name}</h2>
                             <div class="flex justify-center gap-2">
                                 ${pokemon.types.map(type => `
-                                    <span class="type-pill bg-type-${type} text-white shadow-sm capitalize">${type}</span>
+                                    <span class="type-badge type-badge-md bg-type-${type}">${type}</span>
                                 `).join('')}
                             </div>
                         </div>
+
+                        <!-- Flavor Text -->
+                        ${pokemon.flavor_text ? `
+                            <p class="text-center italic text-gray-500 text-sm leading-relaxed px-4 max-w-md">
+                                "${pokemon.flavor_text}"
+                            </p>
+                        ` : ''}
+
+                        <!-- Varieties Selector -->
+                        ${pokemon.varieties && pokemon.varieties.length > 1 ? `
+                            <div class="w-full space-y-3">
+                                <h4 class="font-quicksand font-bold text-gray-800 text-center">Formas & Variedades</h4>
+                                <div class="flex flex-wrap justify-center gap-2">
+                                    ${pokemon.varieties.map(v => `
+                                        <button 
+                                            class="variety-btn px-4 py-2 rounded-xl text-xs font-bold border transition-all 
+                                                   ${v.name === pokemon.name 
+                                                     ? 'bg-coral text-white border-coral shadow-md' 
+                                                     : 'bg-white text-gray-500 border-black/5 hover:bg-black/5'}"
+                                            data-id="${v.id}"
+                                        >
+                                            ${v.name.replace(pokemon.name + '-', '').replace('-', ' ') || 'Normal'}
+                                        </button>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        ` : ''}
                     </div>
 
                     <!-- Stats Grid (Height/Weight) -->
@@ -334,6 +406,14 @@ const ui = {
                 bar.style.width = bar.dataset.width;
             });
         }, 100);
+
+        // Varieties switching logic
+        overlay.querySelectorAll('.variety-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const id = e.currentTarget.dataset.id;
+                this.showPokemonDetails(id);
+            });
+        });
 
         // Add event listeners for navigation
         overlay.querySelector('.nav-prev').addEventListener('click', (e) => {

@@ -5,38 +5,71 @@ const db = require('../config/database');
  */
 class Pokemon {
     /**
-     * Busca todos os Pokémon com paginação e busca opcional.
+     * Busca todos os Pokémon com paginação e múltiplos filtros.
      * @param {number} page - Número da página.
      * @param {number} limit - Limite de resultados por página.
-     * @param {string} search - Termo de busca (nome ou ID).
-     * @returns {Promise<Object>} Um objeto contendo a lista de Pokémon e o total.
+     * @param {string} search - Termo de busca.
+     * @param {Array<Object>} regions - Lista de objetos {start, end}.
+     * @param {Array<string>} types - Lista de tipos.
+     * @returns {Promise<Object>}
      */
-    static async findAll(page = 1, limit = 20, search = '') {
+    static async findAll(page = 1, limit = 20, search = '', regions = [], types = []) {
         try {
             const offset = (page - 1) * limit;
             let query = 'SELECT * FROM pokemons';
             let countQuery = 'SELECT COUNT(*) as total FROM pokemons';
             const params = [];
             const countParams = [];
+            const conditions = [];
 
             if (search) {
                 const isIdSearch = !isNaN(search) && search.trim() !== '';
                 if (isIdSearch) {
-                    query += ' WHERE pokemon_id = ?';
-                    countQuery += ' WHERE pokemon_id = ?';
+                    conditions.push('pokemon_id = ?');
                     params.push(parseInt(search));
                     countParams.push(parseInt(search));
                 } else {
+                    conditions.push('name LIKE ?');
                     const searchStr = `%${search}%`;
-                    query += ' WHERE name LIKE ?';
-                    countQuery += ' WHERE name LIKE ?';
                     params.push(searchStr);
                     countParams.push(searchStr);
                 }
             }
 
-            query += ' ORDER BY pokemon_id ASC LIMIT ? OFFSET ?';
-            params.push(parseInt(limit), parseInt(offset));
+            // Suporte a múltiplas regiões
+            if (regions && regions.length > 0) {
+                const regionConditions = regions.map(() => '(pokemon_id BETWEEN ? AND ?)').join(' OR ');
+                conditions.push(`(${regionConditions})`);
+                regions.forEach(r => {
+                    params.push(parseInt(r.start), parseInt(r.end));
+                    countParams.push(parseInt(r.start), parseInt(r.end));
+                });
+            }
+
+            // Suporte a múltiplos tipos (OR logic entre os tipos selecionados)
+            if (types && types.length > 0) {
+                const typeConditions = types.map(() => 'JSON_CONTAINS(types_json, CAST(? AS JSON))').join(' OR ');
+                conditions.push(`(${typeConditions})`);
+                types.forEach(t => {
+                    const typeJson = `"${t}"`;
+                    params.push(typeJson);
+                    countParams.push(typeJson);
+                });
+            }
+
+            if (conditions.length > 0) {
+                const whereClause = ' WHERE ' + conditions.join(' AND ');
+                query += whereClause;
+                countQuery += whereClause;
+            }
+
+            query += ' ORDER BY pokemon_id ASC';
+            
+            // Só aplica LIMIT se não for busca avançada sem limite (limit = -1)
+            if (limit !== -1) {
+                query += ' LIMIT ? OFFSET ?';
+                params.push(parseInt(limit), parseInt(offset));
+            }
 
             const [rows] = await db.query(query, params);
             const [countResult] = await db.query(countQuery, countParams);
@@ -58,13 +91,18 @@ class Pokemon {
                 ...row,
                 id: row.pokemon_id,
                 types: safeParse(row.types_json) || [row.type],
-                abilities: safeParse(row.abilities) || []
+                abilities: safeParse(row.abilities) || [],
+                flavor_text: row.flavor_text || '',
+                varieties: safeParse(row.varieties_json) || []
             }));
+
+            const total = countResult[0].total;
+            const totalPages = limit === -1 ? 1 : Math.ceil(total / limit);
 
             return {
                 data: formattedRows,
-                total: countResult[0].total,
-                totalPages: Math.ceil(countResult[0].total / limit)
+                total: total,
+                totalPages: totalPages
             };
         } catch (error) {
             console.error(`Erro ao buscar lista de Pokémon no banco:`, error.message);
@@ -116,7 +154,7 @@ class Pokemon {
     static async create(pokemonData) {
         try {
             const {
-                id, name, types, height, weight, base_experience, sprites, stats, abilities
+                id, name, types, height, weight, base_experience, sprites, stats, abilities, flavor_text, varieties
             } = pokemonData;
 
             const hp = stats.find(s => s.name === 'hp')?.value || 0;
@@ -132,13 +170,13 @@ class Pokemon {
                     image_url, front_default_url, back_default_url,
                     stats_hp, stats_attack, stats_defense, 
                     stats_sp_attack, stats_sp_defense, stats_speed, 
-                    abilities, types_json
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                    abilities, types_json, flavor_text, varieties_json
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
                 [
                     id, name, types[0], height, weight, base_experience,
                     sprites.official_artwork, sprites.front_default, sprites.back_default,
                     hp, attack, defense, sp_attack, sp_defense, speed,
-                    JSON.stringify(abilities), JSON.stringify(types)
+                    JSON.stringify(abilities), JSON.stringify(types), flavor_text, JSON.stringify(varieties)
                 ]
             );
             return result.insertId;
@@ -156,7 +194,7 @@ class Pokemon {
     static async update(pokemonData) {
         try {
             const {
-                id, name, types, height, weight, base_experience, sprites, stats, abilities
+                id, name, types, height, weight, base_experience, sprites, stats, abilities, flavor_text, varieties
             } = pokemonData;
 
             const hp = stats.find(s => s.name === 'hp')?.value || 0;
@@ -172,13 +210,14 @@ class Pokemon {
                     image_url = ?, front_default_url = ?, back_default_url = ?,
                     stats_hp = ?, stats_attack = ?, stats_defense = ?, 
                     stats_sp_attack = ?, stats_sp_defense = ?, stats_speed = ?, 
-                    abilities = ?, types_json = ?, updated_at = CURRENT_TIMESTAMP
+                    abilities = ?, types_json = ?, flavor_text = ?, varieties_json = ?, 
+                    updated_at = CURRENT_TIMESTAMP
                 WHERE pokemon_id = ?`,
                 [
                     name, types[0], height, weight, base_experience,
                     sprites.official_artwork, sprites.front_default, sprites.back_default,
                     hp, attack, defense, sp_attack, sp_defense, speed,
-                    JSON.stringify(abilities), JSON.stringify(types), id
+                    JSON.stringify(abilities), JSON.stringify(types), flavor_text, JSON.stringify(varieties), id
                 ]
             );
             return result.affectedRows > 0;

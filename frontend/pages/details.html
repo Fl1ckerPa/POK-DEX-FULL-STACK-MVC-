@@ -12,6 +12,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <!-- Tailwind Config -->
   <script src="../js/tailwind-config.js"></script>
   <!-- Styles -->
@@ -19,127 +21,220 @@
   <link rel="stylesheet" href="../css/animations.css">
 </head> 
 <body class="bg-cream min-h-screen font-body text-gray-800"> 
- 
-  <header class="sticky top-0 z-20 bg-cream/80 backdrop-blur-md 
-                 border-b border-gray-200 px-4 py-3 flex items-center gap-3"> 
-    <button onclick="history.back()" class="p-2 rounded-full hover:bg-gray-200 transition-colors"> 
-      <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"> 
-        <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/> 
-      </svg> 
-    </button> 
-    <span class="font-display font-bold text-gray-400 pokemon-number"></span> 
-    <h1 class="font-display font-bold text-lg capitalize pokemon-name"></h1> 
-    <button id="favorite-btn" class="p-2 rounded-full hover:bg-gray-200 transition-colors ml-auto favorite-btn">
-      <i data-lucide="heart" class="w-6 h-6 text-gray-400"></i>
-    </button>
-  </header> 
- 
-  <main class="max-w-2xl mx-auto px-4 pt-6 pb-12 space-y-6"> 
-    <!-- Hero --> 
-    <section class="glass-card p-8 text-center opacity-0 animate-fade-slide-up delay-100"> 
-      <div class="h-56 w-56 mx-auto rounded-full bg-gray-100 flex items-center justify-center"> 
-        <img class="h-48 w-48 object-contain drop-shadow-xl pokemon-image" src="" alt=""> 
-      </div> 
-      <h2 class="font-display font-bold text-3xl capitalize mt-4 pokemon-title"></h2> 
-      <div class="flex justify-center gap-2 mt-3 types"></div> 
-      <div class="mt-5"> 
-        <button class="cry-btn rounded-full h-12 px-8 font-display font-bold 
-                       bg-[#4FD1C5] hover:bg-[#38B2AC] text-white shadow-lg shadow-teal-500/20
-                       transition-all inline-flex items-center gap-2 active:scale-95"> 
-          <span class="cry-icon-container">
-            <i data-lucide="volume-2" class="w-5 h-5"></i>
-          </span> 
-          <span class="cry-text">Ouvir Som</span> 
+  <div id="app" class="flex min-h-screen">
+    <!-- Sidebar -->
+    <aside class="w-64 bg-white/50 backdrop-blur-md border-r border-black/5 flex-col hidden md:flex sticky top-0 h-screen">
+        <div class="p-6">
+            <div class="flex items-center gap-3 text-coral mb-8">
+                <div class="w-10 h-10 bg-coral rounded-xl flex items-center justify-center text-white">
+                    <i data-lucide="zap" class="w-6 h-6"></i>
+                </div>
+                <span class="font-quicksand font-bold text-xl text-gray-800">Pokédex</span>
+            </div>
+            
+            <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4 px-4">Menu</p>
+
+            <nav class="space-y-2">
+                <a href="dashboard.html" class="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-600 hover:bg-black/5 hover:text-gray-900 transition-all">
+                    <i data-lucide="home" class="w-5 h-5"></i>
+                    Dashboard
+                </a>
+                <a href="advanced-search.html" class="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-600 hover:bg-black/5 hover:text-gray-900 transition-all">
+                    <i data-lucide="search" class="w-5 h-5"></i>
+                    Busca Avançada
+                </a>
+                <a href="favorites.html" class="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-600 hover:bg-black/5 hover:text-gray-900 transition-all">
+                    <i data-lucide="heart" class="w-5 h-5"></i>
+                    Favorites
+                </a>
+                <a href="team.html" class="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-600 hover:bg-black/5 hover:text-gray-900 transition-all">
+                    <i data-lucide="users" class="w-5 h-5"></i>
+                    Teams
+                </a>
+                <a href="history.html" class="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-600 hover:bg-black/5 hover:text-gray-900 transition-all">
+                    <i data-lucide="clock" class="w-5 h-5"></i>
+                    History
+                </a>
+                <a href="profile.html" class="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-600 hover:bg-black/5 hover:text-gray-900 transition-all">
+                    <i data-lucide="user" class="w-5 h-5"></i>
+                    Profile
+                </a>
+            </nav>
+        </div>
+        
+        <div class="mt-auto p-6 border-t border-black/5">
+            <button id="logout-btn" class="flex items-center gap-3 px-4 py-3 w-full rounded-xl text-red-500 hover:bg-red-50 transition-all font-semibold">
+                <i data-lucide="log-out" class="w-5 h-5"></i>
+                Sair
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col min-w-0 overflow-y-auto">
+      <!-- Loading Overlay -->
+      <div id="loading-overlay" class="fixed inset-0 z-50 bg-cream flex flex-col items-center justify-center transition-opacity duration-500">
+        <div class="w-16 h-16 border-4 border-coral/20 border-t-coral rounded-full animate-spin mb-4"></div>
+        <p class="font-display font-bold text-gray-400 animate-pulse">Carregando Pokédex...</p>
+      </div>
+
+      <header class="sticky top-0 z-20 bg-cream/80 backdrop-blur-md 
+                     border-b border-gray-200 px-4 py-3 flex items-center gap-3"> 
+        <button id="back-btn" class="p-2 rounded-full hover:bg-gray-200 transition-colors"> 
+          <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"> 
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/> 
+          </svg> 
         </button> 
-      </div> 
-    </section> 
- 
-    <!-- Físico --> 
-    <section class="grid grid-cols-2 gap-3 opacity-0 animate-fade-slide-up delay-200"> 
-      <div class="glass-card p-4 text-center"> 
-        <i data-lucide="ruler" class="w-6 h-6 text-coral mx-auto mb-1"></i>
-        <p class="text-xs text-gray-500 font-body">Altura</p> 
-        <p class="font-display font-bold text-xl height-value"></p> 
-      </div> 
-      <div class="glass-card p-4 text-center"> 
-        <i data-lucide="weight" class="w-6 h-6 text-coral mx-auto mb-1"></i>
-        <p class="text-xs text-gray-500 font-body">Peso</p> 
-        <p class="font-display font-bold text-xl weight-value"></p> 
-      </div> 
-    </section> 
- 
-    <!-- Abilities --> 
-    <section class="glass-card p-5 opacity-0 animate-fade-slide-up" style="animation-delay: 0.3s"> 
-      <div class="flex items-center gap-2 mb-4"> 
-        <i data-lucide="sparkles" class="w-5 h-5 text-coral"></i>
-        <h3 class="font-display font-bold text-sm text-gray-500 uppercase tracking-wide"> 
-          Habilidades 
-        </h3> 
-      </div> 
-      <div class="space-y-3 abilities-detailed"></div> 
-    </section> 
- 
-    <!-- Evolution Chain -->
-    <section class="glass-card p-5 opacity-0 animate-fade-slide-up" style="animation-delay: 0.4s"> 
-      <div class="flex items-center gap-2 mb-5"> 
-        <i data-lucide="git-branch" class="w-5 h-5 text-coral"></i>
-        <h3 class="font-display font-bold text-sm text-gray-500 uppercase tracking-wide"> 
-          Cadeia de Evolução 
-        </h3> 
-      </div> 
-      <div class="flex items-center justify-center flex-wrap gap-2 evolution-chain"></div> 
-    </section>
-
-    <!-- Stats --> 
-    <section class="glass-card p-5 opacity-0 animate-fade-slide-up" style="animation-delay: 0.5s"> 
-      <h3 class="font-display font-bold text-sm text-gray-500 mb-4 uppercase tracking-wide">Estatísticas Base</h3> 
-      <div class="space-y-3 stats"></div> 
-      <div class="mt-4 pt-3 border-t border-gray-200 flex justify-between"> 
-        <span class="font-display font-bold text-sm text-gray-500 uppercase tracking-wide">Total</span> 
-        <span class="font-display font-bold text-lg stat-total"></span> 
-      </div> 
-    </section> 
-
-    <!-- Moves -->
-    <section class="glass-card p-5 opacity-0 animate-fade-slide-up" style="animation-delay: 0.6s"> 
-      <div class="flex items-center gap-2 mb-4"> 
-        <i data-lucide="swords" class="w-5 h-5 text-coral"></i>
-        <h3 class="font-display font-bold text-sm text-gray-500 dark:text-gray-400 uppercase tracking-wide"> 
-          Ataques 
-        </h3> 
-        <span class="text-xs text-gray-400 dark:text-gray-500 ml-auto moves-count"></span> 
-      </div> 
+        <span class="font-display font-bold text-gray-400 pokemon-number"></span> 
+        <h1 class="font-display font-bold text-lg capitalize pokemon-name"></h1> 
+        <button id="favorite-btn" class="p-2 rounded-full hover:bg-gray-200 transition-colors ml-auto favorite-btn">
+          <i data-lucide="heart" class="w-6 h-6 text-gray-400"></i>
+        </button>
+      </header> 
      
-      <!-- Filtros --> 
-      <div class="flex flex-wrap gap-1.5 mb-4 moves-filters"></div> 
-     
-      <!-- Tabela --> 
-      <div class="overflow-x-auto"> 
-        <table class="w-full text-sm"> 
-          <thead> 
-            <tr class="border-b border-gray-200 dark:border-gray-700 text-left"> 
-              <th class="pb-2 font-medium text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wide">Ataque</th> 
-              <th class="pb-2 font-medium text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wide">Tipo</th> 
-              <th class="pb-2 font-medium text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wide text-center">Pwr</th> 
-              <th class="pb-2 font-medium text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wide text-center">Acc</th> 
-              <th class="pb-2 font-medium text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wide text-center">PP</th> 
-              <th class="pb-2 font-medium text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wide">Classe</th> 
-            </tr> 
-          </thead> 
-          <tbody class="moves-table-body"></tbody> 
-        </table> 
-      </div> 
-     
-      <!-- Botão expandir --> 
-      <div class="moves-expand-container hidden"> 
-        <button class="moves-expand-btn w-full mt-3 py-2 flex items-center justify-center gap-1 
-                       text-sm font-medium text-coral hover:text-coral/80 transition-colors"> 
-        </button> 
-      </div> 
-    </section>
+      <div class="max-w-2xl mx-auto px-4 pt-6 pb-12 space-y-6 w-full"> 
+        <!-- Hero --> 
+        <section class="glass-card p-8 text-center opacity-0 animate-fade-slide-up delay-100"> 
+          <div class="h-56 w-56 mx-auto rounded-full bg-gray-100 flex items-center justify-center"> 
+            <img class="h-48 w-48 object-contain drop-shadow-xl pokemon-image" src="" alt=""> 
+          </div> 
+          <h2 class="font-display font-bold text-3xl capitalize mt-4 pokemon-title"></h2> 
+          <div class="flex justify-center gap-2 mt-3 types"></div> 
+          
+          <!-- Flavor Text -->
+          <p class="mt-4 italic text-gray-500 text-sm leading-relaxed px-4 max-w-md mx-auto flavor-text"></p>
 
-    <!-- Game Appearances -->
-    <section class="glass-card p-5 opacity-0 animate-fade-slide-up" style="animation-delay: 0.7s"> 
+          <!-- Varieties Selector -->
+          <div class="mt-6 space-y-3 hidden">
+            <h4 class="font-display font-bold text-sm text-gray-400 uppercase tracking-widest">Formas & Variedades</h4>
+            <div class="flex flex-wrap justify-center gap-2 varieties-container"></div>
+          </div>
+
+          <div class="mt-5"> 
+            <button class="cry-btn rounded-full h-12 px-8 font-display font-bold 
+                           bg-[#4FD1C5] hover:bg-[#38B2AC] text-white shadow-lg shadow-teal-500/20
+                           transition-all inline-flex items-center gap-2 active:scale-95"> 
+              <span class="cry-icon-container">
+                <i data-lucide="volume-2" class="w-5 h-5"></i>
+              </span> 
+              <span class="cry-text">Ouvir Som</span> 
+            </button> 
+          </div> 
+        </section> 
+     
+        <!-- Físico --> 
+        <section class="grid grid-cols-2 gap-3 opacity-0 animate-fade-slide-up delay-200"> 
+          <div class="glass-card p-4 text-center"> 
+            <i data-lucide="ruler" class="w-6 h-6 text-coral mx-auto mb-1"></i>
+            <p class="text-xs text-gray-500 font-body">Altura</p> 
+            <p class="font-display font-bold text-xl height-value"></p> 
+          </div> 
+          <div class="glass-card p-4 text-center"> 
+            <i data-lucide="weight" class="w-6 h-6 text-coral mx-auto mb-1"></i>
+            <p class="text-xs text-gray-500 font-body">Peso</p> 
+            <p class="font-display font-bold text-xl weight-value"></p> 
+          </div> 
+        </section> 
+     
+        <!-- Abilities --> 
+        <section class="glass-card p-5 opacity-0 animate-fade-slide-up delay-300"> 
+          <div class="flex items-center gap-2 mb-4"> 
+            <i data-lucide="sparkles" class="w-5 h-5 text-coral"></i>
+            <h3 class="font-display font-bold text-sm text-gray-500 uppercase tracking-wide"> 
+              Habilidades 
+            </h3> 
+          </div> 
+          <div class="space-y-3 abilities-detailed"></div> 
+        </section> 
+     
+        <!-- Evolution Chain -->
+        <section class="glass-card p-5 opacity-0 animate-fade-slide-up delay-400"> 
+          <div class="flex items-center gap-2 mb-5"> 
+            <i data-lucide="git-branch" class="w-5 h-5 text-coral"></i>
+            <h3 class="font-display font-bold text-sm text-gray-500 uppercase tracking-wide"> 
+              Cadeia de Evolução 
+            </h3> 
+          </div> 
+          <div class="flex items-center justify-center flex-wrap gap-2 evolution-chain"></div> 
+        </section>
+
+        <!-- Stats --> 
+        <section class="glass-card p-5 opacity-0 animate-fade-slide-up delay-500"> 
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="font-display font-bold text-sm text-gray-500 uppercase tracking-wide">Estatísticas Base</h3> 
+            <div class="flex bg-gray-100 rounded-xl p-1">
+              <button id="stats-bar-btn" class="p-2 rounded-lg bg-white shadow-sm text-coral transition-all" title="Ver Barras">
+                <i data-lucide="bar-chart-2" class="w-4 h-4"></i>
+              </button>
+              <button id="stats-radar-btn" class="p-2 rounded-lg text-gray-400 hover:text-coral transition-all" title="Ver Radar">
+                <i data-lucide="hexagon" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </div>
+
+          <div id="stats-bar-view" class="space-y-3 stats"></div> 
+          <div id="stats-radar-view" class="hidden py-4">
+            <canvas id="stats-radar-chart" width="400" height="400"></canvas>
+          </div>
+
+          <div class="mt-4 pt-3 border-t border-gray-200 flex justify-between"> 
+            <span class="font-display font-bold text-sm text-gray-500 uppercase tracking-wide">Total</span> 
+            <span class="font-display font-bold text-lg stat-total"></span> 
+          </div> 
+        </section> 
+
+        <!-- Moves -->
+        <section class="glass-card p-5 opacity-0 animate-fade-slide-up delay-600"> 
+          <div class="flex items-center gap-2 mb-4"> 
+            <i data-lucide="swords" class="w-5 h-5 text-coral"></i>
+            <h3 class="font-display font-bold text-sm text-gray-500 dark:text-gray-400 uppercase tracking-wide"> 
+              Ataques 
+            </h3> 
+            <span class="text-xs text-gray-400 dark:text-gray-500 ml-auto moves-count"></span> 
+          </div> 
+         
+          <!-- Filtros --> 
+          <div class="flex flex-wrap gap-1.5 mb-4 moves-filters"></div> 
+         
+          <!-- Tabela --> 
+          <div class="overflow-x-auto"> 
+            <table class="w-full text-sm"> 
+              <thead> 
+                <tr class="border-b border-gray-200 dark:border-gray-700 text-left"> 
+                  <th class="pb-2 font-medium text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wide">Ataque</th> 
+                  <th class="pb-2 font-medium text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wide">Tipo</th> 
+                  <th class="pb-2 font-medium text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wide text-center">Pwr</th> 
+                  <th class="pb-2 font-medium text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wide text-center">Acc</th> 
+                  <th class="pb-2 font-medium text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wide text-center">PP</th> 
+                  <th class="pb-2 font-medium text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wide">Classe</th> 
+                </tr> 
+              </thead> 
+              <tbody class="moves-table-body"></tbody> 
+            </table> 
+          </div> 
+         
+          <!-- Botão expandir --> 
+          <div class="moves-expand-container hidden"> 
+            <button class="moves-expand-btn w-full mt-3 py-2 flex items-center justify-center gap-1 
+                           text-sm font-medium text-coral hover:text-coral/80 transition-colors"> 
+            </button> 
+          </div> 
+        </section>
+
+        <!-- Game Appearances -->
+        <section class="glass-card p-5 opacity-0 animate-fade-slide-up delay-700"> 
+          <div class="flex items-center gap-2 mb-4"> 
+            <i data-lucide="gamepad-2" class="w-5 h-5 text-coral"></i>
+            <h3 class="font-display font-bold text-sm text-gray-500 dark:text-gray-400 uppercase tracking-wide"> 
+              Aparições nos Jogos 
+            </h3> 
+            <span class="text-xs text-gray-400 dark:text-gray-500 ml-auto versions-count"></span> 
+          </div> 
+          <div class="space-y-4 versions-container"></div> 
+        </section>
+      </div>
+    </main> 
+  </div>
       <div class="flex items-center gap-2 mb-4"> 
         <i data-lucide="gamepad-2" class="w-5 h-5 text-coral"></i>
         <h3 class="font-display font-bold text-sm text-gray-500 dark:text-gray-400 uppercase tracking-wide"> 

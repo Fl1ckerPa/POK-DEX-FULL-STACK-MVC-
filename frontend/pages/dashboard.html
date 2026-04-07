@@ -33,9 +33,13 @@
                 <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4 px-4">Menu</p>
 
                 <nav class="space-y-2">
-                    <a href="dashboard.html" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-coral/10 text-coral font-semibold transition-all">
+                    <a href="dashboard.html" class="flex items-center gap-3 px-4 py-3 rounded-xl text-coral bg-coral/10 font-bold transition-all shadow-sm shadow-coral/10">
                         <i data-lucide="home" class="w-5 h-5"></i>
                         Dashboard
+                    </a>
+                    <a href="advanced-search.html" class="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-600 hover:bg-black/5 hover:text-gray-900 transition-all">
+                        <i data-lucide="search" class="w-5 h-5"></i>
+                        Busca Avançada
                     </a>
                     <a href="favorites.html" class="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-600 hover:bg-black/5 hover:text-gray-900 transition-all">
                         <i data-lucide="heart" class="w-5 h-5"></i>
@@ -88,38 +92,9 @@
                 </div>
             </header>
 
-            <!-- Dashboard Content -->
-            <div class="p-6 space-y-8 max-w-7xl mx-auto w-full">
-                <!-- Search Section -->
-                <div class="space-y-4">
-                    <div class="relative w-full">
-                        <i data-lucide="search" class="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"></i>
-                        <input 
-                            type="text" 
-                            id="pokemon-search" 
-                            placeholder="Search Pokémon by name or ID..." 
-                            class="w-full pl-14 pr-6 py-4 bg-white border border-black/5 rounded-2xl shadow-sm focus:outline-none focus:ring-4 focus:ring-coral/10 focus:border-coral transition-all text-gray-800 text-lg placeholder:text-gray-400"
-                        >
-                    </div>
-                    <div class="flex items-center justify-between px-2">
-                        <p class="text-gray-600 font-medium">
-                            <span id="result-count">0</span> Pokémon encontrados
-                        </p>
-                        <div class="flex items-center gap-2">
-                            <!-- Filter buttons could go here -->
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Pokémon Grid -->
-                <div id="pokemon-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6">
-                    <!-- Cards will be injected here -->
-                </div>
-
-                <!-- Pagination -->
-                <div id="pagination" class="flex justify-center items-center gap-2 pt-8 pb-12">
-                    <!-- Pagination buttons will be injected here -->
-                </div>
+            <!-- Dashboard Content (Blank Screen) -->
+            <div class="flex-1 flex items-center justify-center p-6 bg-white">
+                <!-- Conteúdo removido conforme solicitação do usuário -->
             </div>
         </main>
     </div>

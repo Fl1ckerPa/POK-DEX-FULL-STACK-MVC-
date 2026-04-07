@@ -45,7 +45,36 @@ exports.createTeam = async (req, res) => {
     res.status(500).json({ success: false, message: 'Erro ao criar time.' }); 
   } 
 }; 
- 
+
+// PUT /api/teams/:id
+exports.updateTeam = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const teamId = req.params.id;
+    const { name, slots } = req.body;
+
+    // Verificar se o time existe e pertence ao usuário
+    const team = await teamsModel.getTeamById(teamId, userId);
+    if (!team) {
+      return res.status(404).json({ success: false, message: 'Time não encontrado.' });
+    }
+
+    // Validações
+    if (!name || !name.trim()) {
+      return res.status(400).json({ success: false, message: 'Nome do time é obrigatório.' });
+    }
+    if (!slots || !Array.isArray(slots) || slots.length === 0) {
+      return res.status(400).json({ success: false, message: 'Adicione pelo menos um Pokémon.' });
+    }
+
+    await teamsModel.updateTeam(teamId, userId, name.trim(), slots);
+    res.json({ success: true, message: 'Time atualizado com sucesso!' });
+  } catch (error) {
+    console.error('Erro ao atualizar time:', error);
+    res.status(500).json({ success: false, message: 'Erro ao atualizar time.' });
+  }
+};
+
 // DELETE /api/teams/:id 
 exports.deleteTeam = async (req, res) => { 
   try { 
