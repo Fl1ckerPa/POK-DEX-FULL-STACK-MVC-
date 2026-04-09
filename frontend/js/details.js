@@ -784,68 +784,14 @@ async function setupFavoriteButton(pokemonId, isFavorite) {
   const favBtn = document.getElementById('favorite-btn');
   if (!favBtn) return;
 
-  const icon = favBtn.querySelector('i');
-  
-  if (isFavorite) {
-    icon.classList.add('fill-coral', 'text-coral');
-  }
+  // Adicionar data-id para que ui.updatePokemonCardState consiga encontrar este botão
+  favBtn.dataset.id = pokemonId;
 
-  // Use addEventListener instead of onclick
+  // Inicializar o estado visual do botão baseado no dado vindo do servidor
+  ui.updatePokemonCardState(pokemonId, isFavorite);
+
   favBtn.addEventListener('click', async () => {
-    const isFavorited = icon.classList.contains('fill-coral');
-    
-    // Optimistic Update
-    if (isFavorited) {
-      icon.classList.remove('fill-coral', 'text-coral');
-    } else {
-      icon.classList.add('fill-coral', 'text-coral');
-    }
-
-    try {
-      let response;
-      if (isFavorited) {
-        response = await api.delete(`/favorites/${pokemonId}`);
-      } else {
-        response = await api.post('/favorites', { pokemonId });
-      }
-      
-      if (response.isUnauthorized) {
-        // Revert
-        if (isFavorited) {
-          icon.classList.add('fill-coral', 'text-coral');
-        } else {
-          icon.classList.remove('fill-coral', 'text-coral');
-        }
-        ui.showNotification('Faça login para favoritar Pokémon', 'error');
-        return;
-      }
-
-      if (response.success) {
-        ui.showNotification(isFavorited ? 'Removido dos favoritos!' : 'Adicionado aos favoritos!', 'success');
-        
-        // Dispatch event for other views to update (like the grid)
-        document.dispatchEvent(new CustomEvent('favoriteChanged', { 
-            detail: { id: pokemonId, isFavorited: !isFavorited } 
-        }));
-      } else {
-        // Revert
-        if (isFavorited) {
-          icon.classList.add('fill-coral', 'text-coral');
-        } else {
-          icon.classList.remove('fill-coral', 'text-coral');
-        }
-        ui.showNotification(response.message || 'Erro ao atualizar favoritos', 'error');
-      }
-    } catch (error) {
-      console.error('Error toggling favorite:', error);
-      // Revert
-      if (isFavorited) {
-        icon.classList.add('fill-coral', 'text-coral');
-      } else {
-        icon.classList.remove('fill-coral', 'text-coral');
-      }
-      ui.showNotification('Erro de conexão com o servidor', 'error');
-    }
+    await ui.toggleFavorite(pokemonId, favBtn);
   });
 }
 

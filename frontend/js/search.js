@@ -23,7 +23,7 @@ const search = {
         this.regionBtns = document.querySelectorAll('.region-pill-btn');
         this.limitBtns = document.querySelectorAll('.limit-btn');
         this.searchInput = document.getElementById('search-input');
-        this.userProfileHeader = document.querySelector('.user-profile-header');
+        this.userDisplay = document.getElementById('user-display');
         this.loginBtnSidebar = document.getElementById('login-btn-sidebar');
         this.logoutBtnSidebar = document.getElementById('logout-btn-sidebar');
     },
@@ -160,11 +160,11 @@ const search = {
             if (userEmail) userEmail.innerText = user.email;
             if (userName) userName.innerText = user.username;
             
-            if (this.userProfileHeader) this.userProfileHeader.classList.remove('hidden');
+            if (this.userDisplay) this.userDisplay.classList.remove('hidden');
             if (this.loginBtnSidebar) this.loginBtnSidebar.classList.add('hidden');
             if (this.logoutBtnSidebar) this.logoutBtnSidebar.classList.remove('hidden');
         } else {
-            if (this.userProfileHeader) this.userProfileHeader.classList.add('hidden');
+            if (this.userDisplay) this.userDisplay.classList.add('hidden');
             if (this.loginBtnSidebar) this.loginBtnSidebar.classList.remove('hidden');
             if (this.logoutBtnSidebar) this.logoutBtnSidebar.classList.add('hidden');
         }

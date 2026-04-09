@@ -98,12 +98,12 @@ const favorites = {
      * Setup event listeners for the page
      */
     setupEventListeners() {
-        // Escuta mudanças globais de favoritos
-        document.addEventListener('favoriteChanged', (e) => {
+        // Escuta mudanças globais de favoritos para atualização em tempo real sem reload
+        document.addEventListener('favoriteChanged', async (e) => {
             const { id, isFavorited } = e.detail;
             
-            // Se o item foi removido dos favoritos e estamos na página de favoritos, remova-o da grade
             if (!isFavorited) {
+                // Remoção em tempo real com animação scale-down
                 const card = document.querySelector(`.favorite-btn[data-id="${id}"]`)?.closest('.glass-card');
                 if (card) {
                     card.classList.add('animate-scale-down');
@@ -112,6 +112,20 @@ const favorites = {
                         this.items = this.items.filter(item => item.id != id);
                         this.updateUIAfterRemoval();
                     }, 300);
+                }
+            } else {
+                // Adição em tempo real se o item não estiver na lista
+                if (!this.items.find(item => item.id == id)) {
+                    try {
+                        // Busca dados completos para renderizar o card corretamente
+                        const result = await api.get(`/pokemon/${id}`);
+                        if (result.success) {
+                            this.items.unshift(result.data);
+                            this.render();
+                        }
+                    } catch (error) {
+                        console.error('Erro ao adicionar favorito em tempo real:', error);
+                    }
                 }
             }
         });
@@ -153,14 +167,14 @@ const favorites = {
      */
     async clearAllFavorites() {
         try {
-            const result = await api.delete('/favorites/clear');
+            const result = await api.delete('/favorites');
             
             if (result.success) {
-                // Add animation to all cards
+                // Animação de remoção em massa para todos os cards
                 const cards = document.querySelectorAll('.glass-card');
                 cards.forEach(card => card.classList.add('animate-scale-down'));
                 
-                // Wait for animation to finish
+                // Aguarda a animação e limpa o estado
                 setTimeout(() => {
                     this.items = [];
                     this.render();

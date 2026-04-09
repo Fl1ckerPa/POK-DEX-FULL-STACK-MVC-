@@ -45,11 +45,11 @@ CREATE TABLE IF NOT EXISTS pokemons (
 CREATE TABLE IF NOT EXISTS favorites (
     id INT PRIMARY KEY AUTO_INCREMENT,
     user_id INT NOT NULL,
-    pokemon_id INT NOT NULL,
+    pokemon_id INT NOT NULL, -- Agora armazena diretamente o ID da PokéAPI
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     UNIQUE(user_id, pokemon_id), -- Evita duplicatas
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (pokemon_id) REFERENCES pokemons(id) ON DELETE CASCADE
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    -- Sem FK para pokemons.id para permitir favoritar antes mesmo do cache estar completo
 );
 
 -- TABELA: teams

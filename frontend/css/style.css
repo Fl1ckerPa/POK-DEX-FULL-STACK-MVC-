@@ -47,6 +47,7 @@
 /* Base Styles */
 html {
     scrollbar-gutter: stable;
+    scroll-behavior: smooth;
 }
 
 body {
@@ -174,35 +175,25 @@ body {
     transform: scale(0.95);
 }
 
-/* Favorite Button Styles */
+/* Favorite Button */
 .favorite-btn {
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .favorite-btn:hover {
     transform: scale(1.1);
-    background-color: white !important;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    color: #ff6b6b !important;
-}
-
-.hidden {
-    display: none;
 }
 
 .favorite-btn:active {
     transform: scale(0.9);
 }
 
-/* Favorites Page - Always show heart buttons */
-.show-favorites .favorite-btn {
-    opacity: 1 !important;
+.favorite-btn i.fill-coral {
+    filter: drop-shadow(0 0 5px rgba(255, 107, 107, 0.3));
 }
 
-.show-favorites .favorite-btn svg,
-.show-favorites .favorite-btn i {
-    fill: #ff6b6b;
-    color: #ff6b6b;
+.hidden {
+    display: none;
 }
 
 /* Base entry animation for favorites */

@@ -6,7 +6,7 @@ const Pokemon = require('../models/Pokemon');
  */
 class FavoriteController {
     /**
-     * Lista todos os favoritos do usuário autenticado.
+     * Lista todos os favoritos do usuário autenticado com dados completos.
      */
     static async list(req, res) {
         try {
@@ -24,14 +24,21 @@ class FavoriteController {
                 }
             };
 
-            // Adicionar is_favorite: true para cada pokémon na lista
-            // E garantir que o ID retornado seja o pokemon_id (Pokédex ID)
+            // Garantir dados completos e formatados
             const data = favorites.map(pokemon => ({
                 ...pokemon,
-                id: pokemon.pokemon_id, // Usar o ID da Pokédex para o frontend
+                id: pokemon.pokemon_id, // Sempre usar ID da PokéAPI para o frontend
                 is_favorite: true,
                 types: safeParse(pokemon.types_json) || [pokemon.type],
-                abilities: safeParse(pokemon.abilities) || []
+                abilities: safeParse(pokemon.abilities) || [],
+                stats: [
+                    { name: 'hp', value: pokemon.stats_hp },
+                    { name: 'attack', value: pokemon.stats_attack },
+                    { name: 'defense', value: pokemon.stats_defense },
+                    { name: 'special-attack', value: pokemon.stats_sp_attack },
+                    { name: 'special-defense', value: pokemon.stats_sp_defense },
+                    { name: 'speed', value: pokemon.stats_speed }
+                ]
             }));
 
             return res.status(200).json({
@@ -48,9 +55,10 @@ class FavoriteController {
     }
 
     /**
-     * Adiciona um Pokémon aos favoritos.
+     * Alterna (Adiciona/Remove) um Pokémon aos favoritos.
+     * Único endpoint para controle inteligente.
      */
-    static async add(req, res) {
+    static async toggle(req, res) {
         try {
             const userId = req.user.id;
             const { pokemonId } = req.body;
@@ -62,30 +70,24 @@ class FavoriteController {
                 });
             }
 
-            const result = await Favorite.add(userId, pokemonId);
+            const { isFavorited } = await Favorite.toggle(userId, pokemonId);
 
-            if (!result) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'Não foi possível adicionar aos favoritos. Verifique se o Pokémon existe no cache.'
-                });
-            }
-
-            return res.status(201).json({
+            return res.status(200).json({
                 success: true,
-                message: 'Pokémon adicionado aos favoritos.'
+                isFavorited,
+                message: isFavorited ? 'Pokémon adicionado aos favoritos.' : 'Pokémon removido dos favoritos.'
             });
         } catch (error) {
-            console.error('Erro em FavoriteController.add:', error.message);
+            console.error('Erro em FavoriteController.toggle:', error.message);
             return res.status(500).json({
                 success: false,
-                message: 'Erro ao adicionar favorito.'
+                message: 'Erro ao alternar favorito.'
             });
         }
     }
 
     /**
-     * Remove um Pokémon dos favoritos.
+     * Remove um Pokémon específico dos favoritos.
      */
     static async remove(req, res) {
         try {

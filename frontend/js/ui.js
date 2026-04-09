@@ -16,41 +16,45 @@ const ui = {
     },
 
     /**
-     * Atualiza o estado visual de todos os cards de um Pokémon específico
+     * Atualiza o estado visual de todos os cards e botões de um Pokémon específico
      * @param {number|string} id - ID do Pokémon
      * @param {boolean} isFavorited - Novo estado de favorito
      */
     updatePokemonCardState(id, isFavorited) {
+        // Atualiza cards na grade
         const favBtns = document.querySelectorAll(`.favorite-btn[data-id="${id}"]`);
         favBtns.forEach(btn => {
-            const icon = btn.querySelector('i');
+            const icon = btn.querySelector('i, svg');
+            if (!icon) return;
+
             if (isFavorited) {
                 icon.classList.add('fill-coral', 'text-coral');
                 btn.classList.add('opacity-100', 'shadow-md');
+                btn.dataset.favorited = 'true';
             } else {
                 icon.classList.remove('fill-coral', 'text-coral');
                 btn.classList.remove('opacity-100', 'shadow-md');
+                btn.dataset.favorited = 'false';
             }
         });
 
         // Também atualiza o botão no painel de detalhes (se estiver aberto e for o mesmo Pokémon)
         const detailFavBtn = document.getElementById('favorite-detail-btn');
-        if (detailFavBtn) {
-            // No painel de detalhes, o ID pode não estar no dataset, mas podemos verificar a classe ou contexto
-            // Para ser seguro, atualizamos se houver uma correspondência visual ou lógica
-            const icon = detailFavBtn.querySelector('i');
+        if (detailFavBtn && detailFavBtn.dataset.id == id) {
+            const icon = detailFavBtn.querySelector('i, svg');
             const span = detailFavBtn.querySelector('span');
             
             if (isFavorited) {
-                icon.classList.add('fill-white');
-                detailFavBtn.classList.replace('bg-gray-100', 'bg-coral');
-                detailFavBtn.classList.replace('text-gray-600', 'text-white');
+                if (icon) icon.classList.add('fill-white');
+                detailFavBtn.classList.remove('bg-gray-100', 'text-gray-600');
+                detailFavBtn.classList.add('bg-coral', 'text-white', 'shadow-coral/20');
                 if (span) span.textContent = 'Favoritado';
+                detailFavBtn.dataset.favorited = 'true';
             } else {
-                icon.classList.remove('fill-white');
-                detailFavBtn.classList.replace('bg-coral', 'bg-gray-100');
-                detailFavBtn.classList.replace('text-white', 'text-gray-600');
+                if (icon) icon.classList.remove('fill-white', 'bg-coral', 'text-white', 'shadow-coral/20');
+                detailFavBtn.classList.add('bg-gray-100', 'text-gray-600');
                 if (span) span.textContent = 'Favoritar';
+                detailFavBtn.dataset.favorited = 'false';
             }
         }
         
@@ -106,72 +110,48 @@ const ui = {
     /**
      * Alterna o estado de favorito de um Pokémon de forma otimista (tempo real)
      * @param {number|string} id - ID do Pokémon
-     * @param {HTMLElement} btn - Elemento do botão
+     * @param {HTMLElement} btn - Elemento do botão que foi clicado
      */
     async toggleFavorite(id, btn) {
-        const icon = btn.querySelector('i');
-        const isFavorited = icon.classList.contains('fill-coral');
+        // Se o botão tem a classe de preenchimento ou o dataset favorited
+        const isFavorited = btn.dataset.favorited === 'true';
         
-        // Estado otimista: muda a cor do ícone imediatamente
-        if (isFavorited) {
-            icon.classList.remove('fill-coral', 'text-coral');
-            btn.classList.remove('opacity-100', 'shadow-md');
-        } else {
-            icon.classList.add('fill-coral', 'text-coral');
-            btn.classList.add('opacity-100', 'shadow-md');
-        }
+        // Estado otimista: muda a cor do ícone imediatamente em todos os lugares
+        this.updatePokemonCardState(id, !isFavorited);
 
         try {
-            let response;
-            if (isFavorited) {
-                // Se já era favorito, remove
-                response = await api.delete(`/favorites/${id}`);
-            } else {
-                // Se não era favorito, adiciona
-                response = await api.post('/favorites', { pokemonId: id });
-            }
+            // Chamada unificada para o novo endpoint /toggle
+            const response = await api.post('/favorites/toggle', { pokemonId: id });
 
             if (response.isUnauthorized) {
                 // Reverte o estado otimista
-                if (isFavorited) {
-                    icon.classList.add('fill-coral', 'text-coral');
-                    btn.classList.add('opacity-100', 'shadow-md');
-                } else {
-                    icon.classList.remove('fill-coral', 'text-coral');
-                    btn.classList.remove('opacity-100', 'shadow-md');
-                }
+                this.updatePokemonCardState(id, isFavorited);
                 this.showNotification('Faça login para favoritar Pokémon', 'error');
                 return;
             }
 
             if (response.success) {
-                this.showNotification(isFavorited ? 'Removido dos favoritos!' : 'Adicionado aos favoritos!', 'success');
+                // Sincroniza o estado real vindo do servidor (embora deva ser o mesmo do otimista)
+                this.updatePokemonCardState(id, response.isFavorited);
+                
+                this.showNotification(
+                    response.isFavorited ? 'Adicionado aos favoritos!' : 'Pokémon removido dos favoritos!', 
+                    'success'
+                );
                 
                 // Dispara um evento para outros módulos (como favorites.js) saberem que mudou
                 document.dispatchEvent(new CustomEvent('favoriteChanged', { 
-                    detail: { id, isFavorited: !isFavorited } 
+                    detail: { id, isFavorited: response.isFavorited } 
                 }));
             } else {
-                // Reverte o estado otimista
-                if (isFavorited) {
-                    icon.classList.add('fill-coral', 'text-coral');
-                    btn.classList.add('opacity-100', 'shadow-md');
-                } else {
-                    icon.classList.remove('fill-coral', 'text-coral');
-                    btn.classList.remove('opacity-100', 'shadow-md');
-                }
+                // Reverte o estado otimista em caso de erro lógico
+                this.updatePokemonCardState(id, isFavorited);
                 this.showNotification(response.message || 'Erro ao atualizar favoritos', 'error');
             }
         } catch (error) {
             console.error('Error toggling favorite:', error);
-            // Reverte o estado otimista
-            if (isFavorited) {
-                icon.classList.add('fill-coral', 'text-coral');
-                btn.classList.add('opacity-100', 'shadow-md');
-            } else {
-                icon.classList.remove('fill-coral', 'text-coral');
-                btn.classList.remove('opacity-100', 'shadow-md');
-            }
+            // Reverte o estado otimista em caso de erro de rede
+            this.updatePokemonCardState(id, isFavorited);
             this.showNotification('Erro de conexão com o servidor', 'error');
         }
     },
@@ -209,7 +189,9 @@ const ui = {
             </span>
 
             <!-- Favorite Button -->
-            <button class="absolute top-4 right-4 p-2 rounded-xl bg-white/80 text-gray-400 hover:text-coral ${pokemon.is_favorite ? 'opacity-100 shadow-md' : 'opacity-0 group-hover:opacity-100'} transition-all duration-300 shadow-sm border border-black/5 favorite-btn z-20" data-id="${pokemon.id}">
+            <button class="absolute top-4 right-4 p-2 rounded-xl bg-white/80 text-gray-400 hover:text-coral ${pokemon.is_favorite ? 'opacity-100 shadow-md' : 'opacity-0 group-hover:opacity-100'} transition-all duration-300 shadow-sm border border-black/5 favorite-btn z-20" 
+                    data-id="${pokemon.id}" 
+                    data-favorited="${pokemon.is_favorite ? 'true' : 'false'}">
                 <i data-lucide="heart" class="w-5 h-5 ${pokemon.is_favorite ? 'fill-coral text-coral' : ''}"></i>
             </button>
 
@@ -458,7 +440,10 @@ const ui = {
 
                     <!-- Actions -->
                     <div class="grid grid-cols-2 gap-4 pt-4">
-                        <button class="btn-action ${pokemon.is_favorite ? 'bg-coral text-white shadow-coral/20' : 'bg-gray-100 text-gray-600 hover:bg-coral hover:text-white'} shadow-lg hover:scale-[1.02]" id="favorite-detail-btn">
+                        <button class="btn-action ${pokemon.is_favorite ? 'bg-coral text-white shadow-coral/20' : 'bg-gray-100 text-gray-600 hover:bg-coral hover:text-white'} shadow-lg hover:scale-[1.02]" 
+                                id="favorite-detail-btn" 
+                                data-id="${pokemon.id}"
+                                data-favorited="${pokemon.is_favorite ? 'true' : 'false'}">
                             <i data-lucide="heart" class="w-5 h-5 ${pokemon.is_favorite ? 'fill-white' : ''}"></i>
                             <span>${pokemon.is_favorite ? 'Favoritado' : 'Favoritar'}</span>
                         </button>
@@ -522,44 +507,7 @@ const ui = {
         // Favorite button logic
         const favBtn = overlay.querySelector('#favorite-detail-btn');
         favBtn.addEventListener('click', async () => {
-            console.log('Favoriting pokemon', pokemon.id);
-            try {
-                const result = await api.post('/favorites', { pokemonId: pokemon.id });
-                
-                if (result.isUnauthorized) {
-                    this.showNotification('Faça login para favoritar Pokémon', 'error');
-                    return;
-                }
-
-                if (result.success) {
-                    this.showNotification(`${pokemon.name} adicionado aos favoritos!`, 'success');
-                    favBtn.querySelector('i').classList.add('fill-white');
-                    favBtn.classList.replace('bg-gray-100', 'bg-coral');
-                    favBtn.classList.replace('text-gray-600', 'text-white');
-                    favBtn.querySelector('span').textContent = 'Favoritado';
-                } else {
-                    const removeResult = await api.delete(`/favorites/${pokemon.id}`);
-                    
-                    if (removeResult.isUnauthorized) {
-                        this.showNotification('Faça login para favoritar Pokémon', 'error');
-                        return;
-                    }
-
-                    if (removeResult.success) {
-                        this.showNotification(`${pokemon.name} removido dos favoritos!`, 'info');
-                        favBtn.querySelector('i').classList.remove('fill-white');
-                        favBtn.classList.replace('bg-coral', 'bg-gray-100');
-                        favBtn.classList.replace('text-gray-600', 'text-white');
-                        favBtn.querySelector('span').textContent = 'Favoritar';
-                    } else {
-                        this.showNotification(removeResult.message || result.message || 'Erro ao atualizar favoritos', 'error');
-                    }
-                }
-                if (window.lucide) lucide.createIcons();
-            } catch (error) {
-                console.error('Error toggling favorite:', error);
-                this.showNotification('Erro de conexão com o servidor', 'error');
-            }
+            await this.toggleFavorite(pokemon.id, favBtn);
         });
 
         // Add to team button logic
