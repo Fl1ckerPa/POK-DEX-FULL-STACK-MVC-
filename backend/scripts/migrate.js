@@ -55,6 +55,38 @@ const migrate = async () => {
         console.log('🔄 Ajustando tipos de dados para height e weight...');
         await db.query('ALTER TABLE pokemons MODIFY COLUMN height DECIMAL(10,2)');
         await db.query('ALTER TABLE pokemons MODIFY COLUMN weight DECIMAL(10,2)');
+
+        console.log('🔄 Corrigindo tabela de favoritos para suportar IDs da PokéAPI...');
+        try {
+            // Tentar remover a constraint antiga se ela existir
+            // O nome padrão costuma ser favorites_ibfk_2, mas vamos tentar de forma genérica
+            const [constraints] = await db.query(`
+                SELECT CONSTRAINT_NAME 
+                FROM information_schema.KEY_COLUMN_USAGE 
+                WHERE TABLE_NAME = 'favorites' 
+                AND COLUMN_NAME = 'pokemon_id' 
+                AND REFERENCED_TABLE_NAME = 'pokemons'
+            `);
+
+            for (const c of constraints) {
+                console.log(`➖ Removendo constraint ${c.CONSTRAINT_NAME}...`);
+                await db.query(`ALTER TABLE favorites DROP FOREIGN KEY ${c.CONSTRAINT_NAME}`);
+            }
+
+            // Agora vamos migrar os dados: converter de internal ID para PokéAPI ID
+            // Apenas se ainda houver IDs que batem com pokemons.id e não com pokemons.pokemon_id
+            console.log('🔄 Migrando dados de favoritos (ID interno -> PokéAPI ID)...');
+            await db.query(`
+                UPDATE favorites f
+                JOIN pokemons p ON f.pokemon_id = p.id
+                SET f.pokemon_id = p.pokemon_id
+                WHERE p.id != p.pokemon_id
+            `);
+            
+            console.log('✅ Tabela de favoritos atualizada!');
+        } catch (err) {
+            console.warn('Aviso ao atualizar favoritos:', err.message);
+        }
         
         console.log('✅ Migração concluída com sucesso!');
         process.exit(0);

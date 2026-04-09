@@ -11,15 +11,19 @@ class Favorite {
      */
     static async add(userId, pokemonId) {
         try {
+            const uId = Number(userId);
+            const pId = Number(pokemonId);
+            
             const [result] = await db.execute(
                 'INSERT INTO favorites (user_id, pokemon_id) VALUES (?, ?)',
-                [userId, pokemonId]
+                [uId, pId]
             );
             return result.insertId;
         } catch (error) {
             if (error.code === 'ER_DUP_ENTRY') {
                 return null; // Já é favorito
             }
+            console.error('Erro em Favorite.add:', error);
             throw error;
         }
     }
@@ -30,11 +34,19 @@ class Favorite {
      * @param {number} pokemonId - ID da PokéAPI do Pokémon.
      */
     static async remove(userId, pokemonId) {
-        const [result] = await db.execute(
-            'DELETE FROM favorites WHERE user_id = ? AND pokemon_id = ?',
-            [userId, pokemonId]
-        );
-        return result.affectedRows > 0;
+        try {
+            const uId = Number(userId);
+            const pId = Number(pokemonId);
+            
+            const [result] = await db.execute(
+                'DELETE FROM favorites WHERE user_id = ? AND pokemon_id = ?',
+                [uId, pId]
+            );
+            return result.affectedRows > 0;
+        } catch (error) {
+            console.error('Erro em Favorite.remove:', error);
+            throw error;
+        }
     }
 
     /**
@@ -44,13 +56,16 @@ class Favorite {
      * @returns {Promise<Object>} - { isFavorited: boolean }
      */
     static async toggle(userId, pokemonId) {
-        const isFavorited = await this.isFavorite(userId, pokemonId);
+        const uId = Number(userId);
+        const pId = Number(pokemonId);
+        
+        const isFavorited = await this.isFavorite(uId, pId);
         
         if (isFavorited) {
-            await this.remove(userId, pokemonId);
+            await this.remove(uId, pId);
             return { isFavorited: false };
         } else {
-            await this.add(userId, pokemonId);
+            await this.add(uId, pId);
             return { isFavorited: true };
         }
     }
@@ -60,14 +75,23 @@ class Favorite {
      * @param {number} userId - ID do usuário.
      */
     static async findByUserId(userId) {
-        const [rows] = await db.execute(`
-            SELECT p.* 
-            FROM pokemons p
-            JOIN favorites f ON p.pokemon_id = f.pokemon_id
-            WHERE f.user_id = ?
-            ORDER BY f.created_at DESC
-        `, [userId]);
-        return rows;
+        try {
+            const uId = Number(userId);
+            // Usar LEFT JOIN para garantir que retornamos o favorito mesmo se não estiver no cache
+            const [rows] = await db.execute(`
+                SELECT 
+                    f.pokemon_id as fav_pokemon_id,
+                    p.* 
+                FROM favorites f
+                LEFT JOIN pokemons p ON f.pokemon_id = p.pokemon_id
+                WHERE f.user_id = ?
+                ORDER BY f.created_at DESC
+            `, [uId]);
+            return rows;
+        } catch (error) {
+            console.error('Erro em Favorite.findByUserId:', error);
+            throw error;
+        }
     }
 
     /**
@@ -75,11 +99,17 @@ class Favorite {
      * @param {number} userId - ID do usuário.
      */
     static async clearAll(userId) {
-        const [result] = await db.execute(
-            'DELETE FROM favorites WHERE user_id = ?',
-            [userId]
-        );
-        return result.affectedRows >= 0;
+        try {
+            const uId = Number(userId);
+            const [result] = await db.execute(
+                'DELETE FROM favorites WHERE user_id = ?',
+                [uId]
+            );
+            return result.affectedRows >= 0;
+        } catch (error) {
+            console.error('Erro em Favorite.clearAll:', error);
+            throw error;
+        }
     }
 
     /**
@@ -87,11 +117,17 @@ class Favorite {
      * @param {number} userId - ID do usuário.
      */
     static async getFavoritePokemonIds(userId) {
-        const [rows] = await db.execute(
-            'SELECT pokemon_id FROM favorites WHERE user_id = ?',
-            [userId]
-        );
-        return rows.map(row => row.pokemon_id);
+        try {
+            const uId = Number(userId);
+            const [rows] = await db.execute(
+                'SELECT pokemon_id FROM favorites WHERE user_id = ?',
+                [uId]
+            );
+            return rows.map(row => row.pokemon_id);
+        } catch (error) {
+            console.error('Erro em Favorite.getFavoritePokemonIds:', error);
+            throw error;
+        }
     }
 
     /**
@@ -100,11 +136,19 @@ class Favorite {
      * @param {number} pokemonId - ID da PokéAPI do Pokémon.
      */
     static async isFavorite(userId, pokemonId) {
-        const [rows] = await db.execute(
-            'SELECT id FROM favorites WHERE user_id = ? AND pokemon_id = ?',
-            [userId, pokemonId]
-        );
-        return rows.length > 0;
+        try {
+            const uId = Number(userId);
+            const pId = Number(pokemonId);
+            
+            const [rows] = await db.execute(
+                'SELECT id FROM favorites WHERE user_id = ? AND pokemon_id = ?',
+                [uId, pId]
+            );
+            return rows.length > 0;
+        } catch (error) {
+            console.error('Erro em Favorite.isFavorite:', error);
+            throw error;
+        }
     }
 }
 
