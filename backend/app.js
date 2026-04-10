@@ -15,6 +15,7 @@ const pokemonRoutes = require('./routes/pokemonRoutes');
 const favoriteRoutes = require('./routes/favoriteRoutes');
 const teamsRoutes = require('./routes/teamsRoutes');
 const historyRoutes = require('./routes/historyRoutes');
+const typeRoutes = require('./routes/typeRoutes');
 
 // Rota básica de teste
 app.get('/', (req, res) => {
@@ -27,5 +28,6 @@ app.use('/api/pokemon', pokemonRoutes);
 app.use('/api/favorites', favoriteRoutes);
 app.use('/api/teams', teamsRoutes);
 app.use('/api/history', historyRoutes);
+app.use('/api/types', typeRoutes);
 
 module.exports = app;

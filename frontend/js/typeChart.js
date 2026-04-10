@@ -1,3 +1,9 @@
+/**
+ * Mapeamento estático de relações de dano entre tipos Pokémon.
+ * Este arquivo mantém as regras de eficácia (typeChart) constantes,
+ * enquanto as cores e ícones podem ser carregados dinamicamente do banco de dados.
+ */
+
 const typeChart = {
     normal: {
         double_damage_from: ['fighting'],
@@ -145,46 +151,119 @@ const typeChart = {
     }
 };
 
+/**
+ * Função utilitária para buscar tipos Pokémon da API e reconstruir os objetos typeColors e typeIcons.
+ * @returns {Promise<{colors: Object, icons: Object}>}
+ */
+async function fetchTypeData() {
+    // 1. Tentar carregar do Cache Local (LocalStorage) primeiro para velocidade instantânea
+    const cached = localStorage.getItem('pokemon_types_cache');
+    if (cached) {
+        try {
+            const parsed = JSON.parse(cached);
+            // Verificar se o cache é válido (ex: menos de 24h)
+            if (Date.now() - parsed.timestamp < 24 * 60 * 60 * 1000) {
+                // Disparar atualização em background para manter o cache fresco
+                updateCacheInBackground();
+                return parsed.data;
+            }
+        } catch (e) {
+            console.warn('Erro ao ler cache de tipos:', e);
+        }
+    }
+
+    try {
+        const response = await fetch('/api/types');
+        const result = await response.json();
+        
+        if (!result.success) throw new Error(result.message);
+
+        const colors = {};
+        const icons = {};
+
+        result.data.forEach(type => {
+            colors[type.name] = type.color;
+            icons[type.name] = type.icon;
+        });
+
+        const data = { colors, icons };
+        
+        // 2. Salvar no Cache Local
+        localStorage.setItem('pokemon_types_cache', JSON.stringify({
+            timestamp: Date.now(),
+            data: data
+        }));
+
+        return data;
+    } catch (error) {
+        console.error('Falha ao carregar dados dos tipos da API:', error.message);
+        // Fallback para valores locais se a API e o Cache falharem
+        return {
+            colors: {
+                normal: '#A8A878', fire: '#F08030', water: '#6890F0', electric: '#F8D030',
+                grass: '#78C850', ice: '#98D8D8', fighting: '#C03028', poison: '#A040A0',
+                ground: '#E0C068', flying: '#A890F0', psychic: '#F85888', bug: '#A8B820',
+                rock: '#B8A038', ghost: '#705898', dragon: '#7038F8', dark: '#705848',
+                steel: '#B8B8D0', fairy: '#EE99AC'
+            },
+            icons: {
+                fire: '../assets/icons/types/fire.png', water: '../assets/icons/types/water.png',
+                grass: '../assets/icons/types/grass.png', electric: '../assets/icons/types/electric.png',
+                psychic: '../assets/icons/types/psychic.png', ice: '../assets/icons/types/ice.png',
+                dragon: '../assets/icons/types/dragon.png', dark: '../assets/icons/types/dark.png',
+                fairy: '../assets/icons/types/fairy.png', fighting: '../assets/icons/types/fighting.png',
+                flying: '../assets/icons/types/flying.png', poison: '../assets/icons/types/poison.png',
+                ground: '../assets/icons/types/ground.png', rock: '../assets/icons/types/rock.png',
+                bug: '../assets/icons/types/bug.png', ghost: '../assets/icons/types/ghost.png',
+                steel: '../assets/icons/types/steel.png', normal: '../assets/icons/types/normal.png'
+            }
+        };
+    }
+}
+
+/**
+ * Atualiza o cache em background para garantir que o próximo carregamento esteja atualizado.
+ */
+async function updateCacheInBackground() {
+    try {
+        const response = await fetch('/api/types');
+        const result = await response.json();
+        if (result.success) {
+            const colors = {};
+            const icons = {};
+            result.data.forEach(type => {
+                colors[type.name] = type.color;
+                icons[type.name] = type.icon;
+            });
+            localStorage.setItem('pokemon_types_cache', JSON.stringify({
+                timestamp: Date.now(),
+                data: { colors, icons }
+            }));
+        }
+    } catch (e) {
+        // Ignorar erros em background
+    }
+}
+
+// Valores iniciais (serão sobrescritos dinamicamente se necessário)
 const typeColors = {
-    normal: '#A8A878',
-    fire: '#F08030',
-    water: '#6890F0',
-    electric: '#F8D030',
-    grass: '#78C850',
-    ice: '#98D8D8',
-    fighting: '#C03028',
-    poison: '#A040A0',
-    ground: '#E0C068',
-    flying: '#A890F0',
-    psychic: '#F85888',
-    bug: '#A8B820',
-    rock: '#B8A038',
-    ghost: '#705898',
-    dragon: '#7038F8',
-    dark: '#705848',
-    steel: '#B8B8D0',
-    fairy: '#EE99AC'
+    normal: '#A8A878', fire: '#F08030', water: '#6890F0', electric: '#F8D030',
+    grass: '#78C850', ice: '#98D8D8', fighting: '#C03028', poison: '#A040A0',
+    ground: '#E0C068', flying: '#A890F0', psychic: '#F85888', bug: '#A8B820',
+    rock: '#B8A038', ghost: '#705898', dragon: '#7038F8', dark: '#705848',
+    steel: '#B8B8D0', fairy: '#EE99AC'
 };
 
 const typeIcons = {
-    fire: '../assets/icons/types/fire.png',
-    water: '../assets/icons/types/water.png',
-    grass: '../assets/icons/types/grass.png',
-    electric: '../assets/icons/types/electric.png',
-    psychic: '../assets/icons/types/psychic.png',
-    ice: '../assets/icons/types/ice.png',
-    dragon: '../assets/icons/types/dragon.png',
-    dark: '../assets/icons/types/dark.png',
-    fairy: '../assets/icons/types/fairy.png',
-    fighting: '../assets/icons/types/fighting.png',
-    flying: '../assets/icons/types/flying.png',
-    poison: '../assets/icons/types/poison.png',
-    ground: '../assets/icons/types/ground.png',
-    rock: '../assets/icons/types/rock.png',
-    bug: '../assets/icons/types/bug.png',
-    ghost: '../assets/icons/types/ghost.png',
-    steel: '../assets/icons/types/steel.png',
-    normal: '../assets/icons/types/normal.png'
+    fire: '../assets/icons/types/fire.png', water: '../assets/icons/types/water.png',
+    grass: '../assets/icons/types/grass.png', electric: '../assets/icons/types/electric.png',
+    psychic: '../assets/icons/types/psychic.png', ice: '../assets/icons/types/ice.png',
+    dragon: '../assets/icons/types/dragon.png', dark: '../assets/icons/types/dark.png',
+    fairy: '../assets/icons/types/fairy.png', fighting: '../assets/icons/types/fighting.png',
+    flying: '../assets/icons/types/flying.png', poison: '../assets/icons/types/poison.png',
+    ground: '../assets/icons/types/ground.png', rock: '../assets/icons/types/rock.png',
+    bug: '../assets/icons/types/bug.png', ghost: '../assets/icons/types/ghost.png',
+    steel: '../assets/icons/types/steel.png', normal: '../assets/icons/types/normal.png'
 };
 
-export { typeChart, typeColors, typeIcons };
+export { typeChart, typeColors, typeIcons, fetchTypeData };

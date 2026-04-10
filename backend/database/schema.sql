@@ -94,3 +94,13 @@ CREATE TABLE IF NOT EXISTS view_history (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (pokemon_id) REFERENCES pokemons(id) ON DELETE CASCADE
 );
+
+-- TABELA: pokemon_types
+-- FINALIDADE: Armazenar informações sobre os tipos Pokémon (nome, cor, ícone)
+CREATE TABLE IF NOT EXISTS pokemon_types ( 
+   id INT AUTO_INCREMENT PRIMARY KEY, 
+   name VARCHAR(50) UNIQUE NOT NULL, 
+   color VARCHAR(20) NOT NULL, 
+   icon_path VARCHAR(255) NOT NULL, 
+   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP 
+); 

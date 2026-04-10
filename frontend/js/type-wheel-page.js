@@ -1,4 +1,4 @@
-import { typeChart, typeColors, typeIcons } from './typeChart.js';
+import { typeChart, typeColors, typeIcons, fetchTypeData } from './typeChart.js';
 import api from './api.js';
 import auth from './auth.js';
 
@@ -8,10 +8,21 @@ class TypeWheelPage {
         this.currentMode = 'advantages'; // 'advantages', 'weaknesses', 'resistances'
         this.types = Object.keys(typeChart);
         this.isDualType = false;
+        
+        // Globais locais para cores e ícones (inicialmente do hardcode, atualizadas via API)
+        this.colors = { ...typeColors };
+        this.icons = { ...typeIcons };
     }
 
     async init() {
         auth.checkAuthOnLoad();
+        
+        // 1. Iniciar carregamento de dados (Sem espera artificial para máxima eficiência)
+        const dynamicData = await fetchTypeData();
+        
+        this.colors = dynamicData.colors;
+        this.icons = dynamicData.icons;
+
         this.updateUserDisplay();
         this.setupEventListeners();
         this.renderWheel();
@@ -20,6 +31,21 @@ class TypeWheelPage {
         this.updateWheelUI();
         this.updateRelations();
         
+        // 2. Finalizar carregamento IMEDIATAMENTE após a renderização
+        const loader = document.getElementById('page-loader');
+        const content = document.getElementById('main-content');
+        
+        if (loader) {
+            loader.style.opacity = '0';
+            loader.style.pointerEvents = 'none'; // Libera cliques instantaneamente
+            setTimeout(() => loader.remove(), 300);
+        }
+        
+        if (content) {
+            content.classList.remove('opacity-0');
+            content.classList.add('opacity-100');
+        }
+
         if (window.lucide) lucide.createIcons();
     }
 
@@ -86,13 +112,13 @@ class TypeWheelPage {
             btn.className = `absolute w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-black/5 flex items-center justify-center transition-all duration-500 hover:scale-125 hover:z-30 group type-node shadow-sm overflow-visible`;
             btn.style.left = `${x - (containerWidth <= 400 ? 24 : 28)}px`;
             btn.style.top = `${y - (containerWidth <= 400 ? 24 : 28)}px`;
-            btn.style.backgroundColor = `${typeColors[type]}15`; // Muito suave
-            btn.style.borderColor = `${typeColors[type]}33`;
+            btn.style.backgroundColor = `${this.colors[type]}15`; // Muito suave
+            btn.style.borderColor = `${this.colors[type]}33`;
             btn.dataset.type = type;
             btn.title = type.charAt(0).toUpperCase() + type.slice(1);
 
             btn.innerHTML = `
-                <img src="${typeIcons[type]}" alt="${type}" class="w-6 h-6 sm:w-7 sm:h-7 object-contain transition-transform group-hover:rotate-12" />
+                <img src="${this.icons[type]}" alt="${type}" class="w-6 h-6 sm:w-7 sm:h-7 object-contain transition-transform group-hover:rotate-12" />
                 
                 <!-- Selection Number Badge -->
                 <div class="selection-badge absolute -top-2 -right-2 w-6 h-6 rounded-full bg-white text-coral text-[10px] font-black flex items-center justify-center shadow-lg border border-coral/20 opacity-0 scale-0 transition-all duration-300 z-50"></div>
@@ -100,7 +126,7 @@ class TypeWheelPage {
                 <!-- Label HUD -->
                 <div class="type-label absolute -bottom-10 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none z-50">
                     <div class="bg-white border border-black/10 px-3 py-1.5 rounded-lg shadow-xl flex items-center gap-2">
-                        <div class="w-2 h-2 rounded-full" style="background-color: ${typeColors[type]}"></div>
+                        <div class="w-2 h-2 rounded-full" style="background-color: ${this.colors[type]}"></div>
                         <span class="text-[10px] font-black uppercase text-gray-800 tracking-widest">${type}</span>
                     </div>
                 </div>
@@ -153,10 +179,10 @@ class TypeWheelPage {
             if (isSelected) {
                 // Node Highlight - More prominent
                 node.classList.add('scale-125', 'z-30', 'shadow-2xl');
-                node.style.backgroundColor = typeColors[type];
+                node.style.backgroundColor = this.colors[type];
                 node.style.borderColor = 'white';
                 node.style.borderWidth = '4px';
-                node.style.boxShadow = `0 0 20px ${typeColors[type]}66`;
+                node.style.boxShadow = `0 0 20px ${this.colors[type]}66`;
                 node.classList.remove('opacity-40');
                 node.classList.add('opacity-100');
 
@@ -175,8 +201,8 @@ class TypeWheelPage {
             } else {
                 // Node Reset
                 node.classList.remove('scale-125', 'z-30', 'shadow-2xl');
-                node.style.backgroundColor = `${typeColors[type]}15`;
-                node.style.borderColor = `${typeColors[type]}33`;
+                node.style.backgroundColor = `${this.colors[type]}15`;
+                node.style.borderColor = `${this.colors[type]}33`;
                 node.style.borderWidth = '2px';
                 node.style.boxShadow = 'none';
                 
@@ -239,22 +265,22 @@ class TypeWheelPage {
             hub.style.borderColor = 'rgba(255,255,255,0.4)';
 
             if (this.selectedTypes.length === 1) {
-                hub.style.background = typeColors[type1];
+                hub.style.background = this.colors[type1];
                 hubIcons.innerHTML = `
                     <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-full flex items-center justify-center border-2 border-white/40 shadow-2xl animate-spring-in bg-white/10 backdrop-blur-sm">
-                        <img src="${typeIcons[type1]}" alt="${type1}" class="w-10 h-10 object-contain" />
+                        <img src="${this.icons[type1]}" alt="${type1}" class="w-10 h-10 object-contain" />
                     </div>
                 `;
             } else {
                 // 50/50 Diagonal Split
-                hub.style.background = `linear-gradient(135deg, ${typeColors[type1]} 50%, ${typeColors[type2]} 50%)`;
+                hub.style.background = `linear-gradient(135deg, ${this.colors[type1]} 50%, ${this.colors[type2]} 50%)`;
                 hubIcons.innerHTML = `
                     <div class="relative w-24 h-20 sm:w-32 sm:h-24 flex items-center justify-center animate-spring-in">
-                        <div class="absolute left-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center border-2 border-white/40 shadow-xl bg-white/10 backdrop-blur-sm z-10" style="background-color: ${typeColors[type1]}">
-                            <img src="${typeIcons[type1]}" alt="${type1}" class="w-8 h-8 sm:w-10 sm:h-10 object-contain" />
+                        <div class="absolute left-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center border-2 border-white/40 shadow-xl bg-white/10 backdrop-blur-sm z-10" style="background-color: ${this.colors[type1]}">
+                            <img src="${this.icons[type1]}" alt="${type1}" class="w-8 h-8 sm:w-10 sm:h-10 object-contain" />
                         </div>
-                        <div class="absolute right-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center border-2 border-white/40 shadow-xl bg-white/10 backdrop-blur-sm z-10" style="background-color: ${typeColors[type2]}">
-                            <img src="${typeIcons[type2]}" alt="${type2}" class="w-8 h-8 sm:w-10 sm:h-10 object-contain" />
+                        <div class="absolute right-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center border-2 border-white/40 shadow-xl bg-white/10 backdrop-blur-sm z-10" style="background-color: ${this.colors[type2]}">
+                            <img src="${this.icons[type2]}" alt="${type2}" class="w-8 h-8 sm:w-10 sm:h-10 object-contain" />
                         </div>
                     </div>
                 `;
@@ -388,8 +414,8 @@ class TypeWheelPage {
         list.innerHTML = filtered.map(([type, mult]) => `
             <div class="flex items-center justify-between p-4 bg-gray-50/50 rounded-2xl border border-black/5 group hover:border-coral/20 transition-all duration-300 animate-fade-in hover:shadow-lg hover:shadow-black/5">
                 <div class="flex items-center gap-4">
-                    <div class="w-12 h-12 rounded-xl flex items-center justify-center shadow-md group-hover:scale-110 transition-transform" style="background-color: ${typeColors[type]}">
-                        <img src="${typeIcons[type]}" alt="${type}" class="w-7 h-7 object-contain" />
+                    <div class="w-12 h-12 rounded-xl flex items-center justify-center shadow-md group-hover:scale-110 transition-transform" style="background-color: ${this.colors[type]}">
+                        <img src="${this.icons[type]}" alt="${type}" class="w-7 h-7 object-contain" />
                     </div>
                     <div>
                         <span class="text-sm font-black text-gray-800 uppercase tracking-widest">${type}</span>

@@ -42,6 +42,9 @@ tailwind.config = {
             },
             borderRadius: {
                 '3xl': '2rem',
+            },
+            animation: {
+                'spin-slow': 'spin 1.5s linear infinite',
             }
         }
     }

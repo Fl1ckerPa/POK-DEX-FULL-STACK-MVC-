@@ -1,0 +1,20 @@
+-- Dados iniciais para a tabela pokemon_types
+INSERT INTO pokemon_types (name, color, icon_path) VALUES 
+('fire', '#F08030', '../assets/icons/types/fire.png'), 
+('water', '#6890F0', '../assets/icons/types/water.png'), 
+('grass', '#78C850', '../assets/icons/types/grass.png'), 
+('electric', '#F8D030', '../assets/icons/types/electric.png'), 
+('psychic', '#F85888', '../assets/icons/types/psychic.png'), 
+('ice', '#98D8D8', '../assets/icons/types/ice.png'), 
+('dragon', '#7038F8', '../assets/icons/types/dragon.png'), 
+('dark', '#705848', '../assets/icons/types/dark.png'), 
+('fairy', '#EE99AC', '../assets/icons/types/fairy.png'), 
+('fighting', '#C03028', '../assets/icons/types/fighting.png'), 
+('flying', '#A890F0', '../assets/icons/types/flying.png'), 
+('poison', '#A040A0', '../assets/icons/types/poison.png'), 
+('ground', '#E0C068', '../assets/icons/types/ground.png'), 
+('rock', '#B8A038', '../assets/icons/types/rock.png'), 
+('bug', '#A8B820', '../assets/icons/types/bug.png'), 
+('ghost', '#705898', '../assets/icons/types/ghost.png'), 
+('steel', '#B8B8D0', '../assets/icons/types/steel.png'), 
+('normal', '#A8A878', '../assets/icons/types/normal.png'); 
