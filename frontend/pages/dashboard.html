@@ -9,7 +9,7 @@
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Quicksand:wght@700&display=swap" rel="stylesheet">
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <!-- Tailwind Config -->
@@ -17,14 +17,26 @@
     <!-- Styles -->
     <link rel="stylesheet" href="../css/style.css">
     <link rel="stylesheet" href="../css/animations.css">
+    <style>
+        :root {
+            --bg-cream: hsl(40, 33%, 98%);
+            --primary-red: hsl(0, 100%, 71%);
+        }
+        .bg-cream { background-color: var(--bg-cream); }
+        .text-coral { color: var(--primary-red); }
+        .bg-coral { background-color: var(--primary-red); }
+        .border-coral { border-color: var(--primary-red); }
+        .font-quicksand { font-family: 'Quicksand', sans-serif; }
+        .font-inter { font-family: 'Inter', sans-serif; }
+    </style>
 </head>
-<body class="bg-cream font-inter min-h-screen">
+<body class="bg-cream font-inter min-h-screen text-gray-800 overflow-x-hidden">
     <div id="app" class="flex min-h-screen">
         <!-- Sidebar -->
-        <aside class="w-64 bg-white/50 backdrop-blur-md border-r border-black/5 flex-col hidden md:flex sticky top-0 h-screen">
+        <aside class="w-64 bg-white/50 backdrop-blur-md border-r border-black/5 flex-col hidden md:flex sticky top-0 h-screen z-50">
             <div class="p-6">
                 <div class="flex items-center gap-3 text-coral mb-8">
-                    <div class="w-10 h-10 bg-coral rounded-xl flex items-center justify-center text-white">
+                    <div class="w-10 h-10 bg-coral rounded-xl flex items-center justify-center text-white shadow-lg shadow-coral/20">
                         <i data-lucide="zap" class="w-6 h-6"></i>
                     </div>
                     <span class="font-quicksand font-bold text-xl text-gray-800">Pokédex</span>
@@ -43,19 +55,15 @@
                     </a>
                     <a href="favorites.html" class="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-600 hover:bg-black/5 hover:text-gray-900 transition-all">
                         <i data-lucide="heart" class="w-5 h-5"></i>
-                        Favorites
+                        Favoritos
                     </a>
                     <a href="team.html" class="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-600 hover:bg-black/5 hover:text-gray-900 transition-all">
                         <i data-lucide="users" class="w-5 h-5"></i>
-                        Teams
+                        Equipes
                     </a>
                     <a href="history.html" class="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-600 hover:bg-black/5 hover:text-gray-900 transition-all">
                         <i data-lucide="clock" class="w-5 h-5"></i>
-                        History
-                    </a>
-                    <a href="profile.html" class="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-600 hover:bg-black/5 hover:text-gray-900 transition-all">
-                        <i data-lucide="user" class="w-5 h-5"></i>
-                        Profile
+                        Histórico
                     </a>
                 </nav>
             </div>
@@ -69,9 +77,9 @@
         </aside>
 
         <!-- Main Content -->
-        <main class="flex-1 flex flex-col min-w-0">
+        <main class="flex-1 flex flex-col min-w-0 bg-cream">
             <!-- Top Bar -->
-            <header class="sticky top-0 z-30 bg-cream/80 backdrop-blur-md border-b border-black/5 py-4">
+            <header class="sticky top-0 z-40 bg-cream/80 backdrop-blur-md border-b border-black/5 py-4">
                 <div class="max-w-7xl mx-auto px-6 flex items-center justify-between">
                     <div class="flex items-center gap-4 md:hidden">
                         <button id="mobile-menu-btn" class="p-2 hover:bg-black/5 rounded-lg transition-colors">
@@ -80,26 +88,108 @@
                         <span class="font-quicksand font-bold text-xl text-gray-800">Pokédex</span>
                     </div>
                     
-                    <div id="user-display" class="hidden md:flex items-center gap-3 ml-auto">
-                        <div class="text-right">
-                            <p id="user-name" class="text-sm font-semibold text-gray-800">...</p>
-                            <p id="user-email" class="text-xs text-gray-500">...</p>
-                        </div>
-                        <div class="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center text-gray-600 border-2 border-white shadow-sm overflow-hidden">
-                            <i data-lucide="user" class="w-6 h-6"></i>
+                    <div class="flex items-center gap-4 ml-auto">
+                        <div id="user-display" class="hidden md:flex items-center gap-3">
+                            <div class="text-right">
+                                <p id="user-name" class="text-sm font-semibold text-gray-800">...</p>
+                                <p id="user-email" class="text-xs text-gray-500">...</p>
+                            </div>
+                            <div class="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center text-gray-600 border-2 border-white shadow-sm overflow-hidden">
+                                <i data-lucide="user" class="w-6 h-6"></i>
+                            </div>
                         </div>
                     </div>
                 </div>
             </header>
 
-            <!-- Dashboard Content (Blank Screen) -->
-            <div class="flex-1 flex items-center justify-center p-6 bg-white">
-                <!-- Conteúdo removido conforme solicitação do usuário -->
+            <!-- Dashboard Content -->
+            <div class="flex-1 p-6 lg:p-12 max-w-7xl mx-auto w-full space-y-12">
+                
+                <!-- 1. Hero Banner -->
+                <section id="hero-banner" class="h-64 sm:h-72">
+                    <!-- Skeleton Hero -->
+                    <div class="animate-pulse bg-gray-200 rounded-3xl h-full w-full"></div>
+                </section>
+
+                <!-- 2. Quick Links -->
+                <section>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4"> 
+                        <a href="advanced-search.html" class="flex flex-col items-center gap-3 p-6 rounded-2xl bg-white border border-gray-100 hover:border-red-400/30 hover:bg-red-50/50 transition-all text-center group shadow-sm hover:shadow-xl"> 
+                            <div class="w-12 h-12 rounded-xl bg-red-50 flex items-center justify-center text-coral group-hover:scale-110 transition-transform">
+                                <i data-lucide="search" class="w-6 h-6"></i>
+                            </div>
+                            <div class="space-y-1">
+                                <span class="font-quicksand font-bold text-sm text-gray-800 block">Pokédex</span> 
+                                <span class="text-[10px] text-gray-400 leading-tight block">Explore todos os Pokémon por região</span> 
+                            </div>
+                        </a>
+                        <a href="favorites.html" class="flex flex-col items-center gap-3 p-6 rounded-2xl bg-white border border-gray-100 hover:border-red-400/30 hover:bg-red-50/50 transition-all text-center group shadow-sm hover:shadow-xl"> 
+                            <div class="w-12 h-12 rounded-xl bg-red-50 flex items-center justify-center text-coral group-hover:scale-110 transition-transform">
+                                <i data-lucide="heart" class="w-6 h-6"></i>
+                            </div>
+                            <div class="space-y-1">
+                                <span class="font-quicksand font-bold text-sm text-gray-800 block">Favoritos</span> 
+                                <span class="text-[10px] text-gray-400 leading-tight block">Salve seus Pokémon preferidos</span> 
+                            </div>
+                        </a>
+                        <a href="team.html" class="flex flex-col items-center gap-3 p-6 rounded-2xl bg-white border border-gray-100 hover:border-red-400/30 hover:bg-red-50/50 transition-all text-center group shadow-sm hover:shadow-xl"> 
+                            <div class="w-12 h-12 rounded-xl bg-red-50 flex items-center justify-center text-coral group-hover:scale-110 transition-transform">
+                                <i data-lucide="users" class="w-6 h-6"></i>
+                            </div>
+                            <div class="space-y-1">
+                                <span class="font-quicksand font-bold text-sm text-gray-800 block">Times</span> 
+                                <span class="text-[10px] text-gray-400 leading-tight block">Monte seu time competitivo</span> 
+                            </div>
+                        </a>
+                        <a href="type-wheel.html" class="flex flex-col items-center gap-3 p-6 rounded-2xl bg-white border border-gray-100 hover:border-red-400/30 hover:bg-red-50/50 transition-all text-center group shadow-sm hover:shadow-xl"> 
+                            <div class="w-12 h-12 rounded-xl bg-red-50 flex items-center justify-center text-coral group-hover:scale-110 transition-transform">
+                                <i data-lucide="radius" class="w-6 h-6"></i>
+                            </div>
+                            <div class="space-y-1">
+                                <span class="font-quicksand font-bold text-sm text-gray-800 block">Roda de Tipos</span> 
+                                <span class="text-[10px] text-gray-400 leading-tight block">Entenda as vantagens de tipo</span> 
+                            </div>
+                        </a>
+                    </div>
+                </section>
+
+                <!-- 3. Notícias & Destaques (PokéAPI) -->
+                <section class="space-y-6">
+                    <div class="flex items-center gap-3">
+                        <i data-lucide="newspaper" class="w-6 h-6 text-coral"></i>
+                        <h2 class="font-quicksand text-2xl font-bold text-gray-800">Notícias & Destaques</h2>
+                    </div>
+                    <div id="highlights-grid" class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <!-- Skeletons renderizados via JS -->
+                    </div>
+                </section>
+
+                <!-- 4. Notícias Pokémon (RSS) -->
+                <section class="space-y-6">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <i data-lucide="rss" class="w-6 h-6 text-coral"></i>
+                            <div>
+                                <h2 class="font-quicksand text-2xl font-bold text-gray-800 leading-none">Notícias Pokémon</h2>
+                                <p class="text-xs text-gray-400 mt-1 uppercase tracking-widest font-bold">Atualização automática</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="news-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <!-- Skeletons renderizados via JS -->
+                    </div>
+                </section>
+
+                <!-- 5. Pokémon do Dia (Destaque Final) -->
+                <section id="daily-pokemon-section">
+                    <!-- Skeleton renderizado via JS -->
+                </section>
+
             </div>
         </main>
     </div>
 
     <!-- Scripts -->
-    <script type="module" src="../js/main.js"></script>
+    <script type="module" src="../js/dashboard.js"></script>
 </body>
 </html>
