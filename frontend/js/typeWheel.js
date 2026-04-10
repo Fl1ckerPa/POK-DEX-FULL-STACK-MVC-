@@ -166,7 +166,7 @@ class TypeWheel {
             btn.title = type.charAt(0).toUpperCase() + type.slice(1);
 
             btn.innerHTML = `
-                <i data-lucide="${typeIcons[type]}" class="w-5 h-5 transition-transform" style="color: ${typeColors[type]}"></i>
+                <img src="${typeIcons[type]}" alt="${type}" class="w-6 h-6 object-contain transition-transform" />
                 <span class="absolute -bottom-8 left-1/2 -translate-x-1/2 text-[10px] font-black uppercase text-white opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap bg-slate-950 px-2 py-1 rounded shadow-xl">
                     ${type}
                 </span>
@@ -200,11 +200,9 @@ class TypeWheel {
             if (isSelected) {
                 node.classList.add('scale-125', 'z-30', 'border-white', 'shadow-[0_0_20px_rgba(255,255,255,0.3)]');
                 node.style.backgroundColor = typeColors[type];
-                node.querySelector('i').style.color = 'white';
             } else {
                 node.classList.remove('scale-125', 'z-30', 'border-white', 'shadow-[0_0_20px_rgba(255,255,255,0.3)]');
                 node.style.backgroundColor = `${typeColors[type]}33`;
-                node.querySelector('i').style.color = typeColors[type];
             }
         });
 
@@ -219,7 +217,7 @@ class TypeWheel {
             hubContent.querySelector('span').textContent = this.selectedTypes.length === 1 ? 'Tipo Único' : 'Tipo Duplo';
             hubIcons.innerHTML = this.selectedTypes.map(t => `
                 <div class="w-8 h-8 rounded-full flex items-center justify-center border border-white/20" style="background-color: ${typeColors[t]}">
-                    <i data-lucide="${typeIcons[t]}" class="w-4 h-4 text-white"></i>
+                    <img src="${typeIcons[t]}" alt="${t}" class="w-5 h-5 object-contain" />
                 </div>
             `).join('');
             if (window.lucide) lucide.createIcons();
@@ -317,7 +315,7 @@ class TypeWheel {
             <div class="flex items-center justify-between p-4 bg-slate-950/50 rounded-2xl border border-white/5 group hover:border-white/10 transition-all">
                 <div class="flex items-center gap-4">
                     <div class="w-10 h-10 rounded-xl flex items-center justify-center shadow-lg" style="background-color: ${typeColors[type]}">
-                        <i data-lucide="${typeIcons[type]}" class="w-5 h-5 text-white"></i>
+                        <img src="${typeIcons[type]}" alt="${type}" class="w-6 h-6 object-contain" />
                     </div>
                     <div>
                         <span class="text-sm font-black text-white uppercase tracking-wider">${type}</span>

@@ -5,7 +5,7 @@ import auth from './auth.js';
 class TypeWheelPage {
     constructor() {
         this.selectedTypes = [];
-        this.currentMode = 'advantages'; // 'advantages', 'weaknesses', 'immunities'
+        this.currentMode = 'advantages'; // 'advantages', 'weaknesses', 'resistances'
         this.types = Object.keys(typeChart);
         this.isDualType = false;
     }
@@ -15,6 +15,9 @@ class TypeWheelPage {
         this.updateUserDisplay();
         this.setupEventListeners();
         this.renderWheel();
+        
+        // Initial UI state
+        this.updateWheelUI();
         this.updateRelations();
         
         if (window.lucide) lucide.createIcons();
@@ -89,7 +92,7 @@ class TypeWheelPage {
             btn.title = type.charAt(0).toUpperCase() + type.slice(1);
 
             btn.innerHTML = `
-                <i data-lucide="${typeIcons[type]}" class="w-5 h-5 sm:w-6 sm:h-6 transition-transform group-hover:rotate-12" style="color: ${typeColors[type]}"></i>
+                <img src="${typeIcons[type]}" alt="${type}" class="w-6 h-6 sm:w-7 sm:h-7 object-contain transition-transform group-hover:rotate-12" />
                 
                 <!-- Selection Number Badge -->
                 <div class="selection-badge absolute -top-2 -right-2 w-6 h-6 rounded-full bg-white text-coral text-[10px] font-black flex items-center justify-center shadow-lg border border-coral/20 opacity-0 scale-0 transition-all duration-300 z-50"></div>
@@ -121,52 +124,63 @@ class TypeWheelPage {
         if (index > -1) {
             this.selectedTypes.splice(index, 1);
         } else {
-            if (this.selectedTypes.length >= 2) this.selectedTypes.shift();
+            if (this.selectedTypes.length >= 2) {
+                // Remove oldest (index 0)
+                this.selectedTypes.shift();
+            }
             this.selectedTypes.push(type);
         }
 
         this.updateWheelUI();
         this.updateRelations();
+        
+        // Ensure icons are created after dynamic update
+        if (window.lucide) lucide.createIcons();
     }
 
     updateWheelUI() {
         const hasSelection = this.selectedTypes.length > 0;
-
-        document.querySelectorAll('.type-node').forEach(node => {
+        const nodes = document.querySelectorAll('.type-node');
+        
+        nodes.forEach(node => {
             const type = node.dataset.type;
             const selectionIndex = this.selectedTypes.indexOf(type);
             const isSelected = selectionIndex > -1;
             const badge = node.querySelector('.selection-badge');
             const label = node.querySelector('.type-label');
+            const icon = node.querySelector('img');
             
             if (isSelected) {
-                // Node Highlight
-                node.classList.add('scale-125', 'z-30', 'border-coral', 'shadow-2xl', 'shadow-coral/40', 'opacity-100');
-                node.classList.remove('opacity-40');
+                // Node Highlight - More prominent
+                node.classList.add('scale-125', 'z-30', 'shadow-2xl');
                 node.style.backgroundColor = typeColors[type];
-                node.querySelector('i').style.color = 'white';
+                node.style.borderColor = 'white';
                 node.style.borderWidth = '4px';
+                node.style.boxShadow = `0 0 20px ${typeColors[type]}66`;
+                node.classList.remove('opacity-40');
+                node.classList.add('opacity-100');
 
                 // Badge (Selection Order)
                 if (badge) {
                     badge.textContent = selectionIndex + 1;
-                    badge.classList.remove('opacity-0', 'scale-0');
-                    badge.classList.add('opacity-100', 'scale-100');
+                    badge.style.opacity = '1';
+                    badge.style.transform = 'scale(1)';
                 }
 
                 // Persistent Label
                 if (label) {
-                    label.classList.add('opacity-100', '-bottom-12');
-                    label.classList.remove('opacity-0', '-bottom-10');
+                    label.style.opacity = '1';
+                    label.style.bottom = '-3.5rem';
                 }
             } else {
                 // Node Reset
-                node.classList.remove('scale-125', 'z-30', 'border-coral', 'shadow-2xl', 'shadow-coral/40');
+                node.classList.remove('scale-125', 'z-30', 'shadow-2xl');
                 node.style.backgroundColor = `${typeColors[type]}15`;
-                node.querySelector('i').style.color = typeColors[type];
+                node.style.borderColor = `${typeColors[type]}33`;
                 node.style.borderWidth = '2px';
+                node.style.boxShadow = 'none';
                 
-                // Dim non-selected
+                // Dim non-selected only if there is a selection
                 if (hasSelection) {
                     node.classList.add('opacity-40');
                     node.classList.remove('opacity-100');
@@ -177,28 +191,38 @@ class TypeWheelPage {
 
                 // Badge Reset
                 if (badge) {
-                    badge.classList.add('opacity-0', 'scale-0');
-                    badge.classList.remove('opacity-100', 'scale-100');
+                    badge.style.opacity = '0';
+                    badge.style.transform = 'scale(0)';
                 }
 
                 // Persistent Label Reset
                 if (label) {
-                    label.classList.remove('opacity-100', '-bottom-12');
-                    label.classList.add('opacity-0', '-bottom-10');
+                    label.style.opacity = '0';
+                    label.style.bottom = '-2.5rem';
                 }
             }
         });
 
         // Hub update
+        this.updateHubDisplay();
+    }
+
+    updateHubDisplay() {
         const hub = document.getElementById('central-hub');
         const hubContent = document.getElementById('hub-content');
         const hubIcons = document.getElementById('hub-selected-icons');
         
+        if (!hub || !hubContent || !hubIcons) return;
+
+        const span = hubContent.querySelector('span');
+
         if (this.selectedTypes.length === 0) {
             hub.style.background = 'white';
-            hub.style.borderColor = '#f3f4f6'; // gray-100
-            hubContent.querySelector('span').textContent = 'Seleção';
-            hubContent.querySelector('span').classList.replace('text-white/70', 'text-gray-400');
+            hub.style.borderColor = '#f3f4f6';
+            if (span) {
+                span.textContent = 'Seleção';
+                span.className = 'text-[10px] sm:text-xs text-gray-400 font-black uppercase tracking-[0.2em] mb-2 block';
+            }
             hubIcons.innerHTML = `
                 <div class="w-10 h-10 rounded-full border-2 border-dashed border-gray-200 flex items-center justify-center animate-pulse">
                     <i data-lucide="plus" class="w-4 h-4 text-gray-300"></i>
@@ -208,27 +232,29 @@ class TypeWheelPage {
             const type1 = this.selectedTypes[0];
             const type2 = this.selectedTypes[1];
             
-            hubContent.querySelector('span').textContent = this.selectedTypes.length === 1 ? 'Tipo Único' : 'Tipo Duplo';
-            hubContent.querySelector('span').classList.replace('text-gray-400', 'text-white/70');
-            hub.style.borderColor = 'rgba(255,255,255,0.2)';
+            if (span) {
+                span.textContent = this.selectedTypes.length === 1 ? 'Tipo Único' : 'Tipo Duplo';
+                span.className = 'text-[10px] sm:text-xs text-white/90 font-black uppercase tracking-[0.2em] mb-2 block drop-shadow-sm';
+            }
+            hub.style.borderColor = 'rgba(255,255,255,0.4)';
 
             if (this.selectedTypes.length === 1) {
                 hub.style.background = typeColors[type1];
                 hubIcons.innerHTML = `
-                    <div class="w-12 h-12 sm:w-16 sm:h-16 rounded-full flex items-center justify-center border-2 border-white/20 shadow-2xl animate-spring-in">
-                        <i data-lucide="${typeIcons[type1]}" class="w-6 h-6 sm:w-8 sm:h-8 text-white"></i>
+                    <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-full flex items-center justify-center border-2 border-white/40 shadow-2xl animate-spring-in bg-white/10 backdrop-blur-sm">
+                        <img src="${typeIcons[type1]}" alt="${type1}" class="w-10 h-10 object-contain" />
                     </div>
                 `;
             } else {
-                // 50/50 Split
-                hub.style.background = `linear-gradient(to bottom, ${typeColors[type1]} 50%, ${typeColors[type2]} 50%)`;
+                // 50/50 Diagonal Split
+                hub.style.background = `linear-gradient(135deg, ${typeColors[type1]} 50%, ${typeColors[type2]} 50%)`;
                 hubIcons.innerHTML = `
-                    <div class="flex flex-col gap-2 animate-spring-in">
-                        <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center border-2 border-white/20 shadow-lg" style="background-color: ${typeColors[type1]}">
-                            <i data-lucide="${typeIcons[type1]}" class="w-5 h-5 sm:w-6 sm:h-6 text-white"></i>
+                    <div class="relative w-24 h-20 sm:w-32 sm:h-24 flex items-center justify-center animate-spring-in">
+                        <div class="absolute left-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center border-2 border-white/40 shadow-xl bg-white/10 backdrop-blur-sm z-10" style="background-color: ${typeColors[type1]}">
+                            <img src="${typeIcons[type1]}" alt="${type1}" class="w-8 h-8 sm:w-10 sm:h-10 object-contain" />
                         </div>
-                        <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center border-2 border-white/20 shadow-lg" style="background-color: ${typeColors[type2]}">
-                            <i data-lucide="${typeIcons[type2]}" class="w-5 h-5 sm:w-6 sm:h-6 text-white"></i>
+                        <div class="absolute right-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center border-2 border-white/40 shadow-xl bg-white/10 backdrop-blur-sm z-10" style="background-color: ${typeColors[type2]}">
+                            <img src="${typeIcons[type2]}" alt="${type2}" class="w-8 h-8 sm:w-10 sm:h-10 object-contain" />
                         </div>
                     </div>
                 `;
@@ -253,12 +279,14 @@ class TypeWheelPage {
         });
 
         // Update Title and Icon
-        if (this.currentMode === 'advantages') {
-            modeTitle.innerHTML = `<i data-lucide="zap" class="w-5 h-5 text-emerald-500"></i> Eficácia de Ataque`;
-        } else if (this.currentMode === 'weaknesses') {
-            modeTitle.innerHTML = `<i data-lucide="shield-alert" class="w-5 h-5 text-rose-500"></i> Vulnerabilidades`;
-        } else {
-            modeTitle.innerHTML = `<i data-lucide="shield-check" class="w-5 h-5 text-blue-500"></i> Resistências e Imunidades`;
+        if (modeTitle) {
+            if (this.currentMode === 'advantages') {
+                modeTitle.innerHTML = `<i data-lucide="zap" class="w-5 h-5 text-emerald-500"></i> Eficácia de Ataque`;
+            } else if (this.currentMode === 'weaknesses') {
+                modeTitle.innerHTML = `<i data-lucide="shield-alert" class="w-5 h-5 text-rose-500"></i> Vulnerabilidades`;
+            } else {
+                modeTitle.innerHTML = `<i data-lucide="shield-check" class="w-5 h-5 text-blue-500"></i> Resistências e Imunidades`;
+            }
         }
         if (window.lucide) lucide.createIcons();
     }
@@ -269,16 +297,10 @@ class TypeWheelPage {
         const multipliers = {};
         this.types.forEach(t => multipliers[t] = 1);
 
-        if (this.currentMode === 'weaknesses') {
-            this.selectedTypes.forEach(defType => {
-                const relations = typeChart[defType];
-                relations.double_damage_from.forEach(atkType => multipliers[atkType] *= 2);
-                relations.half_damage_from.forEach(atkType => multipliers[atkType] *= 0.5);
-                relations.no_damage_from.forEach(atkType => multipliers[atkType] *= 0);
-            });
-        } else if (this.currentMode === 'advantages') {
+        if (this.currentMode === 'advantages') {
+            // Attack: Best multiplier against each target type
             this.types.forEach(defType => {
-                let maxMult = 0;
+                let maxMult = 1;
                 this.selectedTypes.forEach(atkType => {
                     const relations = typeChart[atkType];
                     let currentMult = 1;
@@ -290,15 +312,12 @@ class TypeWheelPage {
                 multipliers[defType] = maxMult;
             });
         } else {
-            this.types.forEach(otherType => {
-                let isImmune = false;
-                this.selectedTypes.forEach(myType => {
-                    if (typeChart[myType].no_damage_from.includes(otherType) || 
-                        typeChart[otherType].no_damage_to.includes(myType)) {
-                        isImmune = true;
-                    }
-                });
-                multipliers[otherType] = isImmune ? 0 : 1;
+            // Defense (Weaknesses and Resistances): Product of multipliers
+            this.selectedTypes.forEach(defType => {
+                const relations = typeChart[defType];
+                relations.double_damage_from.forEach(atkType => multipliers[atkType] *= 2);
+                relations.half_damage_from.forEach(atkType => multipliers[atkType] *= 0.5);
+                relations.no_damage_from.forEach(atkType => multipliers[atkType] *= 0);
             });
         }
 
@@ -330,13 +349,13 @@ class TypeWheelPage {
 
         let filtered = [];
         if (this.currentMode === 'advantages') {
-            // Dano que EU CAUSO (Ataque)
+            // Attack: Show x2 (and theoretically x4 if we considered dual targets, but here we show what we hit hard)
             filtered = Object.entries(multipliers).filter(([_, m]) => m > 1);
         } else if (this.currentMode === 'weaknesses') {
-            // Dano que EU RECEBO (Vulnerabilidades)
+            // Defense: Show x2 and x4
             filtered = Object.entries(multipliers).filter(([_, m]) => m > 1);
         } else {
-            // Dano que EU RECEBO (Resistências e Imunidades)
+            // Defense: Show x0.5, x0.25 and x0
             filtered = Object.entries(multipliers).filter(([_, m]) => m < 1);
         }
 
@@ -359,13 +378,18 @@ class TypeWheelPage {
             return;
         }
 
-        filtered.sort((a, b) => b[1] - a[1]);
+        // Sort by multiplier (descending for advantages/weaknesses, ascending for resistances)
+        if (this.currentMode === 'resistances') {
+            filtered.sort((a, b) => a[1] - b[1]);
+        } else {
+            filtered.sort((a, b) => b[1] - a[1]);
+        }
 
         list.innerHTML = filtered.map(([type, mult]) => `
             <div class="flex items-center justify-between p-4 bg-gray-50/50 rounded-2xl border border-black/5 group hover:border-coral/20 transition-all duration-300 animate-fade-in hover:shadow-lg hover:shadow-black/5">
                 <div class="flex items-center gap-4">
                     <div class="w-12 h-12 rounded-xl flex items-center justify-center shadow-md group-hover:scale-110 transition-transform" style="background-color: ${typeColors[type]}">
-                        <i data-lucide="${typeIcons[type]}" class="w-6 h-6 text-white"></i>
+                        <img src="${typeIcons[type]}" alt="${type}" class="w-7 h-7 object-contain" />
                     </div>
                     <div>
                         <span class="text-sm font-black text-gray-800 uppercase tracking-widest">${type}</span>
@@ -384,8 +408,8 @@ class TypeWheelPage {
     }
 
     getMultLabel(mult) {
-        if (mult === 4) return 'Dano Extremo';
-        if (mult === 2) return 'Super Efetivo';
+        if (mult >= 4) return 'Vulnerabilidade Extrema';
+        if (mult >= 2) return this.currentMode === 'advantages' ? 'Super Efetivo' : 'Fraqueza';
         if (mult === 0.5) return 'Resistente';
         if (mult === 0.25) return 'Dupla Resistência';
         if (mult === 0) return 'Imunidade Total';
@@ -393,20 +417,30 @@ class TypeWheelPage {
     }
 
     getMultColor(mult) {
-        if (mult >= 4) return 'text-emerald-600';
-        if (mult >= 2) return 'text-emerald-500';
-        if (mult === 0) return 'text-gray-400';
-        if (mult <= 0.25) return 'text-blue-600';
-        if (mult <= 0.5) return 'text-blue-500';
+        if (this.currentMode === 'advantages') {
+            if (mult >= 2) return 'text-emerald-500';
+            return 'text-gray-400';
+        }
+        
+        if (mult >= 4) return 'text-rose-600';
+        if (mult >= 2) return 'text-rose-500';
+        if (mult === 0) return 'text-blue-600';
+        if (mult <= 0.25) return 'text-blue-500';
+        if (mult <= 0.5) return 'text-blue-400';
         return 'text-gray-800';
     }
 
     getMultColorHex(mult) {
-        if (mult >= 4) return '#059669'; // emerald-600
-        if (mult >= 2) return '#10b981'; // emerald-500
-        if (mult === 0) return '#9ca3af'; // gray-400
-        if (mult <= 0.25) return '#2563eb'; // blue-600
-        if (mult <= 0.5) return '#3b82f6'; // blue-500
+        if (this.currentMode === 'advantages') {
+            if (mult >= 2) return '#10b981'; // emerald-500 (Green)
+            return '#9ca3af'; // gray-400
+        }
+
+        if (mult >= 4) return '#e11d48'; // rose-600 (Red)
+        if (mult >= 2) return '#f43f5e'; // rose-500 (Red)
+        if (mult === 0) return '#2563eb'; // blue-600 (Blue for immunity)
+        if (mult <= 0.25) return '#3b82f6'; // blue-500
+        if (mult <= 0.5) return '#60a5fa'; // blue-400
         return '#1f2937'; // gray-800
     }
 }

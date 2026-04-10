@@ -167,24 +167,24 @@ const typeColors = {
 };
 
 const typeIcons = {
-    normal: 'circle',
-    fire: 'flame',
-    water: 'droplets',
-    electric: 'zap',
-    grass: 'leaf',
-    ice: 'snowflake',
-    fighting: 'swords',
-    poison: 'skull',
-    ground: 'mountain',
-    flying: 'wind',
-    psychic: 'brain',
-    bug: 'bug',
-    rock: 'gem',
-    ghost: 'ghost',
-    dragon: 'shield-alert',
-    dark: 'moon',
-    steel: 'shield',
-    fairy: 'sparkles'
+    fire: '../assets/icons/types/fire.png',
+    water: '../assets/icons/types/water.png',
+    grass: '../assets/icons/types/grass.png',
+    electric: '../assets/icons/types/electric.png',
+    psychic: '../assets/icons/types/psychic.png',
+    ice: '../assets/icons/types/ice.png',
+    dragon: '../assets/icons/types/dragon.png',
+    dark: '../assets/icons/types/dark.png',
+    fairy: '../assets/icons/types/fairy.png',
+    fighting: '../assets/icons/types/fighting.png',
+    flying: '../assets/icons/types/flying.png',
+    poison: '../assets/icons/types/poison.png',
+    ground: '../assets/icons/types/ground.png',
+    rock: '../assets/icons/types/rock.png',
+    bug: '../assets/icons/types/bug.png',
+    ghost: '../assets/icons/types/ghost.png',
+    steel: '../assets/icons/types/steel.png',
+    normal: '../assets/icons/types/normal.png'
 };
 
 export { typeChart, typeColors, typeIcons };
