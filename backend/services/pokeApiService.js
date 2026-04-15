@@ -108,7 +108,10 @@ class PokeApiService {
             sprites: {
                 front_default: data.sprites.front_default,
                 back_default: data.sprites.back_default,
-                official_artwork: data.sprites.other?.['official-artwork']?.front_default || null
+                front_shiny: data.sprites.front_shiny,
+                back_shiny: data.sprites.back_shiny,
+                official_artwork: data.sprites.other?.['official-artwork']?.front_default || null,
+                official_artwork_shiny: data.sprites.other?.['official-artwork']?.front_shiny || null
             },
             types: data.types.map(t => t.type.name),
             abilities: data.abilities.map(a => a.ability.name),

@@ -3,7 +3,7 @@
 <head> 
   <meta charset="UTF-8"> 
   <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
-  <title>Teams | Pokédex</title> 
+  <title>Equipes | Pokédex</title> 
   <!-- Favicon -->
   <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
   <!-- Tailwind CSS -->
@@ -75,19 +75,24 @@
     </aside>
 
     <main class="flex-1 flex flex-col min-w-0 p-6 lg:p-8 space-y-6"> 
+      <!-- Loading Overlay Standardized -->
+      <div id="loading-overlay" class="loader-overlay">
+          <div class="loader-spinner"></div>
+          <p class="loader-text">Carregando</p>
+      </div>
   
       <!-- Cabeçalho --> 
       <div class="flex items-center justify-between"> 
         <div> 
-          <h1 class="font-quicksand font-bold text-3xl text-gray-800 dark:text-gray-100">Teams</h1> 
-          <p class="text-sm text-gray-500 dark:text-gray-400 mt-1 teams-subtitle">0 times criados</p> 
+          <h1 class="font-quicksand font-bold text-3xl text-gray-800 dark:text-gray-100">Equipes</h1> 
+          <p class="text-sm text-gray-500 dark:text-gray-400 mt-1 teams-subtitle">0 equipes criadas</p> 
         </div> 
         <button id="open-modal-btn" 
                 class="flex items-center gap-2 px-6 py-3 rounded-full 
                        bg-teal text-white shadow-lg shadow-teal/20
                        hover:scale-105 font-quicksand font-bold text-lg transition-all"> 
           <i data-lucide="plus" class="w-5 h-5"></i>
-          New Team 
+          Nova Equipe 
         </button> 
       </div> 
   
@@ -100,10 +105,10 @@
             <i data-lucide="users" class="w-7 h-7"></i>
           </div> 
           <h3 class="font-quicksand font-bold text-xl text-gray-800 dark:text-gray-100 mb-1"> 
-            No teams created 
+            Nenhuma equipe criada 
           </h3> 
           <p class="text-sm text-gray-500 dark:text-gray-400 max-w-xs"> 
-            Build your first team by clicking "New Team" above. 
+            Crie sua primeira equipe clicando em "Nova Equipe" acima. 
           </p> 
         </div> 
       </div> 
@@ -167,7 +172,7 @@
                 class="w-full h-12 rounded-2xl bg-teal text-white 
                        hover:bg-teal/90 font-quicksand font-bold text-lg shadow-lg shadow-teal/20 
                        transition-all active:scale-[0.98]"> 
-          Create Team 
+          Criar Equipe 
         </button> 
       </div> 
     </div> 

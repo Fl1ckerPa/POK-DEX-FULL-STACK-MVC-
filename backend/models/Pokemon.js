@@ -167,14 +167,17 @@ class Pokemon {
             const [result] = await db.query(
                 `INSERT INTO pokemons (
                     pokemon_id, name, type, height, weight, base_experience,
-                    image_url, front_default_url, back_default_url,
+                    image_url, image_shiny_url, front_default_url, back_default_url,
+                    front_shiny_url, back_shiny_url,
                     stats_hp, stats_attack, stats_defense, 
                     stats_sp_attack, stats_sp_defense, stats_speed, 
                     abilities, types_json, flavor_text, varieties_json
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
                 [
                     id, name, types[0], height, weight, base_experience,
-                    sprites.official_artwork, sprites.front_default, sprites.back_default,
+                    sprites.official_artwork, sprites.official_artwork_shiny, 
+                    sprites.front_default, sprites.back_default,
+                    sprites.front_shiny, sprites.back_shiny,
                     hp, attack, defense, sp_attack, sp_defense, speed,
                     JSON.stringify(abilities), JSON.stringify(types), flavor_text, JSON.stringify(varieties)
                 ]
@@ -207,7 +210,8 @@ class Pokemon {
             const [result] = await db.query(
                 `UPDATE pokemons SET 
                     name = ?, type = ?, height = ?, weight = ?, base_experience = ?,
-                    image_url = ?, front_default_url = ?, back_default_url = ?,
+                    image_url = ?, image_shiny_url = ?, front_default_url = ?, back_default_url = ?,
+                    front_shiny_url = ?, back_shiny_url = ?,
                     stats_hp = ?, stats_attack = ?, stats_defense = ?, 
                     stats_sp_attack = ?, stats_sp_defense = ?, stats_speed = ?, 
                     abilities = ?, types_json = ?, flavor_text = ?, varieties_json = ?, 
@@ -215,7 +219,9 @@ class Pokemon {
                 WHERE pokemon_id = ?`,
                 [
                     name, types[0], height, weight, base_experience,
-                    sprites.official_artwork, sprites.front_default, sprites.back_default,
+                    sprites.official_artwork, sprites.official_artwork_shiny, 
+                    sprites.front_default, sprites.back_default,
+                    sprites.front_shiny, sprites.back_shiny,
                     hp, attack, defense, sp_attack, sp_defense, speed,
                     JSON.stringify(abilities), JSON.stringify(types), flavor_text, JSON.stringify(varieties), id
                 ]

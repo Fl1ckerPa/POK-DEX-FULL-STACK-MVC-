@@ -636,6 +636,58 @@ function renderStats(stats) {
 }
 
 /**
+ * Configura o toggle de versão shiny
+ */
+function setupShinyToggle(pokemon) {
+  const shinyBtn = document.getElementById('toggle-shiny-btn');
+  const mainImage = document.querySelector('.pokemon-image');
+  let isShiny = false;
+
+  if (shinyBtn && mainImage) {
+    shinyBtn.addEventListener('click', () => {
+      isShiny = !isShiny;
+      
+      // Add fade + scale transition effect
+      mainImage.style.opacity = '0';
+      mainImage.style.transform = 'scale(0.9)';
+      
+      setTimeout(() => {
+        if (isShiny) {
+          mainImage.src = pokemon.shiny_image_url;
+          mainImage.alt = `${pokemon.name} shiny`;
+          
+          // Active state classes
+          shinyBtn.classList.remove('bg-white/80', 'border-gray-200');
+          shinyBtn.classList.add('bg-amber-500', 'border-amber-400', 'shadow-[0_0_12px_rgba(245,158,11,0.5)]');
+          
+          const icon = shinyBtn.querySelector('i');
+          icon.classList.remove('text-gray-400');
+          icon.classList.add('text-white', 'animate-pulse');
+          
+          shinyBtn.title = "Ver sprite normal";
+        } else {
+          mainImage.src = pokemon.image_url;
+          mainImage.alt = pokemon.name;
+          
+          // Inactive state classes
+          shinyBtn.classList.remove('bg-amber-500', 'border-amber-400', 'shadow-[0_0_12px_rgba(245,158,11,0.5)]');
+          shinyBtn.classList.add('bg-white/80', 'border-gray-200');
+          
+          const icon = shinyBtn.querySelector('i');
+          icon.classList.remove('text-white', 'animate-pulse');
+          icon.classList.add('text-gray-400');
+          
+          shinyBtn.title = "Ver sprite shiny";
+        }
+        
+        mainImage.style.opacity = '1';
+        mainImage.style.transform = 'scale(1)';
+      }, 250);
+    });
+  }
+}
+
+/**
  * Inicializa a página de detalhes
  */
 async function init() {
@@ -668,7 +720,8 @@ async function init() {
     const pokemon = {
       id: data.id,
       name: data.name,
-      image_url: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${data.id}.png`,
+      image_url: data.sprites?.official_artwork || `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${data.id}.png`,
+      shiny_image_url: data.sprites?.official_artwork_shiny || `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/shiny/${data.id}.png`,
       types: data.types || [],
       height: data.height,
       weight: data.weight,
@@ -710,44 +763,32 @@ async function init() {
     document.querySelector('.height-value').textContent = `${pokemon.height / 10} m`;
     document.querySelector('.weight-value').textContent = `${pokemon.weight / 10} kg`;
 
-    // Abilities (Detailed)
-    try {
-      await renderAbilities(pokemon.abilities);
-    } catch (e) {
-      console.error('Erro ao renderizar habilidades:', e);
+    // favorite-btn
+    setupFavoriteButton(pokemon.id, data.is_favorite);
+
+    // Shiny Toggle
+    setupShinyToggle(pokemon);
+
+    // Hide loading overlay as soon as main data is ready
+    const overlay = document.getElementById('loading-overlay');
+    if (overlay) {
+      overlay.classList.add('opacity-0');
+      setTimeout(() => overlay.remove(), 500);
     }
 
-    // Evolution Chain
-    try {
-      await renderEvolutionChain(pokemon.id);
-    } catch (e) {
-      console.error('Erro ao renderizar evolução:', e);
-    }
+    // Load secondary data asynchronously (Non-blocking)
+    renderAbilities(pokemon.abilities).catch(e => console.error('Abilities error:', e));
+    renderEvolutionChain(pokemon.id).catch(e => console.error('Evo error:', e));
+    renderMoves(pokemon.id).catch(e => console.error('Moves error:', e));
+    renderGameVersions(pokemon.id).catch(e => console.error('Versions error:', e));
 
-    // Moves
-    try {
-      await renderMoves(pokemon.id);
-    } catch (e) {
-      console.error('Erro ao renderizar movimentos:', e);
-    }
-
-    // Game Versions
-    try {
-      await renderGameVersions(pokemon.id);
-    } catch (e) {
-      console.error('Erro ao renderizar versões:', e);
-    }
-
-    // Stats
+    // Stats (This is quick, can stay here)
     try {
       renderStats(pokemon.stats);
       setupStatsToggle(pokemon.stats);
     } catch (e) {
       console.error('Erro ao renderizar stats:', e);
     }
-
-    // Favorite Button Logic
-    setupFavoriteButton(pokemon.id, data.is_favorite);
 
     // Cry button
     const cryBtn = document.querySelector('.cry-btn');
@@ -757,13 +798,6 @@ async function init() {
 
     // Initialize icons
     if (window.lucide) lucide.createIcons();
-
-    // Hide loading overlay
-    const overlay = document.getElementById('loading-overlay');
-    if (overlay) {
-      overlay.classList.add('opacity-0');
-      setTimeout(() => overlay.remove(), 500);
-    }
 
   } catch (error) {
     console.error('Erro crítico no init:', error);

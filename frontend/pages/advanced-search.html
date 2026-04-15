@@ -47,11 +47,11 @@
                     </a>
                     <a href="favorites.html" class="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-600 hover:bg-black/5 hover:text-gray-900 transition-all">
                         <i data-lucide="heart" class="w-5 h-5"></i>
-                        Favorites
+                        Favoritos
                     </a>
                     <a href="team.html" class="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-600 hover:bg-black/5 hover:text-gray-900 transition-all">
                         <i data-lucide="users" class="w-5 h-5"></i>
-                        Teams
+                        Equipes
                     </a>
                     <a href="history.html" class="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-600 hover:bg-black/5 hover:text-gray-900 transition-all">
                         <i data-lucide="clock" class="w-5 h-5"></i>
@@ -78,6 +78,12 @@
 
         <!-- Main Content -->
         <main class="flex-1 flex flex-col min-w-0">
+            <!-- Loading Overlay Standardized -->
+            <div id="loading-overlay" class="loader-overlay">
+                <div class="loader-spinner"></div>
+                <p class="loader-text">Carregando</p>
+            </div>
+
             <header class="sticky top-0 z-30 bg-cream/80 backdrop-blur-md border-b border-black/5 py-4">
                 <div class="max-w-7xl mx-auto px-6 flex items-center justify-between">
                     <h1 class="text-xl font-bold text-gray-800">Busca Avançada</h1>
@@ -109,7 +115,7 @@
                 <div class="glass-card p-8 space-y-10">
                     <!-- Type Filter -->
                     <div class="space-y-6">
-                        <h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest">Filter by Type</h3>
+                        <h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest">Filtrar por Tipo</h3>
                         <div id="type-pills" class="flex flex-wrap gap-3">
                             <button class="type-pill-btn type-badge type-badge-md bg-type-normal border-2 border-transparent hover:scale-105 active:scale-95 transition-all" data-type="normal">Normal</button>
                             <button class="type-pill-btn type-badge type-badge-md bg-type-fire border-2 border-transparent hover:scale-105 active:scale-95 transition-all" data-type="fire">Fire</button>
@@ -134,9 +140,9 @@
 
                     <!-- Region Filter -->
                     <div class="space-y-6">
-                        <h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest">Filter by Region</h3>
+                        <h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest">Filtrar por Região</h3>
                         <div id="region-pills" class="flex items-center gap-3 overflow-x-auto pb-4 scrollbar-hide">
-                            <button class="region-pill-btn px-8 py-3 rounded-full text-sm font-bold transition-all bg-coral text-white shadow-lg shadow-coral/30 active whitespace-nowrap" data-region="">All</button>
+                            <button class="region-pill-btn px-8 py-3 rounded-full text-sm font-bold transition-all bg-coral text-white shadow-lg shadow-coral/30 active whitespace-nowrap" data-region="">Todas</button>
                             <button class="region-pill-btn px-8 py-3 rounded-full text-sm font-bold transition-all bg-slate-100 text-slate-500 hover:bg-slate-200 whitespace-nowrap" data-region="1-151">Kanto</button>
                             <button class="region-pill-btn px-8 py-3 rounded-full text-sm font-bold transition-all bg-slate-100 text-slate-500 hover:bg-slate-200 whitespace-nowrap" data-region="152-251">Johto</button>
                             <button class="region-pill-btn px-8 py-3 rounded-full text-sm font-bold transition-all bg-slate-100 text-slate-500 hover:bg-slate-200 whitespace-nowrap" data-region="252-386">Hoenn</button>
@@ -145,7 +151,7 @@
                             <button class="region-pill-btn px-8 py-3 rounded-full text-sm font-bold transition-all bg-slate-100 text-slate-500 hover:bg-slate-200 whitespace-nowrap" data-region="650-721">Kalos</button>
                             <button class="region-pill-btn px-8 py-3 rounded-full text-sm font-bold transition-all bg-slate-100 text-slate-500 hover:bg-slate-200 whitespace-nowrap" data-region="722-809">Alola</button>
                             <button class="region-pill-btn px-8 py-3 rounded-full text-sm font-bold transition-all bg-slate-100 text-slate-500 hover:bg-slate-200 whitespace-nowrap" data-region="810-898">Galar</button>
-                            <button class="region-pill-btn px-8 py-3 rounded-full text-sm font-bold transition-all bg-slate-100 text-slate-500 hover:bg-slate-200 whitespace-nowrap" data-region="899-1010">Paldea</button>
+                            <button class="region-pill-btn px-8 py-3 rounded-full text-sm font-bold transition-all bg-slate-100 text-slate-500 hover:bg-slate-200 whitespace-nowrap" data-region="899-1025">Paldea</button>
                         </div>
                     </div>
 

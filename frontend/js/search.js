@@ -14,6 +14,10 @@ const search = {
         this.cacheDOM();
         this.bindEvents();
         this.updateUserDisplay();
+        
+        // Realiza a busca inicial automática (20 primeiros Pokémon)
+        this.performSearch(1);
+
         if (window.lucide) lucide.createIcons();
     },
 
@@ -110,6 +114,7 @@ const search = {
     async performSearch(page = 1) {
         this.currentPage = page;
         ui.showLoading();
+        ui.showGridLoading(); // Keep skeletons for the grid itself too
         
         let endpoint = `/pokemon?page=${this.currentPage}&limit=${this.currentLimit}`;
         

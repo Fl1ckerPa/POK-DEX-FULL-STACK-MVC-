@@ -17,15 +17,22 @@ class CacheService {
             const cachedPokemon = await Pokemon.findByPokemonId(id);
 
             if (cachedPokemon) {
-                // Verificar política de atualização (7 dias)
-                if (!this._isCacheExpired(cachedPokemon.updated_at)) {
-                    console.log(`✅ Pokémon ID ${id} encontrado no cache.`);
+                // Verificar política de atualização (7 dias) OU se faltam sprites shiny (caso tenha sido cacheado antes da feature)
+                const hasShinySprites = cachedPokemon.image_shiny_url || cachedPokemon.front_shiny_url || cachedPokemon.back_shiny_url;
+                
+                if (!this._isCacheExpired(cachedPokemon.updated_at) && hasShinySprites) {
+                    console.log(`✅ Pokémon ID ${id} encontrado no cache (com sprites shiny).`);
                     return this._formatCachedToApiResponse(cachedPokemon);
                 }
-                console.log(`🔄 Cache expirado para Pokémon ID ${id}. Atualizando...`);
+                
+                if (!hasShinySprites) {
+                    console.log(`🔍 Pokémon ID ${id} no cache mas sem sprites shiny. Atualizando da API...`);
+                } else {
+                    console.log(`🔄 Cache expirado para Pokémon ID ${id}. Atualizando...`);
+                }
             }
 
-            // 2. Caso não exista no cache ou esteja expirado, consultar PokéAPI
+            // 2. Caso não exista no cache, esteja expirado ou sem shiny, consultar PokéAPI
             console.log(`🔍 Buscando Pokémon ID ${id} na PokéAPI...`);
             const pokemonData = await PokeApiService.getById(id);
 
@@ -123,7 +130,10 @@ class CacheService {
             sprites: {
                 front_default: cached.front_default_url,
                 back_default: cached.back_default_url,
-                official_artwork: cached.image_url
+                front_shiny: cached.front_shiny_url,
+                back_shiny: cached.back_shiny_url,
+                official_artwork: cached.image_url,
+                official_artwork_shiny: cached.image_shiny_url
             },
             types: cached.types_json ? (typeof cached.types_json === 'string' ? JSON.parse(cached.types_json) : cached.types_json) : [cached.type],
             abilities: typeof cached.abilities === 'string' ? JSON.parse(cached.abilities) : cached.abilities,

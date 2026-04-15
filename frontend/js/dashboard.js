@@ -93,6 +93,13 @@ class Dashboard {
             this.renderNews();
             this.renderDailySection();
             
+            // Hide loading overlay
+            const overlay = document.getElementById('loading-overlay');
+            if (overlay) {
+                overlay.style.opacity = '0';
+                setTimeout(() => overlay.remove(), 400);
+            }
+
             if (window.lucide) lucide.createIcons();
         } catch (error) {
             console.error("Erro ao carregar dados da Dashboard:", error);
@@ -103,7 +110,7 @@ class Dashboard {
     getDailyPokemonId() { 
         const today = new Date(); 
         const seed = today.getFullYear() * 10000 + (today.getMonth() + 1) * 100 + today.getDate(); 
-        return (seed % 1010) + 1; 
+        return (seed % 1025) + 1; 
     } 
 
     // Gera IDs aleatórios excluindo um específico 
@@ -111,7 +118,7 @@ class Dashboard {
         const ids = new Set(); 
         let attempts = 0; 
         while (ids.size < count && attempts < 100) { 
-            const id = Math.floor(Math.random() * 1010) + 1; 
+            const id = Math.floor(Math.random() * 1025) + 1; 
             if (id !== exclude) ids.add(id); 
             attempts++; 
         } 
@@ -155,7 +162,7 @@ class Dashboard {
                 { id: "daily", title: `Pokémon do Dia: ${capitalize(daily.name)}`, description: dailyFlavor, image: daily.image, tag: "Destaque", pokemonId: daily.id, types: daily.types }, 
                 { id: "spotlight-1", title: `Descubra ${capitalize(spotlights[0].name)}`, description: `Um Pokémon do tipo ${spotlights[0].types.join(" / ")} com habilidades surpreendentes.`, image: spotlights[0].image, tag: "Explorar", pokemonId: spotlights[0].id, types: spotlights[0].types }, 
                 { id: "spotlight-2", title: `Spotlight: ${capitalize(spotlights[1].name)}`, description: `Conheça mais sobre este Pokémon do tipo ${spotlights[1].types.join(" / ")}.`, image: spotlights[1].image, tag: "Novidade", pokemonId: spotlights[1].id, types: spotlights[1].types }, 
-                { id: "tip-types", title: "Dica: Domine as Vantagens de Tipo", description: "Saber as fraquezas e resistências é essencial. Use a Roda de Tipos!", image: `${ARTWORK_URL}/6.png`, tag: "Dica" }, 
+                { id: "tip-types", title: "Dica: Domine as Vantagens de Tipo", description: "Saber as fraquezas e resistências é essencial. Use a Roda de Tipos!", icon: "radius", tag: "Dica", link: "type-wheel.html" }, 
                 { id: "spotlight-3", title: `Batalha: ${capitalize(spotlights[2].name)} vs ${capitalize(spotlights[3].name)}`, description: "Quem venceria? Compare os stats!", image: spotlights[2].image, tag: "Batalha", pokemonId: spotlights[2].id, types: spotlights[2].types }, 
             ], 
         }; 
@@ -192,7 +199,12 @@ class Dashboard {
         container.innerHTML = this.highlights.map((item, i) => `
             <div class="group relative overflow-hidden rounded-2xl bg-white border border-gray-100 hover:border-red-400/30 transition-all shadow-sm hover:shadow-xl ${i === 0 ? 'col-span-2 row-span-2' : ''}">
                 <div class="relative ${i === 0 ? 'h-56' : 'h-32'} overflow-hidden bg-gray-50 flex items-center justify-center p-4">
-                    <img src="${item.image}" class="h-full object-contain group-hover:scale-110 transition-transform duration-500" />
+                    ${item.icon 
+                        ? `<div class="w-16 h-16 rounded-2xl bg-red-400/10 flex items-center justify-center text-red-400 group-hover:scale-110 transition-transform duration-500">
+                             <i data-lucide="${item.icon}" class="w-10 h-10"></i>
+                           </div>`
+                        : `<img src="${item.image}" class="h-full object-contain group-hover:scale-110 transition-transform duration-500" />`
+                    }
                     <span class="absolute top-3 left-3 px-2 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider ${tagColors[item.tag]}">
                         ${item.tag}
                     </span>
@@ -203,7 +215,7 @@ class Dashboard {
                     </h3>
                     <p class="text-xs text-gray-500 line-clamp-2">${item.description}</p>
                 </div>
-                ${item.pokemonId ? `<button onclick="window.location.href='advanced-search.html?id=${item.pokemonId}'" class="absolute inset-0 z-10 opacity-0"></button>` : ''}
+                ${item.link ? `<button onclick="window.location.href='${item.link}'" class="absolute inset-0 z-10 opacity-0 cursor-pointer"></button>` : item.pokemonId ? `<button onclick="window.location.href='details.html?id=${item.pokemonId}'" class="absolute inset-0 z-10 opacity-0 cursor-pointer"></button>` : ''}
             </div>
         `).join('');
     }
@@ -240,7 +252,7 @@ class Dashboard {
 
         container.innerHTML = `
             <div class="rounded-3xl bg-gradient-to-r from-red-400/10 via-white to-white border border-gray-200 p-6 flex flex-col sm:flex-row items-center gap-6 shadow-sm"> 
-                <div class="shrink-0 group cursor-pointer" onclick="window.location.href='advanced-search.html?id=${this.dailyPokemon.id}'"> 
+                <div class="shrink-0 group cursor-pointer" onclick="window.location.href='details.html?id=${this.dailyPokemon.id}'"> 
                     <img src="${this.dailyPokemon.image}" class="w-32 h-32 object-contain group-hover:scale-110 transition-transform duration-500 drop-shadow-xl" /> 
                 </div> 
                 <div class="text-center sm:text-left flex-1"> 
@@ -255,7 +267,7 @@ class Dashboard {
                         `).join('')}
                     </div> 
                     <p class="text-sm text-gray-500 mt-2 max-w-md line-clamp-2 italic">"${this.highlights[0].description}"</p> 
-                    <a href="advanced-search.html?id=${this.dailyPokemon.id}" class="inline-block mt-3 px-6 py-2.5 rounded-xl bg-red-400 text-white font-quicksand font-bold text-sm hover:bg-red-500 transition-all shadow-lg shadow-red-400/20"> 
+                    <a href="details.html?id=${this.dailyPokemon.id}" class="inline-block mt-3 px-6 py-2.5 rounded-xl bg-red-400 text-white font-quicksand font-bold text-sm hover:bg-red-500 transition-all shadow-lg shadow-red-400/20"> 
                         Ver Detalhes 
                     </a> 
                 </div> 

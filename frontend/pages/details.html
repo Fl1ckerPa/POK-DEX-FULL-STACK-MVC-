@@ -72,10 +72,10 @@
 
     <!-- Main Content -->
     <main class="flex-1 flex flex-col min-w-0 overflow-y-auto">
-      <!-- Loading Overlay -->
-      <div id="loading-overlay" class="fixed inset-0 z-50 bg-cream flex flex-col items-center justify-center transition-opacity duration-500">
-        <div class="w-16 h-16 border-4 border-coral/20 border-t-coral rounded-full animate-spin mb-4"></div>
-        <p class="font-display font-bold text-gray-400 animate-pulse">Carregando Pokédex...</p>
+      <!-- Loading Overlay Standardized -->
+      <div id="loading-overlay" class="loader-overlay">
+        <div class="loader-spinner"></div>
+        <p class="loader-text">Carregando</p>
       </div>
 
       <header class="sticky top-0 z-20 bg-cream/80 backdrop-blur-md 
@@ -95,8 +95,15 @@
       <div class="max-w-2xl mx-auto px-4 pt-6 pb-12 space-y-6 w-full"> 
         <!-- Hero --> 
         <section class="glass-card p-8 text-center opacity-0 animate-fade-slide-up delay-100"> 
-          <div class="h-56 w-56 mx-auto rounded-full bg-gray-100 flex items-center justify-center"> 
-            <img class="h-48 w-48 object-contain drop-shadow-xl pokemon-image" src="" alt=""> 
+          <div class="h-56 w-56 mx-auto rounded-full bg-gray-100 flex items-center justify-center relative"> 
+            <img class="h-48 w-48 object-contain drop-shadow-xl pokemon-image transition-all duration-300" src="" alt=""> 
+            
+            <!-- Shiny Toggle Button (Overlay) -->
+            <button id="toggle-shiny-btn" 
+                    class="absolute top-1 right-1 z-20 w-10 h-10 flex items-center justify-center rounded-full bg-white/80 backdrop-blur-sm border border-gray-200 transition-all duration-300 shadow-sm hover:border-gray-400 active:scale-90 group"
+                    title="Ver sprite shiny">
+                <i data-lucide="sparkles" class="w-4 h-4 text-gray-400 group-hover:text-yellow-500 transition-colors"></i>
+            </button>
           </div> 
           <h2 class="font-display font-bold text-3xl capitalize mt-4 pokemon-title"></h2> 
           <div class="flex justify-center gap-2 mt-3 types"></div> 

@@ -15,12 +15,15 @@ const history = {
 
     async loadHistory() {
         try {
+            ui.showLoading();
             const result = await api.get('/history');
             if (result.success) {
                 this.render(result.data);
             }
+            ui.hideLoading();
         } catch (error) {
             console.error('Error loading history:', error);
+            ui.hideLoading();
         }
     },
 

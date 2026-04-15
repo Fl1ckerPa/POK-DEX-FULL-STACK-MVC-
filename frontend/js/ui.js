@@ -5,6 +5,40 @@ import api from './api.js';
 
 const ui = {
     /**
+     * Mostra o overlay de carregamento padronizado
+     */
+    showLoading() {
+        let loader = document.getElementById('loading-overlay');
+        if (!loader) {
+            loader = document.createElement('div');
+            loader.id = 'loading-overlay';
+            loader.className = 'loader-overlay';
+            loader.innerHTML = `
+                <div class="loader-spinner"></div>
+                <p class="loader-text">Carregando</p>
+            `;
+            document.body.appendChild(loader);
+        }
+        loader.style.opacity = '1';
+        loader.style.display = 'flex';
+        loader.style.pointerEvents = 'all';
+    },
+
+    /**
+     * Esconde o overlay de carregamento padronizado
+     */
+    hideLoading() {
+        const loader = document.getElementById('loading-overlay');
+        if (loader) {
+            loader.style.opacity = '0';
+            loader.style.pointerEvents = 'none';
+            setTimeout(() => {
+                loader.style.display = 'none';
+            }, 400);
+        }
+    },
+
+    /**
      * Inicializa ouvintes globais de UI
      */
     init() {
@@ -105,6 +139,9 @@ const ui = {
 
         // Initialize Lucide icons for the new cards
         if (window.lucide) lucide.createIcons();
+
+        // Hide loading
+        this.hideLoading();
     },
 
     /**
@@ -348,10 +385,17 @@ const ui = {
                 <div class="px-8 pb-12 space-y-8">
                     <!-- Image & Name -->
                     <div class="flex flex-col items-center space-y-4">
-                        <div class="relative w-48 h-48 flex items-center justify-center">
+                        <div class="relative w-56 h-56 flex items-center justify-center bg-gray-100/50 rounded-full">
                             <div class="absolute inset-0 bg-gradient-to-br from-coral/10 to-transparent rounded-full blur-2xl"></div>
-                            <div class="absolute inset-4 bg-gray-50 rounded-full border border-black/5 shadow-inner"></div>
-                            <img src="${imageUrl}" alt="${pokemon.name}" class="w-full h-full object-contain relative z-10 drop-shadow-2xl animate-float">
+                            <img src="${imageUrl}" alt="${pokemon.name}" id="pokemon-main-image" 
+                                 class="w-48 h-48 object-contain relative z-10 drop-shadow-2xl animate-float transition-all duration-300">
+                            
+                            <!-- Shiny Toggle Button (Overlay) -->
+                            <button id="toggle-shiny-btn" 
+                                    class="absolute top-1 right-1 z-20 w-10 h-10 flex items-center justify-center rounded-full bg-white/80 backdrop-blur-sm border border-gray-200 transition-all duration-300 shadow-sm hover:border-gray-400 active:scale-90 group"
+                                    title="Ver sprite shiny">
+                                <i data-lucide="sparkles" class="w-4 h-4 text-gray-400 group-hover:text-yellow-500 transition-colors"></i>
+                            </button>
                         </div>
                         
                         <div class="text-center space-y-2">
@@ -517,6 +561,54 @@ const ui = {
             this.showNotification(`${pokemon.name} adicionado à sua equipe!`, 'success');
             document.dispatchEvent(new CustomEvent('addToTeam', { detail: { id: pokemon.id } }));
         });
+
+        // Shiny Toggle Logic
+        const shinyBtn = overlay.querySelector('#toggle-shiny-btn');
+        const mainImage = overlay.querySelector('#pokemon-main-image');
+        let isShiny = false;
+
+        if (shinyBtn && mainImage) {
+            shinyBtn.addEventListener('click', () => {
+                isShiny = !isShiny;
+                
+                // Add fade + scale transition effect
+                mainImage.style.opacity = '0';
+                mainImage.style.transform = 'scale(0.9)';
+                
+                setTimeout(() => {
+                    if (isShiny) {
+                        mainImage.src = pokemon.sprites?.official_artwork_shiny || pokemon.sprites?.official_artwork || `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/shiny/${pokemon.id}.png`;
+                        mainImage.alt = `${pokemon.name} shiny`;
+                        
+                        // Active state classes
+                        shinyBtn.classList.remove('bg-white/80', 'border-gray-200');
+                        shinyBtn.classList.add('bg-amber-500', 'border-amber-400', 'shadow-[0_0_12px_rgba(245,158,11,0.5)]');
+                        
+                        const icon = shinyBtn.querySelector('i');
+                        icon.classList.remove('text-gray-400');
+                        icon.classList.add('text-white', 'animate-pulse');
+                        
+                        shinyBtn.title = "Ver sprite normal";
+                    } else {
+                        mainImage.src = pokemon.sprites?.official_artwork || `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${pokemon.id}.png`;
+                        mainImage.alt = pokemon.name;
+                        
+                        // Inactive state classes
+                        shinyBtn.classList.remove('bg-amber-500', 'border-amber-400', 'shadow-[0_0_12px_rgba(245,158,11,0.5)]');
+                        shinyBtn.classList.add('bg-white/80', 'border-gray-200');
+                        
+                        const icon = shinyBtn.querySelector('i');
+                        icon.classList.remove('text-white', 'animate-pulse');
+                        icon.classList.add('text-gray-400');
+                        
+                        shinyBtn.title = "Ver sprite shiny";
+                    }
+                    
+                    mainImage.style.opacity = '1';
+                    mainImage.style.transform = 'scale(1)';
+                }, 250);
+            });
+        }
     },
 
     /**
@@ -588,9 +680,9 @@ const ui = {
     },
 
     /**
-     * Show loading skeleton
+     * Show loading skeleton in the grid
      */
-    showLoading() {
+    showGridLoading() {
         const grid = document.getElementById('pokemon-grid');
         if (!grid) return;
 

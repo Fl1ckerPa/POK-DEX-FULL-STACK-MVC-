@@ -79,6 +79,7 @@ const favorites = {
             if (clearBtn) clearBtn.classList.add('hidden');
             // Re-initialize Lucide icons for the empty state
             if (window.lucide) window.lucide.createIcons();
+            ui.hideLoading();
         } else {
             grid.classList.remove('hidden');
             emptyState.classList.add('hidden');

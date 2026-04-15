@@ -298,13 +298,16 @@ document.addEventListener('DOMContentLoaded', () => {
     // Load and Render Teams
     async function loadTeams() {
         try {
+            ui.showLoading();
             const res = await api.get('/teams');
             if (res.success) {
                 teams = res.data;
                 renderTeams();
             }
+            ui.hideLoading();
         } catch (error) {
             console.error('Error loading teams:', error);
+            ui.hideLoading();
         }
     }
 

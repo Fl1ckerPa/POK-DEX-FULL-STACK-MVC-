@@ -22,6 +22,21 @@ const migrate = async () => {
             await db.query('ALTER TABLE pokemons ADD COLUMN back_default_url VARCHAR(255) AFTER front_default_url');
         }
 
+        if (!columnNames.includes('image_shiny_url')) {
+            console.log('➕ Adicionando coluna image_shiny_url...');
+            await db.query('ALTER TABLE pokemons ADD COLUMN image_shiny_url VARCHAR(255) AFTER image_url');
+        }
+
+        if (!columnNames.includes('front_shiny_url')) {
+            console.log('➕ Adicionando coluna front_shiny_url...');
+            await db.query('ALTER TABLE pokemons ADD COLUMN front_shiny_url VARCHAR(255) AFTER back_default_url');
+        }
+
+        if (!columnNames.includes('back_shiny_url')) {
+            console.log('➕ Adicionando coluna back_shiny_url...');
+            await db.query('ALTER TABLE pokemons ADD COLUMN back_shiny_url VARCHAR(255) AFTER front_shiny_url');
+        }
+
         if (!columnNames.includes('types_json')) {
             console.log('➕ Adicionando coluna types_json...');
             await db.query('ALTER TABLE pokemons ADD COLUMN types_json JSON AFTER abilities');
