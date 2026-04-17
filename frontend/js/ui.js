@@ -386,9 +386,9 @@ const ui = {
                     <!-- Image & Name -->
                     <div class="flex flex-col items-center space-y-4">
                         <div class="relative w-56 h-56 flex items-center justify-center bg-gray-100/50 rounded-full">
-                            <div class="absolute inset-0 bg-gradient-to-br from-coral/10 to-transparent rounded-full blur-2xl"></div>
+                            <div class="absolute inset-0 bg-gradient-to-br from-coral/10 to-transparent rounded-full blur-2xl z-0"></div>
                             <img src="${imageUrl}" alt="${pokemon.name}" id="pokemon-main-image" 
-                                 class="w-48 h-48 object-contain relative z-10 drop-shadow-2xl animate-float transition-all duration-300">
+                                 class="w-48 h-48 object-contain relative z-10 drop-shadow-2xl transition-all duration-300">
                             
                             <!-- Shiny Toggle Button (Overlay) -->
                             <button id="toggle-shiny-btn" 
@@ -571,42 +571,50 @@ const ui = {
             shinyBtn.addEventListener('click', () => {
                 isShiny = !isShiny;
                 
-                // Add fade + scale transition effect
-                mainImage.style.opacity = '0';
-                mainImage.style.transform = 'scale(0.9)';
+                // 1. Forçar visibilidade e resetar transformações problemáticas
+                mainImage.style.opacity = '0.5'; // Opacidade parcial durante a troca para indicar carregamento
                 
-                setTimeout(() => {
-                    if (isShiny) {
-                        mainImage.src = pokemon.sprites?.official_artwork_shiny || pokemon.sprites?.official_artwork || `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/shiny/${pokemon.id}.png`;
-                        mainImage.alt = `${pokemon.name} shiny`;
-                        
-                        // Active state classes
-                        shinyBtn.classList.remove('bg-white/80', 'border-gray-200');
-                        shinyBtn.classList.add('bg-amber-500', 'border-amber-400', 'shadow-[0_0_12px_rgba(245,158,11,0.5)]');
-                        
-                        const icon = shinyBtn.querySelector('i');
-                        icon.classList.remove('text-gray-400');
-                        icon.classList.add('text-white', 'animate-pulse');
-                        
-                        shinyBtn.title = "Ver sprite normal";
-                    } else {
-                        mainImage.src = pokemon.sprites?.official_artwork || `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${pokemon.id}.png`;
-                        mainImage.alt = pokemon.name;
-                        
-                        // Inactive state classes
-                        shinyBtn.classList.remove('bg-amber-500', 'border-amber-400', 'shadow-[0_0_12px_rgba(245,158,11,0.5)]');
-                        shinyBtn.classList.add('bg-white/80', 'border-gray-200');
-                        
-                        const icon = shinyBtn.querySelector('i');
-                        icon.classList.remove('text-white', 'animate-pulse');
-                        icon.classList.add('text-gray-400');
-                        
-                        shinyBtn.title = "Ver sprite shiny";
-                    }
-                    
+                const shinyUrl = pokemon.sprites?.official_artwork_shiny || 
+                                 pokemon.sprites?.front_shiny || 
+                                 `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/shiny/${pokemon.id}.png` ||
+                                 `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/${pokemon.id}.png`;
+                
+                const normalUrl = pokemon.sprites?.official_artwork || 
+                                  `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${pokemon.id}.png`;
+                
+                const targetUrl = isShiny ? shinyUrl : normalUrl;
+
+                // Troca imediata do SRC
+                mainImage.src = targetUrl;
+                mainImage.alt = isShiny ? `${pokemon.name} shiny` : pokemon.name;
+
+                // Quando a imagem carregar (ou se já estiver no cache do navegador)
+                mainImage.onload = () => {
                     mainImage.style.opacity = '1';
                     mainImage.style.transform = 'scale(1)';
-                }, 250);
+                };
+
+                // Fallback de segurança: garantir que a opacidade volte para 1 após um tempo
+                setTimeout(() => {
+                    mainImage.style.opacity = '1';
+                    mainImage.style.transform = 'scale(1)';
+                }, 500);
+
+                if (isShiny) {
+                    shinyBtn.classList.remove('bg-white/80', 'border-gray-200');
+                    shinyBtn.classList.add('bg-amber-500', 'border-amber-400', 'shadow-[0_0_12px_rgba(245,158,11,0.5)]');
+                    const icon = shinyBtn.querySelector('i');
+                    icon.classList.remove('text-gray-400');
+                    icon.classList.add('text-white', 'animate-pulse');
+                    shinyBtn.title = "Ver sprite normal";
+                } else {
+                    shinyBtn.classList.remove('bg-amber-500', 'border-amber-400', 'shadow-[0_0_12px_rgba(245,158,11,0.5)]');
+                    shinyBtn.classList.add('bg-white/80', 'border-gray-200');
+                    const icon = shinyBtn.querySelector('i');
+                    icon.classList.remove('text-white', 'animate-pulse');
+                    icon.classList.add('text-gray-400');
+                    shinyBtn.title = "Ver sprite shiny";
+                }
             });
         }
     },
